@@ -1,0 +1,36 @@
+--- a/modules/skcms/src/Transform_inl.h
++++ b/modules/skcms/src/Transform_inl.h
+@@ -41,7 +41,7 @@
+     #define  USING_AVX
+ #endif
+ #if !defined(USING_AVX_F16C) && defined(USING_AVX) && defined(__F16C__)
+-    #define  USING AVX_F16C
++    #define  USING_AVX_F16C
+ #endif
+ #if !defined(USING_AVX2)     && defined(USING_AVX) && defined(__AVX2__)
+     #define  USING_AVX2
+@@ -175,8 +175,13 @@
+ #elif defined(USING_AVX512F)
+     return (F)_mm512_cvtph_ps((__m256i)half);
+ #elif defined(USING_AVX_F16C)
++#if defined(__clang__)
++    typedef __fp16 __attribute__((vector_size(16))) F16;
++    return __builtin_convertvector((F16)half, F);
++#else
+     typedef int16_t __attribute__((vector_size(16))) I16;
+     return __builtin_ia32_vcvtph2ps256((I16)half);
++#endif
+ #else
+     I32 wide = cast<I32>(half);
+     // A half is 1-5-10 sign-exponent-mantissa, with 15 exponent bias.
+--- a/src/gpu/tessellate/MiddleOutPolygonTriangulator.h
++++ b/src/gpu/tessellate/MiddleOutPolygonTriangulator.h
+@@ -84,7 +84,7 @@
+         }
+ 
+         PoppedTriangleStack(PoppedTriangleStack&& that) {
+-            memcpy(this, &that, sizeof(*this));
++            memcpy((void*)this, (const void*)&that, sizeof(*this));
+             that.fMiddleOut = nullptr;  // Don't do a stack update during our destructor.
+         }
+ 
