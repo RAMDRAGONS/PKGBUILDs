@@ -1,0 +1,161 @@
+# Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
+pkgname=duckstation-git
+pkgver=0.1.r11768.8056dc705
+pkgrel=1
+pkgdesc="Fast PlayStation 1 emulator for PC and Android (Git version)"
+arch=('x86_64' 'aarch64')
+url="https://github.com/stenzek/duckstation"
+license=('CC-BY-NC-ND-4.0')
+depends=('qt6-base' 'qt6-svg' 'qt6-wayland' 'sdl3' 'curl' 'libzip' 'libwebp' 'zstd' 'libjpeg-turbo' 'freetype2' 'harfbuzz' 'spirv-cross' 'dbus' 'libbacktrace')
+makedepends=('git' 'cmake' 'ninja' 'qt6-tools' 'extra-cmake-modules' 'vulkan-headers' 'clang')
+optdepends=('discord-rpc: for Discord integration'
+            'libcpuinfo: for better CPU detection'
+            'plutosvg: for SVG support')
+source=('duckstation::git+https://github.com/stenzek/duckstation.git'
+        'cpuinfo::git+https://github.com/stenzek/cpuinfo.git'
+        'shaderc::git+https://github.com/stenzek/shaderc.git'
+        'discord-rpc::git+https://github.com/stenzek/discord-rpc.git'
+        'soundtouch::git+https://github.com/stenzek/soundtouch.git'
+        'libpng-1.6.56.tar.xz::https://downloads.sourceforge.net/project/libpng/libpng16/1.6.56/libpng-1.6.56.tar.xz'
+        'libpng-1.6.56-apng.patch.gz::https://downloads.sourceforge.net/project/libpng-apng/libpng16/1.6.56/libpng-1.6.56-apng.patch.gz'
+        'bypass-checks.patch'
+        'system-libs.patch'
+        'libpng-apng-fix.patch')
+b2sums=('SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'f653a3177e0910fc156a792d5522fc2a0c04ce0bb43eabb68e06922303dcf6062d8f9b570440bfe1a94ac1b901ef6e9c32b6882d0f4a406e5a9090ea3396f89a'
+        'f74156fba9dab6c466393ff2fc340b6929aec30d1af0f586046f6ad2f4f85b17d331de7e6a2f8047d51728976e000adf01fde4478a36ea3e4bea33833f1aa40e'
+        '5a89c7bb60c2a1672a3eabd9ec772740762d08199f5f1a6b82a1acecc520e2c106f5f7dbe4755e5f13bca42626826fcdee5321d1220ef1985f4c89454b8ae9c2'
+        '0e1d07587bbb2cd5db8a240b3ec83965c7e13632bd482771858d26cda98caac109d209b15ed54beabdac61926ed49cfa2618c57746632e87458c4058569e0b1e'
+        '39215976258577b31938a356e5abe465eb78324ad84830cbc5039048a0ed462c4d00b6b20a6105451b4e44209a7e165e0dd163e2e9a82a3157a5a48710500fa3')
+
+pkgver() {
+  cd duckstation
+  printf "0.1.r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
+
+prepare() {
+  cd duckstation
+  patch -p1 -i ../bypass-checks.patch
+  patch -p1 -i ../system-libs.patch
+  patch -p1 -i ../libpng-apng-fix.patch
+
+  cd "$srcdir/libpng-1.6.56"
+  zcat ../libpng-1.6.56-apng.patch.gz | patch -p1
+
+  # Patch soundtouch for static build and visibility
+  cd "$srcdir/soundtouch"
+  sed -i 's/add_library(SoundTouchDLL SHARED/add_library(SoundTouchDLL STATIC/' CMakeLists.txt
+  sed -i 's/install(TARGETS SoundTouchDLL EXPORT SoundTouchTargets)/install(TARGETS SoundTouch SoundTouchDLL EXPORT SoundTouchTargets)/' CMakeLists.txt
+  sed -i 's/set(CMAKE_C_VISIBILITY_PRESET hidden)//' CMakeLists.txt
+  sed -i 's/set(CMAKE_CXX_VISIBILITY_PRESET hidden)//' CMakeLists.txt
+  sed -i '1i set(CMAKE_POSITION_INDEPENDENT_CODE ON)' CMakeLists.txt
+}
+
+
+build() {
+  # Build private dependencies from forks statically
+  mkdir -p "$srcdir/deps-install/include"
+  mkdir -p "$srcdir/deps-install/lib"
+
+  # cpuinfo
+  mkdir -p "$srcdir/cpuinfo-build"
+  cd "$srcdir/cpuinfo-build"
+  cmake "$srcdir/cpuinfo" \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX="$srcdir/deps-install" \
+    -DCPUINFO_BUILD_TOOLS=OFF \
+    -DCPUINFO_BUILD_UNIT_TESTS=OFF \
+    -DCPUINFO_BUILD_MOCK_TESTS=OFF \
+    -DCPUINFO_BUILD_BENCHMARKS=OFF \
+    -DCPUINFO_LIBRARY_TYPE=static
+  make install
+
+  # shaderc
+  mkdir -p "$srcdir/shaderc-build"
+  cd "$srcdir/shaderc-build"
+  cmake "$srcdir/shaderc" \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX="$srcdir/deps-install" \
+    -DSHADERC_SKIP_TESTS=ON \
+    -DSHADERC_SKIP_EXAMPLES=ON \
+    -DSHADERC_SKIP_COPYRIGHT_CHECK=ON \
+    -DSHADERC_ENABLE_INSTALL=ON
+  make install
+
+  # discord-rpc
+  mkdir -p "$srcdir/discord-rpc-build"
+  cd "$srcdir/discord-rpc-build"
+  cmake "$srcdir/discord-rpc" \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX="$srcdir/deps-install" \
+    -DBUILD_EXAMPLES=OFF
+  make install
+
+  # soundtouch
+  mkdir -p "$srcdir/soundtouch-build"
+  cd "$srcdir/soundtouch-build"
+  cmake "$srcdir/soundtouch" \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX="$srcdir/deps-install" \
+    -DSOUNDTOUCH_DLL=ON
+  make install
+
+  # libpng with APNG
+  mkdir -p "$srcdir/libpng-build"
+  cd "$srcdir/libpng-build"
+  cmake "$srcdir/libpng-1.6.56" \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX="$srcdir/deps-install" \
+    -DPNG_SHARED=OFF \
+    -DPNG_STATIC=ON \
+    -DPNG_TESTS=OFF
+  make install
+
+  # Build DuckStation
+  export CC=clang
+  export CXX=clang++
+  
+  cd "$srcdir/duckstation"
+  cmake -B build -S . \
+    -GNinja \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DDEPS_PATH="$srcdir/deps-install" \
+    -DCMAKE_INSTALL_RPATH='$ORIGIN' \
+    -DENABLE_X11=OFF \
+    -DENABLE_WAYLAND=ON \
+    -DBUILD_QT_FRONTEND=ON \
+    -DUSE_DRC=ON
+  ninja -C build
+}
+
+
+
+package() {
+  cd "$srcdir/duckstation"
+  install -d "$pkgdir/usr/bin"
+  install -d "$pkgdir/usr/lib/duckstation"
+  
+  # Install binary and resources
+  cp -r build/bin/* "$pkgdir/usr/lib/duckstation/"
+  
+  # Install our private shared libs if any (like shaderc)
+  cp "$srcdir/deps-install/lib/"*.so* "$pkgdir/usr/lib/duckstation/" 2>/dev/null || true
+  
+  # Create symlink for the binary
+  ln -s /usr/lib/duckstation/duckstation-qt "$pkgdir/usr/bin/duckstation-qt"
+  
+  # Install icon
+  install -Dm644 data/resources/images/duck.png "$pkgdir/usr/share/pixmaps/duckstation.png"
+  
+  # Install and fix desktop file
+  install -Dm644 scripts/appimage/org.duckstation.DuckStation.desktop "$pkgdir/usr/share/applications/duckstation.desktop"
+  sed -i 's/^Icon=.*/Icon=duckstation/' "$pkgdir/usr/share/applications/duckstation.desktop"
+}
+
+
+

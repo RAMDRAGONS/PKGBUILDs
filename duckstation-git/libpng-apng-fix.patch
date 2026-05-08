@@ -1,0 +1,17 @@
+--- a/src/util/animated_image.cpp
++++ b/src/util/animated_image.cpp
+@@ -477,8 +477,12 @@
+     for (u32 i = 0; i < frames; i++)
+     {
+       const AnimatedImage::FrameDelay& fd = image.GetFrameDelay(i);
+-      png_write_frame_head(png_ptr, info_ptr, width, height, 0, 0, fd.numerator, fd.denominator, PNG_DISPOSE_OP_NONE,
+-                           PNG_BLEND_OP_SOURCE);
++      std::vector<png_bytep> row_pointers(height);
++      for (u32 y = 0; y < height; y++)
++        row_pointers[y] = (png_bytep)image.GetRowPixels(i, y);
++
++      png_write_frame_head(png_ptr, info_ptr, row_pointers.data(), width, height, 0, 0, fd.numerator, fd.denominator,
++                           PNG_DISPOSE_OP_NONE, PNG_BLEND_OP_SOURCE);
+ 
+       for (u32 y = 0; y < height; ++y)
+         png_write_row(png_ptr, (png_bytep)image.GetRowPixels(i, y));
