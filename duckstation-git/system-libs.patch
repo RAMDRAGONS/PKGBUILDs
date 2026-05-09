@@ -1,9 +1,12 @@
---- a/CMakeModules/DuckStationDependencies.cmake	2026-05-07 23:31:56.845815853 -0400
-+++ a/b/CMakeModules/DuckStationDependencies.cmake	2026-05-07 23:31:45.877087411 -0400
-@@ -2,41 +2,9 @@
+diff --git i/CMakeModules/DuckStationDependencies.cmake w/CMakeModules/DuckStationDependencies.cmake
+index 09875391f..050c5f5db 100644
+--- i/CMakeModules/DuckStationDependencies.cmake
++++ w/CMakeModules/DuckStationDependencies.cmake
+@@ -1,42 +1,9 @@
+ # SPDX-FileCopyrightText: 2019-2026 Connor McLaughlin <stenzek@gmail.com>
  # SPDX-License-Identifier: CC-BY-NC-ND-4.0 + Packaging Restriction
  
- # Get prebuilt dependencies for the current platform and architecture.
+-# Get prebuilt dependencies for the current platform and architecture.
 -if(WIN32)
 -  if (CPU_ARCH_X64)
 -    set(DEPS_PATH "${CMAKE_SOURCE_DIR}/dep/prebuilt/windows-x64")
@@ -34,17 +37,17 @@
 -  endif()
 -else()
 -  message(FATAL_ERROR "Unsupported platform")
--endif()
--if(NOT EXISTS "${DEPS_PATH}")
--  message(FATAL_ERROR "Prebuilt dependencies not found for the current platform and architecture.")
 +if(NOT DEPS_PATH)
 +  set(DEPS_PATH "${CMAKE_SOURCE_DIR}/../../deps-install")
  endif()
+-if(NOT EXISTS "${DEPS_PATH}")
+-  message(FATAL_ERROR "Prebuilt dependencies not found for the current platform and architecture.")
+-endif()
 -set(CMAKE_PREFIX_PATH "${DEPS_PATH}")
  
  # Enable threads everywhere.
  set(THREADS_PREFER_PTHREAD_FLAG ON)
-@@ -52,67 +20,71 @@
+@@ -52,67 +19,87 @@ endif()
  if(APPLE OR CPU_ARCH_ARM32 OR CPU_ARCH_ARM64)
    find_package(ZLIB REQUIRED)
  else()
@@ -82,15 +85,6 @@
 -             NO_DEFAULT_PATH PATHS "${DEPS_PATH}/share/spirv_cross_c_shared/cmake")
 -find_package(SDL3 3.4.4 REQUIRED
 -             NO_DEFAULT_PATH PATHS "${DEPS_PATH}/lib/cmake/SDL3")
--
--# Verify dependency paths.
--foreach(dep zstd WebP PNG libjpeg-turbo freetype harfbuzz plutosvg cpuinfo
--            DiscordRPC SoundTouch libzip Shaderc spirv_cross_c_shared SDL3)
--  if((${dep}_LIBRARY AND NOT "${${dep}_LIBRARY}" MATCHES "^${DEPS_PATH}") OR
--     (${dep}_DIR AND NOT "${${dep}_DIR}" MATCHES "^${DEPS_PATH}"))
--    message(FATAL_ERROR "Using incorrect ${dep} library. Check your dependencies.")
--  endif()
--endforeach()
 +# FORCE LINKING FOR FORKED DEPS
 +macro(import_static_dep NAME TARGET LIB_NAME)
 +  add_library(${TARGET} STATIC IMPORTED)
@@ -130,16 +124,40 @@
 +set(PNG_FOUND TRUE)
 +
 +# System-provided dependencies
-+find_package(zstd REQUIRED)
++find_package(PkgConfig REQUIRED)
++pkg_check_modules(ZSTD REQUIRED libzstd)
++find_library(ZSTD_LIB NAMES ${ZSTD_LIBRARIES} PATHS ${ZSTD_LIBRARY_DIRS})
++if(NOT TARGET zstd::libzstd_shared)
++  add_library(zstd::libzstd_shared UNKNOWN IMPORTED)
++  set_target_properties(zstd::libzstd_shared PROPERTIES
++    IMPORTED_LOCATION "${ZSTD_LIB}"
++    INTERFACE_INCLUDE_DIRECTORIES "${ZSTD_INCLUDE_DIRS}"
++  )
++endif()
++
 +find_package(WebP REQUIRED)
-+find_package(libjpeg-turbo REQUIRED)
++
++find_package(JPEG REQUIRED)
++if(NOT TARGET libjpeg-turbo::jpeg)
++  add_library(libjpeg-turbo::jpeg INTERFACE IMPORTED)
++  target_link_libraries(libjpeg-turbo::jpeg INTERFACE JPEG::JPEG)
++endif()
++
 +find_package(Freetype REQUIRED)
 +find_package(harfbuzz REQUIRED)
 +find_package(plutosvg REQUIRED)
 +find_package(libzip REQUIRED)
 +find_package(spirv_cross_c_shared REQUIRED)
 +find_package(SDL3 REQUIRED)
-+
+ 
+-# Verify dependency paths.
+-foreach(dep zstd WebP PNG libjpeg-turbo freetype harfbuzz plutosvg cpuinfo
+-            DiscordRPC SoundTouch libzip Shaderc spirv_cross_c_shared SDL3)
+-  if((${dep}_LIBRARY AND NOT "${${dep}_LIBRARY}" MATCHES "^${DEPS_PATH}") OR
+-     (${dep}_DIR AND NOT "${${dep}_DIR}" MATCHES "^${DEPS_PATH}"))
+-    message(FATAL_ERROR "Using incorrect ${dep} library. Check your dependencies.")
+-  endif()
+-endforeach()
  
  # All our builds include Qt, so this is not a problem.
  set(QT_NO_PRIVATE_MODULE_WARNING ON)
