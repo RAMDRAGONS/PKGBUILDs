@@ -1,0 +1,107 @@
+# Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
+
+pkgname=oead-git
+_name=oead
+pkgver=1.2.9.4.r4.ga7cb4e0
+pkgrel=1
+pkgdesc="Library for recent Nintendo EAD formats in first-party games (C++ shared library)"
+arch=('x86_64')
+url="https://github.com/zeldamods/oead"
+license=('GPL2')
+depends=('abseil-cpp' 'libyaml')
+makedepends=('git' 'cmake' 'pkgconf')
+provides=('oead')
+conflicts=('oead')
+source=("git+https://github.com/zeldamods/oead.git")
+sha256sums=('SKIP')
+
+pkgver() {
+  cd "${srcdir}/${_name}"
+  git describe --long --tags | sed 's/\([^-]*-g\)/r\1/;s/-/./g;s/^v//'
+}
+
+prepare() {
+  cd "${srcdir}/${_name}"
+  git submodule update --init --recursive
+
+  # Dynamically patch CMakeLists.txt to offload Abseil & LibYAML to system packages,
+  # but keep custom zlib-ng fork and rapidyaml submodule to prevent compile failures.
+  python -c '
+with open("CMakeLists.txt", "r") as f:
+    content = f.read()
+
+target = """add_subdirectory(lib/abseil)
+add_subdirectory(lib/EasyIterator)
+add_subdirectory(lib/libyaml)
+add_subdirectory(lib/ordered-map)
+add_subdirectory(lib/rapidyaml)
+# Enabling AVX2 would require users to have a recent CPU
+option(WITH_AVX2 "" OFF)
+option(ZLIB_ENABLE_TESTS "" OFF)
+add_subdirectory(lib/zlib-ng)"""
+
+replacement = """# Use system versions where they exist
+find_package(absl REQUIRED CONFIG)
+
+add_subdirectory(lib/EasyIterator)
+
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(YAML REQUIRED yaml-0.1)
+add_library(yaml INTERFACE IMPORTED)
+target_link_libraries(yaml INTERFACE ${YAML_LIBRARIES})
+target_include_directories(yaml INTERFACE ${YAML_INCLUDE_DIRS})
+
+add_library(tsl::ordered_map INTERFACE IMPORTED)
+set_target_properties(tsl::ordered_map PROPERTIES
+  INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/lib/ordered-map/include"
+)
+
+add_subdirectory(lib/rapidyaml)
+
+# Enabling AVX2 would require users to have a recent CPU
+option(WITH_AVX2 "" OFF)
+option(ZLIB_ENABLE_TESTS "" OFF)
+add_subdirectory(lib/zlib-ng)"""
+
+if target in content:
+    content = content.replace(target, replacement)
+    with open("CMakeLists.txt", "w") as f:
+        f.write(content)
+    print("Successfully patched CMakeLists.txt")
+else:
+    print("Warning: Could not patch CMakeLists.txt, target string not found")
+'
+}
+
+build() {
+  # Build shared library using standard CMake guidelines for Arch
+  cmake -B build -S "${_name}" \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DBUILD_SHARED_LIBS=ON \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+    -Wno-dev
+  cmake --build build
+}
+
+package() {
+  # Install the shared library
+  install -Dm755 build/liboead.so "${pkgdir}/usr/lib/liboead.so"
+
+  # Install public headers
+  mkdir -p "${pkgdir}/usr/include"
+  cp -r "${srcdir}/${_name}/src/include/oead" "${pkgdir}/usr/include/"
+
+  # Install required utility headers (nonstd)
+  cp -r "${srcdir}/${_name}/lib/nonstd/nonstd" "${pkgdir}/usr/include/"
+
+  # Install required tsl headers (ordered-map)
+  cp -r "${srcdir}/${_name}/lib/ordered-map/include/tsl" "${pkgdir}/usr/include/"
+
+  # Ensure correct directory & file permissions
+  find "${pkgdir}/usr/include" -type f -exec chmod 644 {} +
+  find "${pkgdir}/usr/include" -type d -exec chmod 755 {} +
+
+  # Install license
+  install -Dm644 "${srcdir}/${_name}/LICENSE.md" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE.md"
+}

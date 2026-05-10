@@ -1,0 +1,18 @@
+pkgbase = oead-git
+	pkgdesc = Library for recent Nintendo EAD formats in first-party games (C++ shared library)
+	pkgver = 1.2.9.4.r4.ga7cb4e0
+	pkgrel = 1
+	url = https://github.com/zeldamods/oead
+	arch = x86_64
+	license = GPL2
+	makedepends = git
+	makedepends = cmake
+	makedepends = pkgconf
+	depends = abseil-cpp
+	depends = libyaml
+	provides = oead
+	conflicts = oead
+	source = git+https://github.com/zeldamods/oead.git
+	sha256sums = SKIP
+
+pkgname = oead-git
