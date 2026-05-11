@@ -1,0 +1,166 @@
+# Maintainer: Zion Nimchuk <zionnimchuk@gmail.com>
+# Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
+# Submitter: Maxime Gauduin <alucryd@archlinux.org>
+
+pkgname=rpcs3-git
+pkgver=0.0.40.r19347.6b5a2f781a
+pkgrel=1
+pkgdesc='A Sony PlayStation 3 emulator'
+arch=(x86_64 aarch64)
+url=https://github.com/RPCS3/rpcs3
+license=(GPL-2.0-only)
+depends=(
+  alsa-lib
+  cubeb
+  curl
+  faudio
+  ffmpeg
+  glew
+  glslang
+  glu
+  hidapi
+  libevdev
+  libgl
+  libice
+  libpng
+  libpulse
+  libsm
+  libusb
+  libx11
+  libxext
+  llvm
+  miniupnpc
+  openal
+  opencv
+  protobuf
+  pugixml
+  qt6-base
+  qt6-declarative
+  qt6-multimedia
+  qt6-svg
+  rtmidi
+  sdl3
+  vulkan-icd-loader
+  zlib
+  zstd
+)
+optdepends=(
+  vulkan-validation-layers
+  rpcs3-udev
+)
+makedepends=(
+  cmake
+  git
+  libglvnd
+  python
+  # clang+lld is required because audio is broken with latest gcc
+  clang
+  lld
+  vulkan-headers
+  vulkan-memory-allocator
+)
+provides=(rpcs3)
+conflicts=(rpcs3)
+options=(!emptydirs !strip)
+source=(
+  git+https://github.com/RPCS3/rpcs3.git
+  git+https://github.com/KhronosGroup/glslang.git
+)
+sha256sums=(
+  SKIP
+  SKIP
+)
+
+pkgver() {
+  cd rpcs3
+
+  COMM_TAG="$(grep 'version{.*}' rpcs3/rpcs3_version.cpp | awk -F[{,] '{printf "%d.%d.%d", $2, $3, $4}')"
+  COMM_COUNT="$(git rev-list --count HEAD)"
+  COMM_HASH="$(git rev-parse --short HEAD)"
+  echo "${COMM_TAG}.r${COMM_COUNT}.${COMM_HASH}"
+}
+
+prepare() {
+  cd rpcs3
+  
+  git submodule init 3rdparty/glslang/glslang
+  git config submodule.3rdparty/glslang.url ../glslang
+  
+  SUBMODULES=($(git config --file .gitmodules --get-regexp path | \
+    awk '!/libpng/ && !/zlib/ && !/curl/ && !/llvm/ && !/glslang/ && !/pugixml/ && !/SDL/'))
+
+  # We need to convert from a relative folder path to a https://github.com path
+  for ((i=0;i<${#SUBMODULES[@]};i+=2))
+  do
+    pathid=${SUBMODULES[$i]}
+    path=${SUBMODULES[$i+1]}
+
+    git submodule init $path
+    urlid=${pathid/%.path/.url}
+
+    # This gets the last two paths in the url, ie RPCS3/rpcs3.git
+    url=$(git config $urlid | awk -F/ '{print $(NF-1)"/"$(NF-0)}')
+
+    git config $urlid https://github.com/$url
+    git -c protocol.file.allow=always submodule update --init --filter=tree:0 $path
+  done
+  
+  git -c protocol.file.allow=always submodule update 3rdparty/glslang/glslang
+
+  # Force-allow LTO by downgrading FATAL_ERROR to a STATUS message
+  sed -i "s/FATAL_ERROR \"RPCS3 doesn't support building with LTO/STATUS \"RPCS3 doesn't support building with LTO/" CMakeLists.txt
+
+  # Force static compilation of 3rdparty Fusion library to avoid missing libFusion.so at runtime
+  sed -i 's/add_library(Fusion /add_library(Fusion STATIC /' 3rdparty/fusion/fusion/CMakeLists.txt 3rdparty/fusion/Fusion/CMakeLists.txt 2>/dev/null || true
+}
+
+build() {
+  # GLIBCXX_ASSERTIONS is know to cause unwanted assertions and crash rpcs3
+  BAD_FLAG="-Wp,-D_GLIBCXX_ASSERTIONS"
+  CXXFLAGS="${CXXFLAGS//$BAD_FLAG/} -DNDEBUG"
+  CFLAGS+=" -DNDEBUG"
+
+  CC=clang CXX=clang++ cmake -S rpcs3 -B build \
+    -DCMAKE_BUILD_TYPE=None \
+    -DBUILD_SHARED_LIBS=OFF \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_SKIP_RPATH=ON \
+    -DUSE_NATIVE_INSTRUCTIONS=ON \
+    -DUSE_SYSTEM_CUBEB=ON \
+    -DUSE_SYSTEM_FFMPEG=ON \
+    -DUSE_SYSTEM_FAUDIO=ON \
+    -DUSE_SYSTEM_LIBPNG=ON \
+    -DUSE_SYSTEM_LIBUSB=ON \
+    -DUSE_SYSTEM_MINIUPNPC=ON \
+    -DUSE_SYSTEM_OPENAL=ON \
+    -DUSE_SYSTEM_PUGIXML=ON \
+    -DUSE_SYSTEM_RTMIDI=ON \
+    -DUSE_SYSTEM_VULKAN_MEMORY_ALLOCATOR=ON \
+    -DUSE_SYSTEM_ZLIB=ON \
+    -DUSE_SYSTEM_ZSTD=ON \
+    -DUSE_SYSTEM_CURL=ON \
+    -DUSE_SYSTEM_PROTOBUF=ON \
+    -DUSE_SYSTEM_GLSLANG=ON \
+    -DUSE_SYSTEM_HIDAPI=ON \
+    -DUSE_SYSTEM_PUGIXML=ON \
+    -DUSE_SYSTEM_OPENCV=ON \
+    -DUSE_DISCORD_RPC=ON \
+    -DUSE_SDL=ON \
+    -DUSE_SYSTEM_SDL=ON \
+    -DWITH_LLVM=ON \
+    -DBUILD_LLVM=OFF \
+    -DUSE_LTO=ON \
+    -DUSE_GAMEMODE=OFF \
+    -DUSE_SYSTEM_WOLFSSL=OFF \
+    -DCMAKE_LINKER=lld \
+    -DCMAKE_SHARED_LINKER_FLAGS="$LDFLAGS -fuse-ld=lld" \
+    -DCMAKE_EXE_LINKER_FLAGS="$LDFLAGS -fuse-ld=lld"
+  
+  cmake --build build
+}
+
+package() {
+  DESTDIR="${pkgdir}" cmake --install build
+}
+
+# vim: ts=2 sw=2 et:
