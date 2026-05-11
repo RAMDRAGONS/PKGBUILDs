@@ -1,0 +1,27 @@
+pkgbase = sonic3air-git
+	pkgdesc = A fan-made widescreen remaster of Sonic 3 & Knuckles, built from latest git
+	pkgver = v26.03.28.0.stable.r1609.b196733
+	pkgrel = 1
+	url = https://github.com/Eukaryot/sonic3air
+	arch = x86
+	arch = x86_64
+	arch = aarch64
+	license = GPL 3.0
+	makedepends = git
+	makedepends = cmake
+	makedepends = alsa-lib
+	makedepends = libxcomposite
+	makedepends = openssl
+	makedepends = libxxf86vm
+	makedepends = libpulse
+	makedepends = glu
+	depends = opengl-driver
+	optdepends = zenity: display script errors as a message box
+	optdepends = yad: display script errors as a message box
+	provides = sonic3air
+	source = sonic3air-git::git+https://github.com/Eukaryot/sonic3air.git
+	source = Sonic_Knuckles_wSonic3.bin
+	sha256sums = SKIP
+	sha256sums = fa52ac946dfd576538d00aa858b790b9d81a1217e25aa5193693a4e57f4f89d9
+
+pkgname = sonic3air-git
