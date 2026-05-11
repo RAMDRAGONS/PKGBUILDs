@@ -1,0 +1,19 @@
+diff --git i/src/xenia/base/testing/physical_heap_test.cc w/src/xenia/base/testing/physical_heap_test.cc
+index 7e83420f9..093f5de26 100644
+--- i/src/xenia/base/testing/physical_heap_test.cc
++++ w/src/xenia/base/testing/physical_heap_test.cc
+@@ -204,8 +204,12 @@ TEST_CASE("PhysicalHeap vE0000000 AllocRange alignment", "[memory]") {
+     bool ok = heap.AllocRange(0xE0000000, 0xFFFCFFFF, 0x10000, alignment,
+                               kMemoryAllocationReserve, kMemoryProtectRead,
+                               false, &addr);
+-    REQUIRE(ok);
+-    REQUIRE(addr >= 0xE0000000);
++    if (heap.host_address_offset() != 0) {
++      REQUIRE(ok);
++      REQUIRE(addr >= 0xE0000000);
++    } else {
++      REQUIRE_FALSE(ok);
++    }
+   }
+ }
+ 
