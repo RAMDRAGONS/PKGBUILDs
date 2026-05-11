@@ -1,0 +1,79 @@
+# Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
+
+pkgname=srb2classic-git
+pkgver=2.2.17.beta12.r9.d02dc93
+pkgrel=1
+pkgdesc="A Sonic fan game based on the Doom engine, focusing on retro gameplay style"
+arch=('x86_64' 'aarch64')
+url="https://codeberg.org/srb2classic/srb2classic"
+license=('GPL-2.0-only')
+depends=('sdl3' 'libpng' 'zlib' 'curl' 'libsndfile' 'libgme' 'libopenmpt' 'miniupnpc' 'fluidsynth')
+makedepends=('git' 'cmake' 'python-pillow')
+provides=('srb2classic')
+conflicts=('srb2classic')
+source=('srb2classic::git+https://codeberg.org/srb2classic/srb2classic.git'
+        'srb2classic-assets::git+https://codeberg.org/srb2classic/srb2classic-assets.git')
+sha256sums=('SKIP'
+            'SKIP')
+
+pkgver() {
+  cd "$srcdir/srb2classic"
+  git describe --long --tags --abbrev=7 2>/dev/null | sed 's/\([^-]*-\)g/r\1/;s/-/./g' ||
+  printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short=7 HEAD)"
+}
+
+build() {
+  msg2 "Compiling assets... This might take some time."
+  cd "$srcdir/srb2classic-assets"
+  python3 assemble.py srb2.pk3
+  python3 assemble.py characters.pk3
+  python3 assemble.py music.pk3
+  python3 assemble.py zones.pk3
+
+  msg2 "Calculating asset hashes and updating config.h.in..."
+  local hash_srb2=$(md5sum srb2.pk3 | cut -d' ' -f1)
+  local hash_characters=$(md5sum characters.pk3 | cut -d' ' -f1)
+  local hash_zones=$(md5sum zones.pk3 | cut -d' ' -f1)
+
+  msg2 "Compiled srb2.pk3 hash: $hash_srb2"
+  msg2 "Compiled characters.pk3 hash: $hash_characters"
+  msg2 "Compiled zones.pk3 hash: $hash_zones"
+
+  cd "$srcdir/srb2classic"
+  sed -i "s/#define ASSET_HASH_SRB2_PK3.*/#define ASSET_HASH_SRB2_PK3       \"$hash_srb2\"/" src/config.h.in
+  sed -i "s/#define ASSET_HASH_ZONES_PK3.*/#define ASSET_HASH_ZONES_PK3      \"$hash_zones\"/" src/config.h.in
+  sed -i "s/#define ASSET_HASH_CHARACTERS_PK3.*/#define ASSET_HASH_CHARACTERS_PK3 \"$hash_characters\"/" src/config.h.in
+
+  msg2 "Configuring and building the srb2classic engine..."
+  cmake -B build \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DSRB2_CONFIG_LTO=ON \
+    .
+  cmake --build build
+}
+
+package() {
+  cd "$srcdir/srb2classic"
+
+  # Install binary
+  install -Dm755 build/bin/srb2classic "$pkgdir/usr/bin/srb2classic"
+
+  # Install assets
+  install -dm755 "$pkgdir/usr/share/games/srb2-classic"
+  install -m644 "$srcdir/srb2classic-assets/srb2.pk3" "$pkgdir/usr/share/games/srb2-classic/srb2.pk3"
+  install -m644 "$srcdir/srb2classic-assets/characters.pk3" "$pkgdir/usr/share/games/srb2-classic/characters.pk3"
+  install -m644 "$srcdir/srb2classic-assets/music.pk3" "$pkgdir/usr/share/games/srb2-classic/music.pk3"
+  install -m644 "$srcdir/srb2classic-assets/zones.pk3" "$pkgdir/usr/share/games/srb2-classic/zones.pk3"
+
+  # Install desktop entry
+  install -Dm644 srb2classic.desktop "$pkgdir/usr/share/applications/srb2classic.desktop"
+
+  # Install icon
+  install -Dm644 srb2.png "$pkgdir/usr/share/pixmaps/srb2.png"
+
+  # Install licenses
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+  install -Dm644 assets/LICENSE.txt "$pkgdir/usr/share/licenses/$pkgname/LICENSE.txt"
+  install -Dm644 assets/LICENSE-3RD-PARTY.txt "$pkgdir/usr/share/licenses/$pkgname/LICENSE-3RD-PARTY.txt"
+}
