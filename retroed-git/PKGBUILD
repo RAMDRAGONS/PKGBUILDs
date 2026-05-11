@@ -1,0 +1,66 @@
+# Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
+
+pkgname=retroed-git
+pkgver=2.0.2.r40.gefa811c
+pkgrel=1
+pkgdesc="A general purpose tool suite for the Retro Engine (versions 1-5)"
+arch=('x86_64')
+url="https://github.com/RSDKModding/RetroED"
+license=('GPL-3.0-or-later')
+depends=('qt5-base' 'qt5-svg' 'glibc' 'gcc-libs' 'zlib')
+makedepends=('git' 'python' 'python-pytz')
+provides=('retroed')
+conflicts=('retroed')
+source=("RetroED::git+https://github.com/RSDKModding/RetroED.git")
+sha256sums=('SKIP')
+
+pkgver() {
+  cd "RetroED"
+  git describe --long --tags 2>/dev/null | sed 's/\([^-]*-g\)/r\1/;s/-/./g' ||
+  printf "2.0.0.r%s.g%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
+
+build() {
+  cd "RetroED/RetroEDv2"
+
+  # Run versiongen.py with the current git commit SHA to generate version.hpp
+  local _commit
+  _commit=$(git rev-parse HEAD)
+  python3 versiongen.py "${_commit}"
+
+  # Disable format-security errors for older bundled dependencies (like QtGifImage)
+  export CFLAGS="${CFLAGS} -Wno-error=format-security"
+  export CXXFLAGS="${CXXFLAGS} -Wno-error=format-security"
+
+  qmake-qt5 RetroEDv2.pro \
+    QMAKE_CFLAGS+="${CFLAGS}" \
+    QMAKE_CXXFLAGS+="${CXXFLAGS}" \
+    QMAKE_LFLAGS+="${LDFLAGS}"
+  make
+}
+
+package() {
+  cd "RetroED"
+
+  # Install binary and symlink
+  install -Dm755 "RetroEDv2/RetroED" "${pkgdir}/usr/bin/RetroED"
+  ln -s RetroED "${pkgdir}/usr/bin/retroed"
+
+  # Install icon and .desktop file
+  install -Dm644 "RetroEDv2/icons/icon.svg" "${pkgdir}/usr/share/pixmaps/RetroED.svg"
+
+  install -dm755 "${pkgdir}/usr/share/applications"
+  cat <<EOF > "${pkgdir}/usr/share/applications/RetroED.desktop"
+[Desktop Entry]
+Type=Application
+Name=RetroED
+Comment=A general purpose tool suite for the Retro Engine
+Exec=RetroED
+Icon=RetroED
+Categories=Development;
+Terminal=false
+EOF
+
+  # Install license
+  install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}
