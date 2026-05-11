@@ -1,0 +1,70 @@
+# Maintainer: Darvin Delgado <dnmodder at gmail dot com>
+# Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
+
+pkgname=rom-properties-git
+pkgver=2.7.1.r293.g20ccb0b
+pkgrel=1
+pkgdesc='This shell extension adds a few nice features to file browsers for managing video game ROM and disc images.'
+arch=('x86_64')
+url='https://github.com/GerbilSoft/rom-properties'
+license=('GPL-2.0-or-later')
+depends=('fmt' 'gcc-libs' 'glibc' 'libjpeg-turbo' 'libseccomp' 'nettle' 'pugixml' 'zlib')
+optdepends=('zstd' 'lz4' 'lzo')
+makedepends=('cmake' 'gettext' 'git' 'glib2-devel' 'lz4' 'lzo' 'pkgconf' 'zstd' 'clang' 'lld')
+replaces=('rom-properties')
+conflicts=('rom-properties')
+source=(
+  "git+https://github.com/GerbilSoft/rom-properties.git"
+  "rom-properties-git.install"
+  "nettle3.patch"
+)
+sha256sums=('SKIP'
+            '07ad7da027ed9c4d82166fb5663b5fbbc5298a11423cbaec90ef76f425296b1b'
+            'b88f6d75e56cc3b258bfb5baf683241578df53342b88968c2b8f2c071c38f452')
+install=rom-properties-git.install
+
+pkgver() {
+  cd "${pkgname%%-git}"
+  git describe --long --abbrev=7 | sed 's/^v//;s/\([^-]*-g\)/r\1/;s/-/./g'
+}
+
+prepare() {
+  cd "${pkgname%%-git}"
+  patch -Np1 -i "$srcdir/nettle3.patch"
+  sed -i '1i include(CheckLibraryExists)' extlib/libpng/CMakeLists.txt
+}
+
+build() {
+  export CC=clang
+  export CXX=clang++
+  export AR=llvm-ar
+  export NM=llvm-nm
+  export RANLIB=llvm-ranlib
+  export LDFLAGS="$LDFLAGS -fuse-ld=lld"
+
+  mkdir -p build && cd build
+
+  cmake "../${pkgname%%-git}" \
+    -DCMAKE_BUILD_TYPE=None \
+    -DCMAKE_C_FLAGS="$CFLAGS" \
+    -DCMAKE_CXX_FLAGS="$CXXFLAGS -Wno-stringop-overread -Wno-error=format-security" \
+    -DCMAKE_INSTALL_PREFIX="/usr" \
+    -DCMAKE_INSTALL_LIBEXECDIR="lib/rom-properties" \
+    -DENABLE_LTO=OFF \
+    -DSPLIT_DEBUG=OFF \
+    -DUSE_INTERNAL_PNG=ON \
+    -DBUILD_KF6=ON \
+    -DBUILD_KF5=OFF \
+    -DBUILD_KDE4=OFF \
+    -DBUILD_GTK3=OFF \
+    -DBUILD_GTK4=OFF \
+    -DBUILD_XFCE=OFF
+
+  cmake --build .
+}
+
+package() {
+  cd "$srcdir/build"
+
+  make DESTDIR="$pkgdir" install
+}

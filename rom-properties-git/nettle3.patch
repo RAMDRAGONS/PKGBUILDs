@@ -1,0 +1,33 @@
+diff --git i/src/librpbase/crypto/HashNettle.cpp w/src/librpbase/crypto/HashNettle.cpp
+index 962691654..96644ea5a 100644
+--- i/src/librpbase/crypto/HashNettle.cpp
++++ w/src/librpbase/crypto/HashNettle.cpp
+@@ -221,6 +221,20 @@ int Hash::getHash(uint8_t *pHash, size_t hash_len)
+ 			break;
+ 		}
+ #ifdef ENABLE_DECRYPTION
++#ifdef HAVE_NETTLE_3
++		case Algorithm::MD5:
++			md5_digest(&d->ctx.md5, pHash);
++			break;
++		case Algorithm::SHA1:
++			sha1_digest(&d->ctx.sha1, pHash);
++			break;
++		case Algorithm::SHA256:
++			sha256_digest(&d->ctx.sha256, pHash);
++			break;
++		case Algorithm::SHA512:
++			sha512_digest(&d->ctx.sha512, pHash);
++			break;
++#else /* !HAVE_NETTLE_3 */
+ 		case Algorithm::MD5:
+ 			md5_digest(&d->ctx.md5, hash_len, pHash);
+ 			break;
+@@ -233,6 +247,7 @@ int Hash::getHash(uint8_t *pHash, size_t hash_len)
+ 		case Algorithm::SHA512:
+ 			sha512_digest(&d->ctx.sha512, hash_len, pHash);
+ 			break;
++#endif /* HAVE_NETTLE_3 */
+ #endif /* ENABLE_DECRYPTION */
+ 	}
+ 
