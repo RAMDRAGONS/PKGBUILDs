@@ -22,17 +22,13 @@ build() {
     dotnet build --configuration release --output "artifacts"
 }
 
-package() {
-	cd "$pkgname-$pkgver"
-	make DESTDIR="$pkgdir/" install
-}
-
 package() { 
-  mkdir -p "${pkgdir}/usr/share/"
-  cp -r "${srcdir}/${_gitname}/artifacts/" "${pkgdir}/usr/share/${pkgname}"
-  mkdir -p "${pkgdir}/usr/bin/"
-  ln -s "/usr/share/${pkgname}/hactoolnet" "${pkgdir}/usr/bin/hactoolnet"
+  install -dm755 "${pkgdir}/usr/lib/${pkgname}"
+  cp -r "${srcdir}/${_gitname}/artifacts/"* "${pkgdir}/usr/lib/${pkgname}/"
+
+  install -dm755 "${pkgdir}/usr/bin"
+  ln -s "/usr/lib/${pkgname}/hactoolnet" "${pkgdir}/usr/bin/hactoolnet"
 
   # Licenses
-  install -Dm644 "${srcdir}/${_gitname}/LICENSE" "${pkgdir}/usr/share/licenses/$pkgname/LICENSE"
+  install -Dm644 "${srcdir}/${_gitname}/LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
 }
