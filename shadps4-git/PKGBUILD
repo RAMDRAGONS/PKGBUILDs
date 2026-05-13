@@ -1,7 +1,7 @@
 # Maintainer: Alexandre Bouvier <contact@amb.tf>
 _pkgname=shadps4
 pkgname=$_pkgname-git
-pkgver=0.15.0.r171.g1409b26
+pkgver=0.15.0.r176.g0c78ea9
 pkgrel=1
 pkgdesc="Sony PlayStation 4 emulator (CLI)"
 arch=('aarch64' 'x86_64')
@@ -94,11 +94,11 @@ prepare() {
 }
 
 build() {
+	export CFLAGS="$CFLAGS -DNDEBUG"
+	export CXXFLAGS="$CXXFLAGS -DNDEBUG"
 	local options=(
 		-B build
-		-D CMAKE_BUILD_TYPE=Release
-		-D CMAKE_C_FLAGS_RELEASE="-DNDEBUG"
-		-D CMAKE_CXX_FLAGS_RELEASE="-DNDEBUG"
+		-D CMAKE_BUILD_TYPE=None
 		-D CMAKE_INSTALL_PREFIX=/usr
 		-D CMAKE_SKIP_INSTALL_RPATH=ON
 		-D ENABLE_UPDATER=OFF
