@@ -1,7 +1,7 @@
-diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 3d3c28c3..e322c1ae 100644
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
+diff --git i/CMakeLists.txt w/CMakeLists.txt
+index 69a5b0b0..b4bd2456 100644
+--- i/CMakeLists.txt
++++ w/CMakeLists.txt
 @@ -73,8 +73,6 @@ add_definitions(-DEMULATOR_VERSION_PATCH=${EMULATOR_VERSION_PATCH})
  set_property(GLOBAL PROPERTY USE_FOLDERS ON)
  
@@ -11,7 +11,7 @@ index 3d3c28c3..e322c1ae 100644
  
  if (MSVC)
  	set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT CemuBin)
-@@ -225,7 +223,7 @@ if(UNIX AND NOT APPLE)
+@@ -233,7 +231,7 @@ if(UNIX AND NOT APPLE)
  endif()
  
  if (ENABLE_WXWIDGETS)
@@ -20,10 +20,35 @@ index 3d3c28c3..e322c1ae 100644
  endif()
  
  if (ENABLE_CUBEB)
-diff --git a/src/Common/precompiled.h b/src/Common/precompiled.h
+diff --git i/src/CMakeLists.txt w/src/CMakeLists.txt
+index 977f48b7..b3a39844 100644
+--- i/src/CMakeLists.txt
++++ w/src/CMakeLists.txt
+@@ -211,6 +211,10 @@ set_target_properties(CemuBin PROPERTIES
+ 	OUTPUT_NAME "${OUTPUT_NAME}"
+ )
+ 
++if(ENABLE_SDL)
++	target_link_libraries(CemuBin PRIVATE SDL3::SDL3)
++endif()
++
+ target_link_libraries(CemuBin PRIVATE
+ 	CemuAudio
+ 	CemuCafe
+@@ -222,9 +226,6 @@ target_link_libraries(CemuBin PRIVATE
+ 	CemuUtil
+ )
+ 
+-if(ENABLE_SDL)
+-	target_link_libraries(CemuBin PRIVATE SDL3::SDL3)
+-endif()
+ 
+ if(UNIX AND NOT APPLE)
+ 	# due to nasm output some linkers will make stack executable
+diff --git i/src/Common/precompiled.h w/src/Common/precompiled.h
 index e0373952..8560ca3c 100644
---- a/src/Common/precompiled.h
-+++ b/src/Common/precompiled.h
+--- i/src/Common/precompiled.h
++++ w/src/Common/precompiled.h
 @@ -5,7 +5,6 @@
  #include "version.h"
  #include "platform.h"
@@ -32,11 +57,11 @@ index e0373952..8560ca3c 100644
  #define FMT_USE_GRISU 1
  #include <fmt/core.h>
  #include <fmt/format.h>
-diff --git a/src/gui/wxgui/CemuApp.cpp b/src/gui/wxgui/CemuApp.cpp
-index 7b381bc0..fa44894d 100644
---- a/src/gui/wxgui/CemuApp.cpp
-+++ b/src/gui/wxgui/CemuApp.cpp
-@@ -253,7 +253,7 @@ void CemuApp::InitializeExistingMLCOrFail(fs::path mlc)
+diff --git i/src/gui/wxgui/CemuApp.cpp w/src/gui/wxgui/CemuApp.cpp
+index 9a636989..69ee55fe 100644
+--- i/src/gui/wxgui/CemuApp.cpp
++++ w/src/gui/wxgui/CemuApp.cpp
+@@ -257,7 +257,7 @@ void CemuApp::InitializeExistingMLCOrFail(fs::path mlc)
  
  std::string TranslationCallback(std::string_view msgId)
  {
@@ -45,10 +70,10 @@ index 7b381bc0..fa44894d 100644
  }
  
  bool CemuApp::OnInit()
-diff --git a/src/gui/wxgui/GraphicPacksWindow2.cpp b/src/gui/wxgui/GraphicPacksWindow2.cpp
+diff --git i/src/gui/wxgui/GraphicPacksWindow2.cpp w/src/gui/wxgui/GraphicPacksWindow2.cpp
 index 9ac52304..9d53dfe6 100644
---- a/src/gui/wxgui/GraphicPacksWindow2.cpp
-+++ b/src/gui/wxgui/GraphicPacksWindow2.cpp
+--- i/src/gui/wxgui/GraphicPacksWindow2.cpp
++++ w/src/gui/wxgui/GraphicPacksWindow2.cpp
 @@ -96,10 +96,10 @@ void GraphicPacksWindow2::FillGraphicPackList() const
  			const auto parent_node = node;
  			if (i < (tokens.size() - 1))
@@ -71,10 +96,10 @@ index 9ac52304..9d53dfe6 100644
  					if (s > 0)
  						nodeName.append(formatWxString(" #{}", s + 1));
  
-diff --git a/src/gui/wxgui/GraphicPacksWindow2.h b/src/gui/wxgui/GraphicPacksWindow2.h
+diff --git i/src/gui/wxgui/GraphicPacksWindow2.h w/src/gui/wxgui/GraphicPacksWindow2.h
 index 0d24e87b..78be5766 100644
---- a/src/gui/wxgui/GraphicPacksWindow2.h
-+++ b/src/gui/wxgui/GraphicPacksWindow2.h
+--- i/src/gui/wxgui/GraphicPacksWindow2.h
++++ w/src/gui/wxgui/GraphicPacksWindow2.h
 @@ -8,6 +8,7 @@
  #include "wxcomponents/checktree.h"
  
@@ -94,11 +119,11 @@ index 0d24e87b..78be5766 100644
  
  	wxTreeItemId FindTreeItem(const wxTreeItemId& root, const wxString& text) const;
  	void LoadPresetSelections(const GraphicPackPtr& gp);
-diff --git a/src/gui/wxgui/MainWindow.cpp b/src/gui/wxgui/MainWindow.cpp
-index d2deef7b..f8891ea8 100644
---- a/src/gui/wxgui/MainWindow.cpp
-+++ b/src/gui/wxgui/MainWindow.cpp
-@@ -1589,7 +1589,7 @@ void MainWindow::OnGameLoaded()
+diff --git i/src/gui/wxgui/MainWindow.cpp w/src/gui/wxgui/MainWindow.cpp
+index cac5db85..9f3a7ebc 100644
+--- i/src/gui/wxgui/MainWindow.cpp
++++ w/src/gui/wxgui/MainWindow.cpp
+@@ -1587,7 +1587,7 @@ void MainWindow::OnGameLoaded()
  void MainWindow::AsyncSetTitle(std::string_view windowTitle)
  {
  	wxCommandEvent set_title_event(wxEVT_SET_WINDOW_TITLE);
@@ -107,11 +132,11 @@ index d2deef7b..f8891ea8 100644
  	g_mainFrame->QueueEvent(set_title_event.Clone());
  }
  
-diff --git a/src/gui/wxgui/PadViewFrame.cpp b/src/gui/wxgui/PadViewFrame.cpp
-index 2079f1eb..531b03c7 100644
---- a/src/gui/wxgui/PadViewFrame.cpp
-+++ b/src/gui/wxgui/PadViewFrame.cpp
-@@ -228,6 +228,6 @@ void PadViewFrame::OnSetWindowTitle(wxCommandEvent& event)
+diff --git i/src/gui/wxgui/PadViewFrame.cpp w/src/gui/wxgui/PadViewFrame.cpp
+index ca213849..6ffaa4f8 100644
+--- i/src/gui/wxgui/PadViewFrame.cpp
++++ w/src/gui/wxgui/PadViewFrame.cpp
+@@ -237,6 +237,6 @@ void PadViewFrame::OnSetWindowTitle(wxCommandEvent& event)
  void PadViewFrame::AsyncSetTitle(std::string_view windowTitle)
  {
  	wxCommandEvent set_title_event(wxEVT_SET_WINDOW_TITLE);
@@ -119,10 +144,10 @@ index 2079f1eb..531b03c7 100644
 +	set_title_event.SetString(wxString::FromUTF8(windowTitle.data(), windowTitle.size()));
  	QueueEvent(set_title_event.Clone());
  }
-diff --git a/src/gui/wxgui/TitleManager.cpp b/src/gui/wxgui/TitleManager.cpp
+diff --git i/src/gui/wxgui/TitleManager.cpp w/src/gui/wxgui/TitleManager.cpp
 index a4e191c9..4dbf9341 100644
---- a/src/gui/wxgui/TitleManager.cpp
-+++ b/src/gui/wxgui/TitleManager.cpp
+--- i/src/gui/wxgui/TitleManager.cpp
++++ w/src/gui/wxgui/TitleManager.cpp
 @@ -382,7 +382,7 @@ void TitleManager::OnInstallTitle(wxCommandEvent& event)
  	if (openFileDialog.ShowModal() == wxID_CANCEL || openFileDialog.GetPath().IsEmpty())
  		return;
@@ -132,10 +157,10 @@ index a4e191c9..4dbf9341 100644
  	try
  	{
  		filePath = filePath.parent_path();
-diff --git a/src/gui/wxgui/components/TextList.cpp b/src/gui/wxgui/components/TextList.cpp
+diff --git i/src/gui/wxgui/components/TextList.cpp w/src/gui/wxgui/components/TextList.cpp
 index f5e3f133..92c80508 100644
---- a/src/gui/wxgui/components/TextList.cpp
-+++ b/src/gui/wxgui/components/TextList.cpp
+--- i/src/gui/wxgui/components/TextList.cpp
++++ w/src/gui/wxgui/components/TextList.cpp
 @@ -27,8 +27,12 @@ TextList::TextList(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wx
  	m_font = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
  	this->wxWindowBase::SetBackgroundStyle(wxBG_STYLE_PAINT);
@@ -149,10 +174,10 @@ index f5e3f133..92c80508 100644
  	dc.SetFont(m_font);
  	m_line_height = dc.GetCharHeight();
  	m_char_width = dc.GetCharWidth();
-diff --git a/src/gui/wxgui/components/wxGameList.h b/src/gui/wxgui/components/wxGameList.h
+diff --git i/src/gui/wxgui/components/wxGameList.h w/src/gui/wxgui/components/wxGameList.h
 index 388a9df6..bc937149 100644
---- a/src/gui/wxgui/components/wxGameList.h
-+++ b/src/gui/wxgui/components/wxGameList.h
+--- i/src/gui/wxgui/components/wxGameList.h
++++ w/src/gui/wxgui/components/wxGameList.h
 @@ -63,8 +63,8 @@ private:
  	Style m_style;
  	long GetStyleFlags(Style style) const;
@@ -164,10 +189,10 @@ index 388a9df6..bc937149 100644
  	const wxColour kPrimaryColor = GetBackgroundColour();
  	const wxColour kAlternateColor = wxHelper::CalculateAccentColour(kPrimaryColor);
  	void UpdateItemColors(sint32 startIndex = 0);
-diff --git a/src/gui/wxgui/components/wxInputDraw.cpp b/src/gui/wxgui/components/wxInputDraw.cpp
+diff --git i/src/gui/wxgui/components/wxInputDraw.cpp w/src/gui/wxgui/components/wxInputDraw.cpp
 index d12237c8..68f8652d 100644
---- a/src/gui/wxgui/components/wxInputDraw.cpp
-+++ b/src/gui/wxgui/components/wxInputDraw.cpp
+--- i/src/gui/wxgui/components/wxInputDraw.cpp
++++ w/src/gui/wxgui/components/wxInputDraw.cpp
 @@ -1,4 +1,5 @@
  #include "wxgui/components/wxInputDraw.h"
 +#include "wxHelper.h"
@@ -189,10 +214,10 @@ index d12237c8..68f8652d 100644
  
  	if(!IsEnabled())
  	{
-diff --git a/src/gui/wxgui/debugger/DisasmCtrl.cpp b/src/gui/wxgui/debugger/DisasmCtrl.cpp
+diff --git i/src/gui/wxgui/debugger/DisasmCtrl.cpp w/src/gui/wxgui/debugger/DisasmCtrl.cpp
 index 33da4774..c3d6769c 100644
---- a/src/gui/wxgui/debugger/DisasmCtrl.cpp
-+++ b/src/gui/wxgui/debugger/DisasmCtrl.cpp
+--- i/src/gui/wxgui/debugger/DisasmCtrl.cpp
++++ w/src/gui/wxgui/debugger/DisasmCtrl.cpp
 @@ -72,32 +72,32 @@ static wxColour theme_patchedData;
  static void InitSyntaxColors()
  {
@@ -245,10 +270,10 @@ index 33da4774..c3d6769c 100644
  
  	// theme the current instruction pointer arrow
  	g_ipArrowBitmap = wxHelper::LoadThemedBitmapFromPNG(arrowRightPNG, sizeof(arrowRightPNG), wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
-diff --git a/src/gui/wxgui/input/InputAPIAddWindow.cpp b/src/gui/wxgui/input/InputAPIAddWindow.cpp
+diff --git i/src/gui/wxgui/input/InputAPIAddWindow.cpp w/src/gui/wxgui/input/InputAPIAddWindow.cpp
 index b10a2c75..e931934b 100644
---- a/src/gui/wxgui/input/InputAPIAddWindow.cpp
-+++ b/src/gui/wxgui/input/InputAPIAddWindow.cpp
+--- i/src/gui/wxgui/input/InputAPIAddWindow.cpp
++++ w/src/gui/wxgui/input/InputAPIAddWindow.cpp
 @@ -43,7 +43,7 @@ InputAPIAddWindow::InputAPIAddWindow(wxWindow* parent, const wxPoint& position,
  				continue;
  
@@ -276,10 +301,10 @@ index b10a2c75..e931934b 100644
  	{
  		const auto controllers = InputManager::instance().get_api_provider(InputAPI::Keyboard)->get_controllers();
  		if (!controllers.empty())
-diff --git a/src/gui/wxgui/input/InputSettings2.cpp b/src/gui/wxgui/input/InputSettings2.cpp
+diff --git i/src/gui/wxgui/input/InputSettings2.cpp w/src/gui/wxgui/input/InputSettings2.cpp
 index d77e1430..94d31b14 100644
---- a/src/gui/wxgui/input/InputSettings2.cpp
-+++ b/src/gui/wxgui/input/InputSettings2.cpp
+--- i/src/gui/wxgui/input/InputSettings2.cpp
++++ w/src/gui/wxgui/input/InputSettings2.cpp
 @@ -1,4 +1,5 @@
  #include "wxgui/input/InputSettings2.h"
 +#include "wxHelper.h"
@@ -322,10 +347,10 @@ index d77e1430..94d31b14 100644
  	}
  
  	emulated_controllers->SetStringSelection(selected_value);
-diff --git a/src/gui/wxgui/input/panels/ClassicControllerInputPanel.cpp b/src/gui/wxgui/input/panels/ClassicControllerInputPanel.cpp
+diff --git i/src/gui/wxgui/input/panels/ClassicControllerInputPanel.cpp w/src/gui/wxgui/input/panels/ClassicControllerInputPanel.cpp
 index b1b5205c..232849e7 100644
---- a/src/gui/wxgui/input/panels/ClassicControllerInputPanel.cpp
-+++ b/src/gui/wxgui/input/panels/ClassicControllerInputPanel.cpp
+--- i/src/gui/wxgui/input/panels/ClassicControllerInputPanel.cpp
++++ w/src/gui/wxgui/input/panels/ClassicControllerInputPanel.cpp
 @@ -103,7 +103,7 @@ ClassicControllerInputPanel::ClassicControllerInputPanel(wxWindow* parent)
  
  void ClassicControllerInputPanel::add_button_row(wxGridBagSizer *sizer, sint32 row, sint32 column, const ClassicController::ButtonId &button_id) {
@@ -335,10 +360,10 @@ index b1b5205c..232849e7 100644
  		wxGBPosition(row, column),
  		wxDefaultSpan,
  		wxALL | wxALIGN_CENTER_VERTICAL, 5);
-diff --git a/src/gui/wxgui/input/panels/ProControllerInputPanel.cpp b/src/gui/wxgui/input/panels/ProControllerInputPanel.cpp
+diff --git i/src/gui/wxgui/input/panels/ProControllerInputPanel.cpp w/src/gui/wxgui/input/panels/ProControllerInputPanel.cpp
 index 8b8ac741..e1733e07 100644
---- a/src/gui/wxgui/input/panels/ProControllerInputPanel.cpp
-+++ b/src/gui/wxgui/input/panels/ProControllerInputPanel.cpp
+--- i/src/gui/wxgui/input/panels/ProControllerInputPanel.cpp
++++ w/src/gui/wxgui/input/panels/ProControllerInputPanel.cpp
 @@ -101,7 +101,7 @@ ProControllerInputPanel::ProControllerInputPanel(wxWindow* parent)
  
  void ProControllerInputPanel::add_button_row(wxGridBagSizer *sizer, sint32 row, sint32 column, const ProController::ButtonId &button_id) {
@@ -348,10 +373,10 @@ index 8b8ac741..e1733e07 100644
  		wxGBPosition(row, column),
  		wxDefaultSpan,
  		wxALL | wxALIGN_CENTER_VERTICAL, 5);
-diff --git a/src/gui/wxgui/input/panels/VPADInputPanel.cpp b/src/gui/wxgui/input/panels/VPADInputPanel.cpp
+diff --git i/src/gui/wxgui/input/panels/VPADInputPanel.cpp w/src/gui/wxgui/input/panels/VPADInputPanel.cpp
 index 676d70eb..b6cd638a 100644
---- a/src/gui/wxgui/input/panels/VPADInputPanel.cpp
-+++ b/src/gui/wxgui/input/panels/VPADInputPanel.cpp
+--- i/src/gui/wxgui/input/panels/VPADInputPanel.cpp
++++ w/src/gui/wxgui/input/panels/VPADInputPanel.cpp
 @@ -157,7 +157,7 @@ VPADInputPanel::VPADInputPanel(wxWindow* parent)
  }
  
@@ -361,10 +386,10 @@ index 676d70eb..b6cd638a 100644
  }
  
  void VPADInputPanel::add_button_row(wxGridBagSizer *sizer, sint32 row, sint32 column,
-diff --git a/src/gui/wxgui/input/panels/WiimoteInputPanel.cpp b/src/gui/wxgui/input/panels/WiimoteInputPanel.cpp
+diff --git i/src/gui/wxgui/input/panels/WiimoteInputPanel.cpp w/src/gui/wxgui/input/panels/WiimoteInputPanel.cpp
 index da94852c..728906cb 100644
---- a/src/gui/wxgui/input/panels/WiimoteInputPanel.cpp
-+++ b/src/gui/wxgui/input/panels/WiimoteInputPanel.cpp
+--- i/src/gui/wxgui/input/panels/WiimoteInputPanel.cpp
++++ w/src/gui/wxgui/input/panels/WiimoteInputPanel.cpp
 @@ -122,7 +122,7 @@ WiimoteInputPanel::WiimoteInputPanel(wxWindow* parent)
  			continue;
  
@@ -383,10 +408,10 @@ index da94852c..728906cb 100644
  		wxGBPosition(row, column),
  		wxDefaultSpan,
  		wxALL | wxALIGN_CENTER_VERTICAL, 5);
-diff --git a/src/gui/wxgui/wxHelper.h b/src/gui/wxgui/wxHelper.h
+diff --git i/src/gui/wxgui/wxHelper.h w/src/gui/wxgui/wxHelper.h
 index 9bbaddac..2fac9b68 100644
---- a/src/gui/wxgui/wxHelper.h
-+++ b/src/gui/wxgui/wxHelper.h
+--- i/src/gui/wxgui/wxHelper.h
++++ w/src/gui/wxgui/wxHelper.h
 @@ -2,6 +2,8 @@
  #include <wx/string.h>
  #include <wx/bitmap.h>
@@ -411,10 +436,10 @@ index 9bbaddac..2fac9b68 100644
 +#endif
 +	}
  };
-diff --git a/src/gui/wxgui/wxWindowSystem.cpp b/src/gui/wxgui/wxWindowSystem.cpp
-index 4b199741..e2e57228 100644
---- a/src/gui/wxgui/wxWindowSystem.cpp
-+++ b/src/gui/wxgui/wxWindowSystem.cpp
+diff --git i/src/gui/wxgui/wxWindowSystem.cpp w/src/gui/wxgui/wxWindowSystem.cpp
+index bb730db8..3e4dfb57 100644
+--- i/src/gui/wxgui/wxWindowSystem.cpp
++++ w/src/gui/wxgui/wxWindowSystem.cpp
 @@ -62,8 +62,8 @@ void WindowSystem::ShowErrorDialog(std::string_view message, std::string_view ti
  	if (title.empty())
  		caption = wxASCII_STR(wxMessageBoxCaptionStr);
@@ -426,10 +451,10 @@ index 4b199741..e2e57228 100644
  }
  
  WindowSystem::WindowInfo& WindowSystem::GetWindowInfo()
-diff --git a/src/gui/wxgui/wxgui.h b/src/gui/wxgui/wxgui.h
+diff --git i/src/gui/wxgui/wxgui.h w/src/gui/wxgui/wxgui.h
 index bb4352d1..f0175ba7 100644
---- a/src/gui/wxgui/wxgui.h
-+++ b/src/gui/wxgui/wxgui.h
+--- i/src/gui/wxgui/wxgui.h
++++ w/src/gui/wxgui/wxgui.h
 @@ -35,6 +35,7 @@
  #include <wx/wupdlock.h>
  #include <wx/infobar.h>

@@ -2,7 +2,7 @@
 # Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
 _pkgname=cemu
 pkgname=$_pkgname-git
-pkgver=2.6.r209.g0d832c4
+pkgver=2.6.r213.g8e3e961
 pkgrel=1
 pkgdesc="Nintendo Wii U emulator"
 arch=('x86_64')
@@ -57,7 +57,7 @@ source=(
 )
 b2sums=('SKIP'
         'SKIP'
-        '4fa3aa78b6e8cdcdd86c426851e303c3a38f391d8598d3b50967b7854bad6b1622dd78e9efa845cea314d80dddadaf3df7974ab7f02c4dc44846c6c36fa05a3b')
+        '4dcb535b3d6681e3c8390946d67a24780bd0cff234398cc19d0bcce525a134d58e74c3a497d722db7fb45f381e1c5086d73801c85db8249b9ed86b7406555ea1')
 
 pkgver() {
 	cd $_pkgname
@@ -72,12 +72,12 @@ prepare() {
 }
 
 build() {
+	export CFLAGS="$CFLAGS -DNDEBUG"
+	export CXXFLAGS="$CXXFLAGS -DNDEBUG"
 	local options=(
 		-B build
 		-D ALLOW_PORTABLE=OFF
-		-D CMAKE_BUILD_TYPE=Release
-		-D CMAKE_C_FLAGS_RELEASE="-DNDEBUG"
-		-D CMAKE_CXX_FLAGS_RELEASE="-DNDEBUG"
+		-D CMAKE_BUILD_TYPE=None
 		-D ENABLE_VCPKG=OFF
 		-W no-dev
 	)
@@ -111,7 +111,13 @@ package() {
 	cd $_pkgname
 	# shellcheck disable=SC2154
 	install -d "$pkgdir"/usr/{bin,share/Cemu}
-	mv bin/Cemu_release "$pkgdir"/usr/bin/Cemu
+	local _bin
+	for _bin in bin/Cemu_*; do
+		if [[ -f "$_bin" ]]; then
+			mv "$_bin" "$pkgdir"/usr/bin/Cemu
+			break
+		fi
+	done
 	cp -dr --no-preserve=ownership -t "$pkgdir"/usr/share/Cemu bin/*
 	install -Dm644 -t "$pkgdir"/usr/share/applications dist/linux/info.cemu.Cemu.desktop
 	install -Dm644 -t "$pkgdir"/usr/share/icons/hicolor/128x128/apps dist/linux/info.cemu.Cemu.png

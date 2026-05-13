@@ -1,6 +1,6 @@
 pkgbase = cemu-git
 	pkgdesc = Nintendo Wii U emulator
-	pkgver = 2.6.r209.g0d832c4
+	pkgver = 2.6.r213.g8e3e961
 	pkgrel = 1
 	url = https://cemu.info/
 	arch = x86_64
@@ -50,7 +50,7 @@ pkgbase = cemu-git
 	source = wx32.patch
 	b2sums = SKIP
 	b2sums = SKIP
-	b2sums = 4fa3aa78b6e8cdcdd86c426851e303c3a38f391d8598d3b50967b7854bad6b1622dd78e9efa845cea314d80dddadaf3df7974ab7f02c4dc44846c6c36fa05a3b
+	b2sums = 4dcb535b3d6681e3c8390946d67a24780bd0cff234398cc19d0bcce525a134d58e74c3a497d722db7fb45f381e1c5086d73801c85db8249b9ed86b7406555ea1
 
 pkgname = cemu-git
 	depends = glibc
