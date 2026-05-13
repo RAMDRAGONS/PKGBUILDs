@@ -25,14 +25,15 @@ prepare() {
 }
 
 build() {
-  cd "${srcdir}"/VulkanMemoryAllocator
-
-  cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -Bbuild
-  ninja -C build
+  cmake -B build -S VulkanMemoryAllocator \
+    -G Ninja \
+    -DCMAKE_BUILD_TYPE=None \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -Wno-dev
+  cmake --build build
 }
 
 package() {
-  cd "${srcdir}"/VulkanMemoryAllocator
-  DESTDIR="$pkgdir" ninja -C build install
+  DESTDIR="$pkgdir" cmake --install build
 }
 
