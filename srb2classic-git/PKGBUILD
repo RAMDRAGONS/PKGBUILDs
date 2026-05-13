@@ -3,7 +3,7 @@
 pkgname=srb2classic-git
 pkgver=2.2.17.beta12.r9.d02dc93
 pkgrel=1
-pkgdesc="A Sonic fan game based on the Doom engine, focusing on retro gameplay style"
+pkgdesc="A fork of SRB2 2.2, with the aim of continuing its development (Git version)"
 arch=('x86_64' 'aarch64')
 url="https://codeberg.org/srb2classic/srb2classic"
 license=('GPL-2.0-only')
@@ -47,7 +47,7 @@ build() {
   msg2 "Configuring and building the srb2classic engine..."
   cmake -B build \
     -DCMAKE_INSTALL_PREFIX=/usr \
-    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_BUILD_TYPE=None \
     -DSRB2_CONFIG_LTO=ON \
     .
   cmake --build build

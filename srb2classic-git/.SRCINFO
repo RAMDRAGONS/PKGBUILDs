@@ -1,5 +1,5 @@
 pkgbase = srb2classic-git
-	pkgdesc = A Sonic fan game based on the Doom engine, focusing on retro gameplay style
+	pkgdesc = A fork of SRB2 2.2, with the aim of continuing its development (Git version)
 	pkgver = 2.2.17.beta12.r9.d02dc93
 	pkgrel = 1
 	url = https://codeberg.org/srb2classic/srb2classic
