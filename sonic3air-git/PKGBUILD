@@ -30,13 +30,13 @@ prepare() {
 
 build() {
   cd "${srcdir}/${pkgname}/Oxygen/sonic3air/build/_cmake/"
-  mkdir -p build
-  cd ./build
-  cmake -DCMAKE_BUILD_TYPE=Release \
+  cmake -B build -S . \
+    -DCMAKE_BUILD_TYPE=None \
     -DBUILD_SDL_STATIC=ON \
     -DUSE_DISCORD=ON \
-    -DBUILD_OXYGEN_ENGINEAPP=OFF ..
-  cmake --build .
+    -DBUILD_OXYGEN_ENGINEAPP=OFF \
+    -Wno-dev
+  cmake --build build
 }
 
 package() {
