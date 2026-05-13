@@ -73,3 +73,15 @@ index 63a0685ec..9e44123f4 100644
    //
    // To those distributing their own builds or packages of DuckStation, and seeing this message:
    //
+diff --git i/CMakeLists.txt w/CMakeLists.txt
+index 5b7a16811..d5e35c1bf 100644
+--- i/CMakeLists.txt
++++ w/CMakeLists.txt
+@@ -21,7 +21,7 @@ if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
+                       "running cmake from the build directory.")
+ endif()
+ 
+-if(NOT CMAKE_BUILD_TYPE MATCHES "Debug|Devel|MinSizeRel|RelWithDebInfo|Release")
++if(NOT CMAKE_BUILD_TYPE MATCHES "Debug|Devel|MinSizeRel|RelWithDebInfo|Release|None")
+   message(FATAL_ERROR "CMAKE_BUILD_TYPE not set. Please set it first.")
+ endif()
