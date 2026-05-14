@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=MSBT Editor
+Comment=Modern editor for MSBT and BMG files
+Icon=msbt-editor
+Exec=msbt-editor %U
+StartupWMClass=MsbtEditor
+Categories=Utility;

@@ -1,0 +1,73 @@
+# Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
+
+pkgname=msbt-editor-git
+pkgver=3.0.3.r9.g4531d7c
+pkgrel=1
+pkgdesc="A modern editor for MSBT and BMG files. (Git version)"
+arch=('x86_64')
+url="https://gitlab.com/AeonSake/msbt-editor"
+license=('GPL-3.0-only')
+depends=(
+  'alsa-lib'
+  'at-spi2-core'
+  'cairo'
+  'gcc-libs'
+  'glibc'
+  'libcups'
+  'libx11'
+  'libxcomposite'
+  'libxdamage'
+  'libxext'
+  'libxfixes'
+  'libxkbcommon'
+  'libxrandr'
+  'libxrender'
+  'mesa'
+  'nspr'
+  'nss'
+  'pango'
+  'zlib'
+)
+makedepends=('git' 'dotnet-sdk-10.0' 'npm')
+provides=('msbt-editor')
+conflicts=('msbt-editor')
+source=(
+  "git+https://gitlab.com/AeonSake/msbt-editor.git"
+  "msbt-editor.desktop"
+  "msbt-editor.sh"
+)
+sha256sums=('SKIP'
+            'fe9718dbfe25418ce4393875557a69531aa5ef5be352b44e725ff8f80b030080'
+            '7cb5f1a894ba3d3a4e328f23e8e99f0ddb68f6171e483cb8b706e1f50712ad48')
+
+pkgver() {
+  cd msbt-editor
+  git describe --long --tags | sed 's/\([^-]*-g\)/r\1/;s/-/./g'
+}
+
+prepare() {
+  cd msbt-editor
+  export DOTNET_CLI_TELEMETRY_OPTOUT=1
+  export DOTNET_NOLOGO=1
+  dotnet restore src/MsbtEditor.App/MsbtEditor.App.csproj -r linux-x64
+}
+
+build() {
+  cd msbt-editor
+  export DOTNET_CLI_TELEMETRY_OPTOUT=1
+  export DOTNET_NOLOGO=1
+  dotnet publish src/MsbtEditor.App/MsbtEditor.App.csproj -c Release -r linux-x64 -p:PublishProfile=linux-x64 --no-restore
+}
+
+package() {
+  # Install application binaries
+  install -dm755 "$pkgdir/opt/msbt-editor"
+  cp -a msbt-editor/src/MsbtEditor.App/bin/Release/net10.0/linux-x64/publish/linux-unpacked/* "$pkgdir/opt/msbt-editor/"
+
+  # Install launcher script
+  install -Dm755 msbt-editor.sh "$pkgdir/usr/bin/msbt-editor"
+
+  # Install desktop file and icon
+  install -Dm644 msbt-editor.desktop "$pkgdir/usr/share/applications/msbt-editor.desktop"
+  install -Dm644 msbt-editor/src/assets/icon.png "$pkgdir/usr/share/icons/hicolor/512x512/apps/msbt-editor.png"
+}
