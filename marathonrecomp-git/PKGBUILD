@@ -1,0 +1,60 @@
+# Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
+
+pkgname=marathonrecomp-git
+pkgver=r893.1a32f18
+pkgrel=1
+pkgdesc="An unofficial PC port of the Xbox 360 version of Sonic the Hedgehog (2006) created through the process of static recompilation. (Git version)"
+arch=('x86_64')
+url="https://github.com/sonicnext-dev/MarathonRecomp"
+license=('GPL3')
+depends=('sdl2' 'sdl2_mixer' 'fmt' 'tomlplusplus' 'xxhash' 'zstd' 'curl')
+makedepends=('git' 'cmake' 'ninja' 'clang' 'lld')
+source=('git+https://github.com/sonicnext-dev/MarathonRecomp.git'
+        '215.patch'
+        'system-libs.patch'
+        'default.xex'
+        'shader.arc'
+        'shader_lt.arc')
+sha256sums=('SKIP'
+            '29b60a2400b43441ea90db72bb54896fdb5345abfcb834b08342909e487f4e1e'
+            '17cdbf3cd7532fb809b16fa92e8fec7e112a15eea88e6fc5373b1062f0fe69d2'
+            '373689b7c8bc839fbc00f55f756da7a1ff55d786d043423606db8bf7f3905c94'
+            '1bc8fd8d7a879ec6dcef4321ff19b8cbb05fabfc127f063ad56c9a7214e52ae2'
+            'ca08119e9ee97e6a6fc4e2d48ad9492412d710f6ee8480e6a5318aa922659011')
+
+pkgver() {
+  cd MarathonRecomp
+  if git describe --long --tags >/dev/null 2>&1; then
+    git describe --long --tags | sed 's/^v//;s/\([^-]*-g\)/r\1/;s/-/./g'
+  else
+    printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+  fi
+}
+
+prepare() {
+  cd MarathonRecomp
+  git submodule update --init --recursive
+  patch -Np1 -i "$srcdir/215.patch"
+  patch -Np1 -i "$srcdir/system-libs.patch"
+  mkdir -p MarathonRecompLib/private
+  cp "$srcdir/default.xex" "$srcdir/shader.arc" "$srcdir/shader_lt.arc" MarathonRecompLib/private/
+}
+
+build() {
+  cd MarathonRecomp
+  export CC=clang
+  export CXX=clang++
+  cmake -B build -G Ninja \
+    -DCMAKE_BUILD_TYPE=None \
+    -DMARATHON_RECOMP_USE_SYSTEM_LIBS=ON \
+    -DCMAKE_INSTALL_PREFIX=/usr
+  cmake --build build
+}
+
+package() {
+  cd MarathonRecomp
+  install -Dm755 build/MarathonRecomp/MarathonRecomp "$pkgdir/usr/bin/marathonrecomp"
+  install -Dm644 MarathonRecompResources/images/game_icon.png "$pkgdir/usr/share/icons/hicolor/128x128/apps/io.github.sonicnext_dev.marathonrecomp.png"
+  install -Dm644 flatpak/io.github.sonicnext_dev.marathonrecomp.desktop "$pkgdir/usr/share/applications/io.github.sonicnext_dev.marathonrecomp.desktop"
+  sed -i 's|Exec=/app/bin/MarathonRecomp|Exec=marathonrecomp|' "$pkgdir/usr/share/applications/io.github.sonicnext_dev.marathonrecomp.desktop"
+}

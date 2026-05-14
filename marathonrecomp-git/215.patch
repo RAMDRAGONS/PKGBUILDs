@@ -1,0 +1,114 @@
+From 73946b4105bcaac379e6e3dfba321eec8eaf19c0 Mon Sep 17 00:00:00 2001
+From: Hourai <yannick_profet@hotmail.com>
+Date: Sun, 11 Jan 2026 16:50:11 +0100
+Subject: [PATCH 1/2] Implemented the XDG Basedir spec for MarathonRecomp
+
+---
+ .gitignore                    |  1 +
+ MarathonRecomp/user/paths.cpp | 11 ++++++++++-
+ MarathonRecomp/user/paths.h   | 28 +++++++++++++++++++++++++++-
+ 3 files changed, 38 insertions(+), 2 deletions(-)
+
+diff --git a/.gitignore b/.gitignore
+index 3093c5c8a..64a0ae622 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -404,3 +404,4 @@ FodyWeavers.xsd
+ 
+ UnleashedRecompLib/build
+ UnleashedRecompLib/ppc*
++.vscode
+diff --git a/MarathonRecomp/user/paths.cpp b/MarathonRecomp/user/paths.cpp
+index e3dbf101a..1c6584a04 100644
+--- a/MarathonRecomp/user/paths.cpp
++++ b/MarathonRecomp/user/paths.cpp
+@@ -36,7 +36,16 @@ std::filesystem::path BuildUserPath()
+         // Prefer to store in the .config directory if it exists. Use the home directory otherwise.
+         std::filesystem::path homePath = homeDir;
+ #if defined(__linux__)
+-        std::filesystem::path configPath = homePath / ".config";
++        const char* configDir = getenv("XDG_CONFIG_HOME");
++        std::filesystem::path configPath = "";
++        if (configDir == nullptr)
++        {
++            configPath = homePath / ".config";
++        } else
++        {
++            configPath = configDir;
++        }
++
+ #else
+         std::filesystem::path configPath = homePath / "Library" / "Application Support";
+ #endif
+diff --git a/MarathonRecomp/user/paths.h b/MarathonRecomp/user/paths.h
+index 11f4abe84..f141a13a5 100644
+--- a/MarathonRecomp/user/paths.h
++++ b/MarathonRecomp/user/paths.h
+@@ -14,7 +14,6 @@ inline std::unordered_map<std::string, std::filesystem::path> g_pathCache;
+ bool CheckPortable();
+ std::filesystem::path BuildUserPath();
+ const std::filesystem::path& GetUserPath();
+-
+ inline std::filesystem::path GetGamePath()
+ {
+ #ifdef __APPLE__
+@@ -22,6 +21,33 @@ inline std::filesystem::path GetGamePath()
+     // /Applications/, and the bundle should not be modified. Thus we need
+     // to install game files to the user directory instead of next to the app.
+     return GetUserPath();
++#elif defined(__linux__)
++    // On Linux, and some other Unix-like systems like FreeBSD, 
++    // following freedesktop's XDG Base Directory Specification is encouraged.
++    // https://specifications.freedesktop.org/basedir/latest/
++    // basically, user-specific files should be installed to a user-set variable of $XDG_DATA_HOME
++    // If $XDG_DATA_HOME is either not set or empty, a default of $HOME/.local/share should be used.
++    const char* homeDir = getenv("HOME");
++    if (homeDir == nullptr)
++    {
++        homeDir = getpwuid(getuid())->pw_dir;
++    }
++    std::filesystem::path homePath = "";
++    if (homeDir != nullptr) {
++        // Prefer to store in the .config directory if it exists. Use the home directory otherwise.
++        homePath = homeDir;
++    }
++    const char* dataDir = getenv("XDG_DATA_HOME");
++    std::filesystem::path dataPath = "";
++    if (dataDir != nullptr)
++    {
++        dataPath = dataDir;
++    } else
++    {
++        dataPath = homePath / ".local" / "share";
++    }
++    std::filesystem::path gamePath = dataPath / "MarathonRecomp";
++    return gamePath;
+ #else
+     return GAME_INSTALL_DIRECTORY;
+ #endif
+
+From 9caf8fde87c22a4013f3f8b601874a79c4c21737 Mon Sep 17 00:00:00 2001
+From: Hourai <yannick_profet@hotmail.com>
+Date: Sun, 11 Jan 2026 16:58:06 +0100
+Subject: [PATCH 2/2] portable.txt now makes sure that the game is installed
+ and run from the working directory
+
+---
+ MarathonRecomp/user/paths.h | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/MarathonRecomp/user/paths.h b/MarathonRecomp/user/paths.h
+index f141a13a5..9db377ffb 100644
+--- a/MarathonRecomp/user/paths.h
++++ b/MarathonRecomp/user/paths.h
+@@ -27,6 +27,10 @@ inline std::filesystem::path GetGamePath()
+     // https://specifications.freedesktop.org/basedir/latest/
+     // basically, user-specific files should be installed to a user-set variable of $XDG_DATA_HOME
+     // If $XDG_DATA_HOME is either not set or empty, a default of $HOME/.local/share should be used.
++    if (CheckPortable())
++    {
++        return GAME_INSTALL_DIRECTORY;
++    }
+     const char* homeDir = getenv("HOME");
+     if (homeDir == nullptr)
+     {

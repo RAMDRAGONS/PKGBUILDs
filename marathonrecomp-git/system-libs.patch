@@ -1,0 +1,59 @@
+diff --git i/CMakeLists.txt w/CMakeLists.txt
+index 6a06ffb..e129973 100644
+--- i/CMakeLists.txt
++++ w/CMakeLists.txt
+@@ -1,6 +1,8 @@
+ cmake_minimum_required (VERSION 3.20)
+ 
+-if(NOT DEFINED ENV{VCPKG_ROOT})
++option(MARATHON_RECOMP_USE_SYSTEM_LIBS "Use system libraries" OFF)
++
++if(NOT MARATHON_RECOMP_USE_SYSTEM_LIBS AND NOT DEFINED ENV{VCPKG_ROOT})
+     message(FATAL_ERROR "VCPKG_ROOT is not defined!")
+ endif()
+ 
+@@ -19,6 +21,21 @@ set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+ 
+ project("MarathonRecomp-ALL")
+ 
++if(MARATHON_RECOMP_USE_SYSTEM_LIBS)
++    find_package(PkgConfig REQUIRED)
++    find_package(fmt REQUIRED)
++    find_package(tomlplusplus REQUIRED)
++    find_package(SDL2 REQUIRED CONFIG)
++    find_package(SDL2_mixer REQUIRED CONFIG)
++    pkg_check_modules(xxHash REQUIRED IMPORTED_TARGET libxxhash)
++    add_library(xxHash::xxhash ALIAS PkgConfig::xxHash)
++    pkg_check_modules(zstd REQUIRED IMPORTED_TARGET libzstd)
++    add_library(libzstd ALIAS PkgConfig::zstd)
++    add_library(libzstd_static ALIAS PkgConfig::zstd)
++    add_library(SDL2::SDL2-static ALIAS SDL2::SDL2)
++    add_library(SDL2_mixer ALIAS SDL2_mixer::SDL2_mixer)
++endif()
++
+ if (APPLE)
+     enable_language(OBJC OBJCXX)
+ endif()
+diff --git i/thirdparty/CMakeLists.txt w/thirdparty/CMakeLists.txt
+index d5c0858..a0b13ba 100644
+--- i/thirdparty/CMakeLists.txt
++++ w/thirdparty/CMakeLists.txt
+@@ -40,11 +40,17 @@ else()
+     message(FATAL_ERROR "Unsupported CPU architecture: ${BASE_ARCHITECTURE}")
+ endif()
+ 
++set(MSDF_ATLAS_USE_VCPKG OFF)
++
+ add_subdirectory("${MARATHON_RECOMP_THIRDPARTY_ROOT}/msdf-atlas-gen")
+ add_subdirectory("${MARATHON_RECOMP_THIRDPARTY_ROOT}/nativefiledialog-extended")
+ add_subdirectory("${MARATHON_RECOMP_THIRDPARTY_ROOT}/o1heap")
+-add_subdirectory("${MARATHON_RECOMP_THIRDPARTY_ROOT}/SDL")
+-add_subdirectory("${MARATHON_RECOMP_THIRDPARTY_ROOT}/SDL_mixer")
++if (NOT TARGET SDL2::SDL2-static)
++    add_subdirectory("${MARATHON_RECOMP_THIRDPARTY_ROOT}/SDL")
++endif()
++if (NOT TARGET SDL2_mixer)
++    add_subdirectory("${MARATHON_RECOMP_THIRDPARTY_ROOT}/SDL_mixer")
++endif()
+ add_subdirectory("${MARATHON_RECOMP_THIRDPARTY_ROOT}/plume")
+ add_subdirectory("${MARATHON_RECOMP_THIRDPARTY_ROOT}/ffmpeg-core")
