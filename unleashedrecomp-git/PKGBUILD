@@ -1,0 +1,74 @@
+# Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
+
+pkgname=unleashedrecomp-git
+pkgver=1.0.3.r10.g5e8695a
+pkgrel=1
+pkgdesc="An unofficial PC port of the Xbox 360 version of Sonic Unleashed created through the process of static recompilation. (Git version)"
+arch=('x86_64')
+url="https://github.com/hedge-dev/UnleashedRecomp"
+license=('GPL3')
+depends=('sdl2' 'sdl2_mixer' 'fmt' 'tomlplusplus' 'xxhash' 'zstd')
+makedepends=('git' 'cmake' 'ninja' 'clang' 'lld')
+source=('git+https://github.com/hedge-dev/UnleashedRecomp.git'
+        'xdg-basedir.patch'
+        'system-libs.patch'
+        '1519.patch'
+        '1558.patch'
+        '1727.patch'
+        '1728.patch'
+        '1735.patch'
+        '1738.patch'
+        'default.xex'
+        'default.xexp'
+        'shader.ar')
+sha256sums=('SKIP'
+            'bd689283161308d5c0727b4dc49e3fb72ea11a3908eee6a63e15d778b85267c3'
+            'f85a45c62ba8ba9b6000080913a5e3ade3cd64f9a7a6ec5c7212ca322ec86864'
+            '57c8014435dffd1da789f6a8b13216f8203369cb04fa629d157cb4618f56831b'
+            'df12e32a0a2380ce508366d1392523e75f989edce3fdb177956c2e77905ed2cc'
+            '8f2860c16412dd5baa059878605ab53153b4d557d10400163d141674d931a068'
+            '80c7253bb3d150347d98555c0d92643e81c520282c11981e6560cbedb41ccf29'
+            '0c815b6eecd51d02414081571235b9e962ce458de50f7a1f42b212a1fd94a2af'
+            '8cd41b01097c07e46c34bb32506fa905021f93f86f44f85b317fb532b8fb4a92'
+            '1172fbbce7e145b3dc850c1403f57739febd2fb886dfc16f6da291c49a2cd6e1'
+            '8cbc696f70f5b518da2ce2e27c7303e2ea9c49e63045b6315a9cc7c98fa3b700'
+            'e5eff2b0efabd6c4aff6c563329232810271526e4fd0abf2de2f7730db8b63e5')
+
+pkgver() {
+  cd UnleashedRecomp
+  git describe --long --tags | sed 's/^v//;s/\([^-]*-g\)/r\1/;s/-/./g'
+}
+
+prepare() {
+  cd UnleashedRecomp
+  git submodule update --init --recursive
+  patch -Np1 -i "$srcdir/xdg-basedir.patch"
+  patch -Np1 -i "$srcdir/system-libs.patch"
+  patch -Np1 -i "$srcdir/1519.patch"
+  patch -Np1 -i "$srcdir/1558.patch"
+  patch -Np1 -i "$srcdir/1727.patch"
+  patch -Np1 -i "$srcdir/1728.patch"
+  patch -Np1 -i "$srcdir/1735.patch"
+  patch -Np1 -i "$srcdir/1738.patch"
+  mkdir -p UnleashedRecompLib/private
+  cp "$srcdir/default.xex" "$srcdir/default.xexp" "$srcdir/shader.ar" UnleashedRecompLib/private/
+}
+
+build() {
+  cd UnleashedRecomp
+  export CC=clang
+  export CXX=clang++
+  cmake -B build -G Ninja \
+    -DCMAKE_BUILD_TYPE=None \
+    -DUNLEASHED_RECOMP_USE_SYSTEM_LIBS=ON \
+    -DCMAKE_INSTALL_PREFIX=/usr
+  cmake --build build
+}
+
+package() {
+  cd UnleashedRecomp
+  install -Dm755 build/UnleashedRecomp/UnleashedRecomp "$pkgdir/usr/bin/unleashedrecomp"
+  install -Dm644 UnleashedRecompResources/images/game_icon.png "$pkgdir/usr/share/icons/hicolor/128x128/apps/io.github.hedge_dev.unleashedrecomp.png"
+  install -Dm644 flatpak/io.github.hedge_dev.unleashedrecomp.desktop "$pkgdir/usr/share/applications/io.github.hedge_dev.unleashedrecomp.desktop"
+  sed -i 's|Exec=/app/bin/UnleashedRecomp|Exec=unleashedrecomp|' "$pkgdir/usr/share/applications/io.github.hedge_dev.unleashedrecomp.desktop"
+}

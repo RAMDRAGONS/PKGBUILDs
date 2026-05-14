@@ -1,0 +1,58 @@
+From 460bc583a5bf46d33a547d5b043acb7b35905dcb Mon Sep 17 00:00:00 2001
+From: DeaTh-G <hatvongeorge@gmail.com>
+Date: Sun, 1 Feb 2026 19:35:54 +0100
+Subject: [PATCH] Respect update check timeout without the same session too
+
+---
+ UnleashedRecomp/install/update_checker.h             | 3 +++
+ UnleashedRecomp/main.cpp                             | 6 +++---
+ UnleashedRecomp/patches/CTitleStateIntro_patches.cpp | 4 +++-
+ 3 files changed, 9 insertions(+), 4 deletions(-)
+
+diff --git a/UnleashedRecomp/install/update_checker.h b/UnleashedRecomp/install/update_checker.h
+index 484eaaaad..5763dc250 100644
+--- a/UnleashedRecomp/install/update_checker.h
++++ b/UnleashedRecomp/install/update_checker.h
+@@ -1,5 +1,8 @@
+ #pragma once
+ 
++// 6 hour long timeout between checks.
++static constexpr double g_timeBetweenUpdateChecksInSeconds = 6 * 60 * 60;
++
+ struct UpdateChecker
+ {
+     enum class Result
+diff --git a/UnleashedRecomp/main.cpp b/UnleashedRecomp/main.cpp
+index bb241760c..b930c0784 100644
+--- a/UnleashedRecomp/main.cpp
++++ b/UnleashedRecomp/main.cpp
+@@ -307,11 +307,11 @@ int main(int argc, char *argv[])
+     }
+ #endif
+ 
+-    // Check the time since the last time an update was checked. Store the new time if the difference is more than six hours.
+-    constexpr double TimeBetweenUpdateChecksInSeconds = 6 * 60 * 60;
++    // Check the time since the last time an update was checked.
++    // Store the new time if the difference is more than g_timeBetweenUpdateChecksInSeconds hours.
+     time_t timeNow = std::time(nullptr);
+     double timeDifferenceSeconds = difftime(timeNow, Config::LastChecked);
+-    if (timeDifferenceSeconds > TimeBetweenUpdateChecksInSeconds)
++    if (timeDifferenceSeconds > g_timeBetweenUpdateChecksInSeconds)
+     {
+         UpdateChecker::initialize();
+         UpdateChecker::start();
+diff --git a/UnleashedRecomp/patches/CTitleStateIntro_patches.cpp b/UnleashedRecomp/patches/CTitleStateIntro_patches.cpp
+index 4affb80a7..443e93d08 100644
+--- a/UnleashedRecomp/patches/CTitleStateIntro_patches.cpp
++++ b/UnleashedRecomp/patches/CTitleStateIntro_patches.cpp
+@@ -129,7 +129,9 @@ PPC_FUNC(sub_822C55B0)
+ 
+ void PressStartSaveLoadThreadMidAsmHook()
+ {
+-    if (UpdateChecker::check() == UpdateChecker::Result::UpdateAvailable)
++    time_t timeNow = std::time(nullptr);
++    double timeDifferenceSeconds = difftime(timeNow, Config::LastChecked);
++    if (UpdateChecker::check() == UpdateChecker::Result::UpdateAvailable && timeDifferenceSeconds > g_timeBetweenUpdateChecksInSeconds)
+     {
+         g_updateAvailableMessageOpen = true;
+         g_updateAvailableMessageOpen.wait(true);

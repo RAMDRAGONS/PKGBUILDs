@@ -1,0 +1,63 @@
+From a47d699295e5554085344c2274449e3accc34d75 Mon Sep 17 00:00:00 2001
+From: DeaTh-G <hatvongeorge@gmail.com>
+Date: Sun, 20 Apr 2025 19:37:43 +0200
+Subject: [PATCH] implement returning to title from installer menu
+
+---
+ UnleashedRecomp/main.cpp                 | 9 ++++++++-
+ UnleashedRecomp/patches/misc_patches.cpp | 3 ++-
+ UnleashedRecomp/ui/installer_wizard.h    | 1 +
+ 3 files changed, 11 insertions(+), 2 deletions(-)
+
+diff --git a/UnleashedRecomp/main.cpp b/UnleashedRecomp/main.cpp
+index e8123b389..a3d2356b9 100644
+--- a/UnleashedRecomp/main.cpp
++++ b/UnleashedRecomp/main.cpp
+@@ -333,7 +333,14 @@ int main(int argc, char *argv[])
+ 
+         if (!InstallerWizard::Run(GAME_INSTALL_DIRECTORY, isGameInstalled && forceDLCInstaller))
+         {
+-            std::_Exit(0);
++            if (!forceDLCInstaller)
++            {
++                std::_Exit(0);
++            }
++            else
++            {
++                InstallerWizard::s_returnToTitle = true;
++            }
+         }
+     }
+ 
+diff --git a/UnleashedRecomp/patches/misc_patches.cpp b/UnleashedRecomp/patches/misc_patches.cpp
+index ec4e1a8be..b98c8ee17 100644
+--- a/UnleashedRecomp/patches/misc_patches.cpp
++++ b/UnleashedRecomp/patches/misc_patches.cpp
+@@ -1,5 +1,6 @@
+ #include <api/SWA.h>
+ #include <ui/game_window.h>
++#include <ui/installer_wizard.h>
+ #include <user/achievement_manager.h>
+ #include <user/persistent_storage_manager.h>
+ #include <user/config.h>
+@@ -83,7 +84,7 @@ PPC_FUNC(sub_825197C0)
+ PPC_FUNC_IMPL(__imp__sub_82547DF0);
+ PPC_FUNC(sub_82547DF0)
+ {
+-    if (Config::SkipIntroLogos)
++    if (Config::SkipIntroLogos || InstallerWizard::s_returnToTitle)
+     {
+         ctx.r4.u64 = 0;
+         ctx.r5.u64 = 0;
+diff --git a/UnleashedRecomp/ui/installer_wizard.h b/UnleashedRecomp/ui/installer_wizard.h
+index 488cc0e7f..4bccec925 100644
+--- a/UnleashedRecomp/ui/installer_wizard.h
++++ b/UnleashedRecomp/ui/installer_wizard.h
+@@ -5,6 +5,7 @@
+ struct InstallerWizard
+ {
+     static inline bool s_isVisible = false;
++    static inline bool s_returnToTitle = false;
+ 
+     static void Init();
+     static void Draw();

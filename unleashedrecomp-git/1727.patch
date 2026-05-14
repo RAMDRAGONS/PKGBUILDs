@@ -1,0 +1,41 @@
+From 92ccc1f2984e5c7c319eb77fb6322b7738e3586f Mon Sep 17 00:00:00 2001
+From: DeaTh-G <hatvongeorge@gmail.com>
+Date: Sun, 1 Feb 2026 18:24:25 +0100
+Subject: [PATCH] Make advertise logo overlay aspect ratio aware
+
+---
+ UnleashedRecomp/patches/aspect_ratio_patches.cpp | 10 ++++++++++
+ UnleashedRecompLib/config/SWA.toml               |  5 +++++
+ 2 files changed, 15 insertions(+)
+
+diff --git a/UnleashedRecomp/patches/aspect_ratio_patches.cpp b/UnleashedRecomp/patches/aspect_ratio_patches.cpp
+index 02f49ee0e..2bfe4158a 100644
+--- a/UnleashedRecomp/patches/aspect_ratio_patches.cpp
++++ b/UnleashedRecomp/patches/aspect_ratio_patches.cpp
+@@ -1686,3 +1686,13 @@ void EndingTextPositionMidAsmHook(PPCRegister& r31, PPCRegister& f13)
+     else if (align == ALIGN_LEFT)
+         f13.f64 += 133.0 * (1.0 - g_aspectRatioNarrowScale);
+ }
++
++// Offsets calculated by converting the 4:3 values to 16:9 space and then substracting the differences from the original 16:9 position.
++// Afterward fact checked by overlaying a capture from the original hardware at 4:3 and a capture from recomp at 4:3.
++void AdvertiseLogoPlacementMidAsmHook(PPCRegister& f0, PPCRegister& f13, PPCRegister& f12, PPCRegister& f11)
++{
++    f0.f64 += -133.0f / 1280.0f * (1.0 - g_aspectRatioNarrowScale);
++    f13.f64 += 3.5f / 720.0f * (1.0 - g_aspectRatioNarrowScale);
++    f12.f64 += -133.0f / 1280.0f * (1.0 - g_aspectRatioNarrowScale);
++    f11.f64 += 3.5f / 720.0f * (1.0 - g_aspectRatioNarrowScale);
++}
+diff --git a/UnleashedRecompLib/config/SWA.toml b/UnleashedRecompLib/config/SWA.toml
+index 5063e7123..217a87411 100644
+--- a/UnleashedRecompLib/config/SWA.toml
++++ b/UnleashedRecompLib/config/SWA.toml
+@@ -1153,3 +1153,8 @@ registers = ["f1"]
+ name = "CEvilSonicContext_CStateWall_LeaveRotationMidAsmHook"
+ address = 0x82406774
+ registers = ["f1"]
++
++[[midasm_hook]]
++name = "AdvertiseLogoPlacementMidAsmHook"
++address = 0x82B729A0
++registers = ["f0", "f13", "f12", "f11"]

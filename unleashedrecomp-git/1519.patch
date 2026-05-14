@@ -1,0 +1,86 @@
+From 7740f6587d980ef294860ed2a6fc47fd2b260708 Mon Sep 17 00:00:00 2001
+From: Hyper <34012267+hyperbx@users.noreply.github.com>
+Date: Fri, 4 Apr 2025 21:43:09 +0100
+Subject: [PATCH] Fix "Use Alternate Title" code not swapping logos for certain
+ scenarios
+
+---
+ UnleashedRecomp/patches/misc_patches.cpp | 24 ++++++++++++++++++++++++
+ UnleashedRecompLib/config/SWA.toml       | 23 +++++++++++++++++++++++
+ 2 files changed, 47 insertions(+)
+
+diff --git a/UnleashedRecomp/patches/misc_patches.cpp b/UnleashedRecomp/patches/misc_patches.cpp
+index ec4e1a8be..039fd301b 100644
+--- a/UnleashedRecomp/patches/misc_patches.cpp
++++ b/UnleashedRecomp/patches/misc_patches.cpp
+@@ -64,6 +64,30 @@ bool UseAlternateTitleMidAsmHook()
+     return isSWA;
+ }
+ 
++bool UseAlternateTitleStaffRollMidAsmHook(PPCRegister& r1)
++{
++    auto pGroupName = (Hedgehog::Base::CSharedString*)g_memory.Translate(r1.s64 + 0x60);
++
++    if (Config::UseAlternateTitle)
++    {
++        // Redirect English title to Japanese title.
++        if (strcmp(pGroupName->c_str(), "OFCI5") == 0 || strcmp(pGroupName->c_str(), "OTLR11") == 0)
++            return Config::Language == ELanguage::Japanese;
++
++        // Redirect Japanese title to English title.
++        if (strcmp(pGroupName->c_str(), "JFCI7") == 0 || strcmp(pGroupName->c_str(), "JTLR13") == 0)
++            return Config::Language != ELanguage::Japanese;
++    }
++
++    if (pGroupName->c_str()[0] == 'J')
++        return Config::Language == ELanguage::Japanese;
++
++    if (pGroupName->c_str()[0] == 'O')
++        return Config::Language != ELanguage::Japanese;
++
++    return true;
++}
++
+ /* Hook function that gets the game region
+    and force result to zero for Japanese
+    to display the correct logos. */
+diff --git a/UnleashedRecompLib/config/SWA.toml b/UnleashedRecompLib/config/SWA.toml
+index eb871b8a3..1fb40bf68 100644
+--- a/UnleashedRecompLib/config/SWA.toml
++++ b/UnleashedRecompLib/config/SWA.toml
+@@ -1101,12 +1101,35 @@ name = "ObjGrindDashPanelAllocMidAsmHook"
+ address = 0x82614948
+ registers = ["r3"]
+ 
++# Title screen logo
+ [[midasm_hook]]
+ name = "UseAlternateTitleMidAsmHook"
+ address = 0x82580F44
+ jump_address_on_true = 0x82580F48
+ jump_address_on_false = 0x82580FA0
+ 
++# Advertise movie logo
++[[midasm_hook]]
++name = "UseAlternateTitleMidAsmHook"
++address = 0x82B73780
++jump_address_on_true = 0x82B73784
++jump_address_on_false = 0x82B737F8
++
++# Opening movie logo
++[[midasm_hook]]
++name = "UseAlternateTitleMidAsmHook"
++address = 0x82B73630
++jump_address_on_true = 0x82B73634
++jump_address_on_false = 0x82B736B0
++
++# Staff roll logo
++[[midasm_hook]]
++name = "UseAlternateTitleStaffRollMidAsmHook"
++address = 0x8257EBF0
++registers = ["r1"]
++jump_address_on_true = 0x8257EC7C
++jump_address_on_false = 0x8257ECC0
++
+ [[midasm_hook]]
+ name = "EndingTextAllocMidAsmHook"
+ address = 0x8257E284
