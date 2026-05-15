@@ -17,7 +17,7 @@ source=('git+https://github.com/sonicnext-dev/MarathonRecomp.git'
         'shader_lt.arc')
 sha256sums=('SKIP'
             '29b60a2400b43441ea90db72bb54896fdb5345abfcb834b08342909e487f4e1e'
-            '17cdbf3cd7532fb809b16fa92e8fec7e112a15eea88e6fc5373b1062f0fe69d2'
+            '4515f869aad0c4276f12acc5bc402917f8d1f2f228f54beca4e5653680da3cc5'
             '373689b7c8bc839fbc00f55f756da7a1ff55d786d043423606db8bf7f3905c94'
             '1bc8fd8d7a879ec6dcef4321ff19b8cbb05fabfc127f063ad56c9a7214e52ae2'
             'ca08119e9ee97e6a6fc4e2d48ad9492412d710f6ee8480e6a5318aa922659011')

@@ -1,5 +1,5 @@
 diff --git i/CMakeLists.txt w/CMakeLists.txt
-index 6a06ffb..e129973 100644
+index 6a06ffb..b585a3a 100644
 --- i/CMakeLists.txt
 +++ w/CMakeLists.txt
 @@ -1,6 +1,8 @@
@@ -34,6 +34,20 @@ index 6a06ffb..e129973 100644
  if (APPLE)
      enable_language(OBJC OBJCXX)
  endif()
+@@ -33,13 +50,6 @@ endif()
+ string(TOLOWER "${MARATHON_RECOMP_ARCHITECTURE}" MARATHON_RECOMP_ARCHITECTURE)
+ message(STATUS "Detected architecture: ${MARATHON_RECOMP_ARCHITECTURE}")
+ 
+-if (MARATHON_RECOMP_ARCHITECTURE STREQUAL "x86_64" OR MARATHON_RECOMP_ARCHITECTURE STREQUAL "amd64")
+-    # Target Sandy Bridge for all projects
+-    add_compile_options(
+-        -march=sandybridge
+-    )
+-endif()
+-
+ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+     # Normally only defined by Visual Studio, added for consistency
+     add_compile_definitions(_DEBUG)
 diff --git i/thirdparty/CMakeLists.txt w/thirdparty/CMakeLists.txt
 index d5c0858..a0b13ba 100644
 --- i/thirdparty/CMakeLists.txt
