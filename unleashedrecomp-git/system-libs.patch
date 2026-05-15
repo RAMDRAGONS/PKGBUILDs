@@ -1,5 +1,5 @@
 diff --git i/CMakeLists.txt w/CMakeLists.txt
-index 6a06ffb..e129973 100644
+index 6a06ffb..b585a3a 100644
 --- i/CMakeLists.txt
 +++ w/CMakeLists.txt
 @@ -1,6 +1,8 @@
@@ -34,6 +34,20 @@ index 6a06ffb..e129973 100644
  if (APPLE)
      enable_language(OBJC OBJCXX)
  endif()
+@@ -33,13 +50,6 @@ endif()
+ string(TOLOWER "${UNLEASHED_RECOMP_ARCHITECTURE}" UNLEASHED_RECOMP_ARCHITECTURE)
+ message(STATUS "Detected architecture: ${UNLEASHED_RECOMP_ARCHITECTURE}")
+ 
+-if (UNLEASHED_RECOMP_ARCHITECTURE STREQUAL "x86_64" OR UNLEASHED_RECOMP_ARCHITECTURE STREQUAL "amd64")
+-    # Target Sandy Bridge for all projects
+-    add_compile_options(
+-        -march=sandybridge
+-    )
+-endif()
+-
+ add_subdirectory(${UNLEASHED_RECOMP_THIRDPARTY_ROOT})
+ add_subdirectory(${UNLEASHED_RECOMP_TOOLS_ROOT})
+ 
 diff --git i/thirdparty/CMakeLists.txt w/thirdparty/CMakeLists.txt
 index d5c0858..a0b13ba 100644
 --- i/thirdparty/CMakeLists.txt
