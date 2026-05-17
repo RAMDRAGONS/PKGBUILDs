@@ -1,6 +1,6 @@
-diff --git i/CMakeModules/DuckStationDependencies.cmake w/CMakeModules/DuckStationDependencies.cmake
-index 71d1cb041..9a10746c8 100644
---- i/CMakeModules/DuckStationDependencies.cmake
+diff --git c/CMakeModules/DuckStationDependencies.cmake w/CMakeModules/DuckStationDependencies.cmake
+index 52c3831b9..e62ce0831 100644
+--- c/CMakeModules/DuckStationDependencies.cmake
 +++ w/CMakeModules/DuckStationDependencies.cmake
 @@ -2,41 +2,9 @@
  # SPDX-License-Identifier: CC-BY-NC-ND-4.0 + Packaging Restriction
@@ -46,11 +46,7 @@ index 71d1cb041..9a10746c8 100644
  
  # Enable threads everywhere.
  set(THREADS_PREFER_PTHREAD_FLAG ON)
-@@ -48,72 +16,90 @@ if(NOT WIN32 AND NOT APPLE)
-   find_package(Libbacktrace REQUIRED)
- endif()
- 
--# libpng relies on zlib, which we need the system version for on Mac.
+@@ -52,68 +20,88 @@ endif()
  if(APPLE OR CPU_ARCH_ARM32 OR CPU_ARCH_ARM64)
    find_package(ZLIB REQUIRED)
  else()
@@ -96,11 +92,21 @@ index 71d1cb041..9a10746c8 100644
 +    INTERFACE_INCLUDE_DIRECTORIES "${DEPS_PATH}/include"
 +  )
 +endmacro()
-+
+ 
+-# Verify dependency paths.
+-foreach(dep zstd WebP PNG libjpeg-turbo freetype harfbuzz plutosvg cpuinfo
+-            DiscordRPC SoundTouch libzip Shaderc spirv_cross_c_shared SDL3)
+-  if((${dep}_LIBRARY AND NOT "${${dep}_LIBRARY}" MATCHES "^${DEPS_PATH}") OR
+-     (${dep}_DIR AND NOT "${${dep}_DIR}" MATCHES "^${DEPS_PATH}"))
+-    message(FATAL_ERROR "Using incorrect ${dep} library. Check your dependencies.")
+-  endif()
+-endforeach()
 +macro(import_shared_dep NAME TARGET LIB_NAME)
 +  add_library(${TARGET} SHARED IMPORTED)
 +  set_target_properties(${TARGET} PROPERTIES 
 +    IMPORTED_LOCATION "${DEPS_PATH}/lib/${LIB_NAME}"
++    IMPORTED_LOCATION_RELEASE "${DEPS_PATH}/lib/${LIB_NAME}"
++    IMPORTED_SONAME_RELEASE "${LIB_NAME}"
 +    INTERFACE_INCLUDE_DIRECTORIES "${DEPS_PATH}/include"
 +  )
 +endmacro()
@@ -115,14 +121,14 @@ index 71d1cb041..9a10746c8 100644
 +import_static_dep(cpuinfo cpuinfo::cpuinfo libcpuinfo.a)
 +
 +# DiscordRPC
-+import_static_dep(DiscordRPC DiscordRPC libdiscord-rpc.a)
++import_static_dep(DiscordRPC DiscordRPC::discord-rpc libdiscord-rpc.a)
 +
 +# Shaderc
 +import_shared_dep(Shaderc Shaderc::shaderc_shared libshaderc_shared.so)
 +
 +# libpng (APNG fork)
-+import_static_dep(PNG PNG::PNG libpng16.a)
-+set(PNG_LIBRARIES PNG::PNG)
++import_static_dep(PNG PNG::png_shared libpng16.a)
++set(PNG_LIBRARIES PNG::png_shared)
 +set(PNG_INCLUDE_DIRS "${DEPS_PATH}/include")
 +set(PNG_FOUND TRUE)
 +
@@ -153,15 +159,6 @@ index 71d1cb041..9a10746c8 100644
 +find_package(spirv_cross_c_shared REQUIRED)
 +find_package(SDL3 REQUIRED)
  
--# Verify dependency paths.
--foreach(dep zstd WebP PNG libjpeg-turbo freetype harfbuzz plutosvg cpuinfo
--            DiscordRPC SoundTouch libzip Shaderc spirv_cross_c_shared SDL3)
--  if((${dep}_LIBRARY AND NOT "${${dep}_LIBRARY}" MATCHES "^${DEPS_PATH}") OR
--     (${dep}_DIR AND NOT "${${dep}_DIR}" MATCHES "^${DEPS_PATH}"))
--    message(FATAL_ERROR "Using incorrect ${dep} library. Check your dependencies.")
--  endif()
--endforeach()
- 
  # All our builds include Qt, so this is not a problem.
  set(QT_NO_PRIVATE_MODULE_WARNING ON)
  
@@ -186,12 +183,24 @@ index 71d1cb041..9a10746c8 100644
  # Libraries that are pulled in from host.
  if(NOT WIN32)
    find_package(CURL REQUIRED)
-@@ -138,7 +124,7 @@ if(NOT WIN32)
+@@ -138,7 +126,7 @@ if(NOT WIN32)
  endif()
  
  if(NOT WIN32)
--  find_package(FFMPEG 8.1.0 COMPONENTS avcodec avformat avutil swresample swscale)
+-  find_package(FFMPEG 8.1.1 COMPONENTS avcodec avformat avutil swresample swscale)
 +  find_package(FFMPEG COMPONENTS avcodec avformat avutil swresample swscale)
    if(NOT FFMPEG_FOUND)
      message(WARNING "FFmpeg not found, using bundled headers.")
    endif()
+diff --git c/CMakeModules/DuckStationUtils.cmake w/CMakeModules/DuckStationUtils.cmake
+index 6d2c8c6d0..aabcd8e0f 100644
+--- c/CMakeModules/DuckStationUtils.cmake
++++ w/CMakeModules/DuckStationUtils.cmake
+@@ -380,6 +380,7 @@ function(add_resources TARGET DEST_SUBDIR SOURCE_DIR)
+ endfunction()
+ 
+ function(bundle_libraries TARGET)
++  return()
+   unset(LIBRARY_SOURCES)
+   foreach(NAME IN LISTS ARGN)
+     get_target_property(dyn_lib_path ${NAME} IMPORTED_LOCATION_RELEASE)
