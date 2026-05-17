@@ -2,7 +2,7 @@
 # Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
 
 pkgname=rom-properties-git
-pkgver=2.7.1.r293.g20ccb0b
+pkgver=2.7.1.r337.g6dae8e6
 pkgrel=1
 pkgdesc='This shell extension adds a few nice features to file browsers for managing video game ROM and disc images.'
 arch=('x86_64')
@@ -32,6 +32,7 @@ prepare() {
   cd "${pkgname%%-git}"
   patch -Np1 -i "$srcdir/nettle3.patch"
   sed -i '1i include(CheckLibraryExists)' extlib/libpng/CMakeLists.txt
+  sed -i 's|INSTALL(FILES servicemenus/rp-convert-to-png.desktop|INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/servicemenus/rp-convert-to-png.desktop|' src/kde/CMakeLists.txt
 }
 
 build() {
