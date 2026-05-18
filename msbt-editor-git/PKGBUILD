@@ -64,6 +64,9 @@ package() {
   install -dm755 "$pkgdir/opt/msbt-editor"
   cp -a msbt-editor/src/MsbtEditor.App/bin/Release/net10.0/linux-x64/publish/linux-unpacked/* "$pkgdir/opt/msbt-editor/"
 
+  # Remove LTTng tracing library to prevent checkrebuild from flagging missing liblttng-ust.so.0
+  rm -f "$pkgdir/opt/msbt-editor/resources/bin/libcoreclrtraceptprovider.so"
+
   # Install launcher script
   install -Dm755 msbt-editor.sh "$pkgdir/usr/bin/msbt-editor"
 
