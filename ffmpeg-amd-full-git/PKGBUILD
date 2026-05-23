@@ -1,10 +1,11 @@
 # Maintainer: Nathaniel Chin <thegamingorangutans+aur at gmail.com>
+# Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
 # Original: Daniel Bermond <dbermond@archlinux.org> > https://aur.archlinux.org/packages/ffmpeg-full-git
 # Contributor: Marko Korhonen <reekymarko at reekynet.com>
 # Contributor: Bruno Filipe < gmail-com: bmilreu >
 
 pkgname=ffmpeg-amd-full-git
-pkgver=8.2.r124419.gc8a4770599
+pkgver=8.2.r124595.g4492ad7228
 pkgrel=1
 _svt_hevc_ver='4181c9ee0611baefb40b4c0ed10023cfd837d522'
 _whispercpp_ver='1.8.3'
@@ -270,7 +271,6 @@ build() {
         --enable-libbluray \
         --enable-libbs2b \
         --enable-libcaca \
-        --enable-libcelt \
         --enable-libcdio \
         --enable-libcodec2 \
         --enable-libdav1d \
