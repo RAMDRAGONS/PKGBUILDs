@@ -2,7 +2,7 @@
 # Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
 
 pkgname=sonic3air-git
-pkgver=v26.03.28.0.stable.r1609.b196733
+pkgver=v26.03.28.0.stable.r1614.887a8b3
 pkgrel=1
 pkgdesc='A fan-made widescreen remaster of Sonic 3 & Knuckles, built from latest git'
 arch=('x86' 'x86_64' 'aarch64')
@@ -26,6 +26,10 @@ pkgver() {
 prepare() {
   cd "${srcdir}/${pkgname}"
   sed -i '/add_library(minizip/a \  target_compile_definitions(minizip PRIVATE IOAPI_NO_64)' Oxygen/sonic3air/build/_cmake/CMakeLists.txt
+
+  # Ignore GLEW_ERROR_NO_GLX_DISPLAY (value 4, "Unknown error") returned by glewInit() under Wayland/EGL
+  sed -i 's/result != GLEW_OK/result != GLEW_OK \&\& result != GLEW_ERROR_NO_GLX_DISPLAY/g' librmx/source/rmxmedia/framework/VideoManager.cpp
+  sed -i 's/result != GLEW_OK/result != GLEW_OK \&\& result != GLEW_ERROR_NO_GLX_DISPLAY/g' Oxygen/oxygenengine/source/oxygen/drawing/opengl/OpenGLDrawer.cpp
 }
 
 build() {
