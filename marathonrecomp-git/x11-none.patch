@@ -1,0 +1,13 @@
+diff --git a/MarathonRecomp/ui/game_window.cpp b/MarathonRecomp/ui/game_window.cpp
+index aaaaaaa..bbbbbbb 100644
+--- a/MarathonRecomp/ui/game_window.cpp
++++ b/MarathonRecomp/ui/game_window.cpp
+@@ -6,5 +6,8 @@
+ #include <app.h>
+ #include <sdl_listener.h>
+ #include <SDL_syswm.h>
++#ifdef None
++#undef None
++#endif
+ 
+ #if _WIN32
