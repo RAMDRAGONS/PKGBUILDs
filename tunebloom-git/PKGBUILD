@@ -1,0 +1,84 @@
+# Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
+
+pkgname=tunebloom-git
+_pkgname=TuneBloom
+pkgver=1.01.r26.g8e6f078
+pkgrel=1
+pkgdesc="BFSAR (Binary caFe Sound ARchive) editor written in C++ (Git version)"
+arch=('x86_64')
+url="https://github.com/stupidestmodder/TuneBloom"
+license=('MIT')
+depends=('gcc-libs' 'glibc' 'libx11' 'libxrandr' 'libxinerama' 'libxcursor' 'libxi' 'libglvnd' 'alsa-lib')
+makedepends=('git' 'premake' 'clang')
+provides=('tunebloom')
+conflicts=('tunebloom')
+source=("git+https://github.com/stupidestmodder/TuneBloom.git"
+        "git+https://github.com/stupidestmodder/sead.git"
+        "git+https://github.com/glfw/glfw.git"
+        "tunebloom.desktop")
+sha256sums=('SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP')
+
+pkgver() {
+  cd "${srcdir}/${_pkgname}"
+  git describe --long --tags --exclude 'nightly-*' 2>/dev/null | sed 's/^v//;s/\([^-]*-g\)/r\1/;s/-/./g'
+}
+
+prepare() {
+  cd "${srcdir}/${_pkgname}"
+
+  # Initialize and configure the sead submodule
+  git submodule init TuneBloom/vendor/sead
+  git config submodule.TuneBloom/vendor/sead.url "${srcdir}/sead"
+  git -c protocol.file.allow=always submodule update TuneBloom/vendor/sead
+
+  # Configure the nested libs/glfw submodule inside sead
+  cd TuneBloom/vendor/sead
+  git submodule init libs/glfw
+  git config submodule.libs/glfw.url "${srcdir}/glfw"
+  git -c protocol.file.allow=always submodule update libs/glfw
+
+  # Go back to main repository root
+  cd "${srcdir}/${_pkgname}"
+
+  # Patch the asset path references to look in /usr/share/tunebloom/content
+  sed -i 's|"content/icon.png"|"/usr/share/tunebloom/content/icon.png"|g' TuneBloom/src/tasks/BfsarTask.cpp
+  sed -i 's|PosixFileDevice("content", "content")|PosixFileDevice("content", "/usr/share/tunebloom/content")|g' TuneBloom/vendor/sead/src/filedevice/posix/seadPosixContentFileDevicePosix.cpp
+}
+
+build() {
+  cd "${srcdir}/${_pkgname}"
+  
+  export CXXFLAGS="${CXXFLAGS} -Wno-error=format-security -Wno-format-security"
+  export CFLAGS="${CFLAGS} -Wno-error=format-security -Wno-format-security"
+
+  # Embed the current commit hash in the binary version title
+  export COMMIT_SHA=$(git rev-parse HEAD)
+  
+  premake5 gmake
+  make config=release_glfw_x86_64
+}
+
+package() {
+  cd "${srcdir}/${_pkgname}"
+
+  # Install binary
+  install -Dm755 "TuneBloom/bin/TuneBloom-GLFW_x86_64-Release/out/TuneBloom" "${pkgdir}/usr/bin/tunebloom"
+
+  # Install assets to /usr/share/tunebloom/content
+  install -d "${pkgdir}/usr/share/tunebloom/content"
+  cp -r workdir/content/* "${pkgdir}/usr/share/tunebloom/content/"
+  
+  # Ensure correct permissions for assets
+  find "${pkgdir}/usr/share/tunebloom/content" -type d -exec chmod 755 {} +
+  find "${pkgdir}/usr/share/tunebloom/content" -type f -exec chmod 644 {} +
+
+  # Install desktop entry and icon
+  install -Dm644 "${srcdir}/tunebloom.desktop" "${pkgdir}/usr/share/applications/tunebloom.desktop"
+  install -Dm644 "workdir/content/icon.png" "${pkgdir}/usr/share/pixmaps/tunebloom.png"
+
+  # Install license
+  install -Dm644 LICENSE.txt "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}

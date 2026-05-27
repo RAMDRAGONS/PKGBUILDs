@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=TuneBloom
+Comment=Editor for NintendoWare audio formats
+Exec=tunebloom %F
+Icon=tunebloom
+Terminal=false
+Type=Application
+Categories=AudioVideo;Audio;AudioVideoEditing;
+MimeType=audio/x-bfsar;
