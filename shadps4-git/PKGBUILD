@@ -1,7 +1,7 @@
 # Maintainer: Alexandre Bouvier <contact@amb.tf>
 _pkgname=shadps4
 pkgname=$_pkgname-git
-pkgver=0.15.0.r198.gf4b787f
+pkgver=0.16.0.r5.g0b9eb3d
 pkgrel=1
 pkgdesc="Sony PlayStation 4 emulator (CLI)"
 arch=('aarch64' 'x86_64')
@@ -17,7 +17,7 @@ depends=(
 makedepends=(
 	'boost>=1.84'
 	'cli11>=2.6.1'
-	'cmake>=3.16.3'
+	'cmake'
 	'ffmpeg'
 	'fmt>=12'
 	'git'
