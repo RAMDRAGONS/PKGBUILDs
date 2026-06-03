@@ -2,7 +2,7 @@
 # Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
 _pkgname=cemu
 pkgname=$_pkgname-git
-pkgver=2.6.r213.g8e3e961
+pkgver=2.6.r221.g591e721
 pkgrel=1
 pkgdesc="Nintendo Wii U emulator"
 arch=('x86_64')
@@ -21,7 +21,7 @@ makedepends=(
 	'bluez-libs'
 	'boost'
 	'boost-libs'
-	'cmake>=3.21.1'
+	'cmake'
 	'cubeb'
 	'curl'
 	'fmt>=9'
