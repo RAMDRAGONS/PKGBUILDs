@@ -9,7 +9,7 @@
 
 pkgname=aseprite-git
 _pkgname=aseprite
-pkgver=1.3.18.beta3.r5.gce2db8405
+pkgver=1.3.18.beta3.r11.gce66abcc5
 pkgrel=1
 pkgdesc='Create animated sprites and pixel art'
 arch=('x86_64' 'i686')
@@ -173,6 +173,7 @@ build() {
         -DSKIA_LIBRARY="$srcdir/skia/out/Clang/libskia.a" \
         -DLAF_WITH_TESTS=OFF \
         -DLAF_WITH_EXAMPLES=OFF \
+        -Dld-version-script=OFF \
         -G Ninja \
         ..
     ninja ${_pkgname}
