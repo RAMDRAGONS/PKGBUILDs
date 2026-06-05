@@ -1,6 +1,6 @@
 # Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
 pkgname=duckstation-git
-pkgver=0.1.r11826.fc72f17a5
+pkgver=0.1.r11898.02a41fa06
 pkgrel=1
 pkgdesc="Fast PlayStation 1 emulator for PC and Android (Git version)"
 arch=('x86_64' 'aarch64')
@@ -120,7 +120,8 @@ build() {
     -DCMAKE_INSTALL_PREFIX="$srcdir/deps-install" \
     -DPNG_SHARED=OFF \
     -DPNG_STATIC=ON \
-    -DPNG_TESTS=OFF
+    -DPNG_TESTS=OFF \
+    -Dld-version-script=OFF
   make install
 
   # Build DuckStation
