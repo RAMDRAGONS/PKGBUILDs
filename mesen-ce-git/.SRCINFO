@@ -1,0 +1,26 @@
+pkgbase = mesen-ce-git
+	pkgdesc = Multi-system emulator (NES, SNES, GB, GBA, PCE, SMS/GG, WS)
+	pkgver = r3716.0cef745
+	pkgrel = 1
+	url = https://github.com/nesdev-org/MesenCE
+	arch = x86_64
+	license = GPL-3.0-only
+	makedepends = dotnet-sdk-8.0
+	makedepends = git
+	makedepends = zip
+	makedepends = clang
+	makedepends = coreutils
+	depends = libevdev
+	depends = sdl2
+	provides = mesen-ce
+	conflicts = mesen-ce
+	options = !strip
+	options = !debug
+	source = mesen-ce::git+https://github.com/nesdev-org/MesenCE.git
+	source = mesen-disable-shortcut-creation.patch
+	source = mesen-force-x11-on-linux.patch
+	sha256sums = SKIP
+	sha256sums = a2feb9ae42788dcc2113e606b37ac1ccff37546ee844f798ee06d507d63f2a98
+	sha256sums = 014599224e7835acef87f80c339aee521e29ed5c6ffd253eff0a538c5d06de65
+
+pkgname = mesen-ce-git
