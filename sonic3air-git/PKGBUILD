@@ -2,7 +2,7 @@
 # Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
 
 pkgname=sonic3air-git
-pkgver=v26.03.28.0.stable.r1614.887a8b3
+pkgver=v26.03.28.0.stable.r1641.c528de6
 pkgrel=1
 pkgdesc='A fan-made widescreen remaster of Sonic 3 & Knuckles, built from latest git'
 arch=('x86' 'x86_64' 'aarch64')
@@ -30,6 +30,9 @@ prepare() {
   # Ignore GLEW_ERROR_NO_GLX_DISPLAY (value 4, "Unknown error") returned by glewInit() under Wayland/EGL
   sed -i 's/result != GLEW_OK/result != GLEW_OK \&\& result != GLEW_ERROR_NO_GLX_DISPLAY/g' librmx/source/rmxmedia/framework/VideoManager.cpp
   sed -i 's/result != GLEW_OK/result != GLEW_OK \&\& result != GLEW_ERROR_NO_GLX_DISPLAY/g' Oxygen/oxygenengine/source/oxygen/drawing/opengl/OpenGLDrawer.cpp
+
+  # Fix format security error in AppDebugWindow.cpp
+  sed -i 's/ImGui::BulletText(element.getInternalName().c_str())/ImGui::BulletText("%s", element.getInternalName().c_str())/g' Oxygen/oxygenengine/source/oxygen/menu/devmode/windows/AppDebugWindow.cpp
 }
 
 build() {
