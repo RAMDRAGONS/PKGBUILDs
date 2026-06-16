@@ -33,6 +33,9 @@ prepare() {
 
   # Fix format security error in AppDebugWindow.cpp
   sed -i 's/ImGui::BulletText(element.getInternalName().c_str())/ImGui::BulletText("%s", element.getInternalName().c_str())/g' Oxygen/oxygenengine/source/oxygen/menu/devmode/windows/AppDebugWindow.cpp
+
+  # Patch OggLoader.cpp to fix free(): invalid pointer crash on startup
+  python3 "${startdir}/patch_oggloader.py"
 }
 
 build() {
