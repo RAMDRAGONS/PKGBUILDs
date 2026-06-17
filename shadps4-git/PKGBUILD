@@ -1,7 +1,7 @@
 # Maintainer: Alexandre Bouvier <contact@amb.tf>
 _pkgname=shadps4
 pkgname=$_pkgname-git
-pkgver=0.16.0.r27.gb3a9e20
+pkgver=0.16.0.r54.g462cd07
 pkgrel=1
 pkgdesc="Sony PlayStation 4 emulator (CLI)"
 arch=('aarch64' 'x86_64')
@@ -27,6 +27,7 @@ makedepends=(
 	'libpng>=1.6'
 	'libstdc++'
 	'magic_enum>=0.9.7'
+	'miniupnpc'
 	'nlohmann-json>=3.12'
 	'openal'
 	'openssl'
@@ -91,12 +92,10 @@ prepare() {
 	git -c protocol.file.allow=always submodule update
 	# remove hardcoded flag
 	sed -i '/-march=/d' CMakeLists.txt
-	# use system glslang
-	sed -i '/find_package/s/glslang 15/glslang/' CMakeLists.txt
-	# use system openssl
-	sed -i 's/LibreSSL.*MODULE/OpenSSL CONFIG/' CMakeLists.txt
-	# use system freetype
-	sed -i '/find_package(pugixml 1.14 CONFIG)/a find_package(Freetype REQUIRED)\nadd_library(freetype ALIAS Freetype::Freetype)' CMakeLists.txt
+	# allow newer glslang versions
+	sed -i 's/glslang 15/glslang/' CMakeLists.txt
+	# find system OpenSSL instead of LibreSSL
+	sed -i 's/LibreSSL 4.3.1 MODULE/OpenSSL REQUIRED/' CMakeLists.txt
 }
 
 build() {
@@ -107,6 +106,7 @@ build() {
 		-D CMAKE_BUILD_TYPE=None
 		-D CMAKE_INSTALL_PREFIX=/usr
 		-D CMAKE_SKIP_INSTALL_RPATH=ON
+		-D ENABLE_SYSTEM_LIBRARIES=ON
 		-D ENABLE_UPDATER=OFF
 		-D SIRIT_USE_SYSTEM_SPIRV_HEADERS=ON
 		-W no-dev
@@ -120,11 +120,13 @@ package() {
 		'libavcodec.so'
 		'libavformat.so'
 		'libavutil.so'
+		'libcrypto.so'
 		'libfmt.so'
 		'libfreetype.so'
 		'libgcc_s.so'
 		'libopenal.so'
 		'libpng16.so'
+		'libssl.so'
 		'libstdc++.so'
 		'libswresample.so'
 		'libswscale.so'
