@@ -1,0 +1,62 @@
+# Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
+# Maintainer: Charlotte Ausel <ettolrach@disroot.org>
+# Maintainer: Echo J. <aidas957 at gmail dot com>
+
+_pkgname=vgmtrans
+pkgname=${_pkgname}-git
+pkgver=r1644.58939d8
+pkgrel=1
+pkgdesc="Converter for sequenced videogame music"
+arch=("x86_64")
+url="https://github.com/vgmtrans/vgmtrans"
+license=("BSD-3-Clause" "Zlib")
+depends=("hicolor-icon-theme" "qt6-base" "qt6-svg" "fmt" "libchdr" "qwindowkit" "spdlog" "zlib" "minizip")
+makedepends=("cmake" "git" "qt6-tools" "pkgconf")
+provides=("${_pkgname}")
+conflicts=("${_pkgname}-bin")
+source=("${_pkgname}::git+${url}")
+sha256sums=("SKIP")
+
+prepare() {
+	cd "${srcdir}/${_pkgname}"
+
+	# Create dummy license files for resources.qrc since submodules are not checked out
+	mkdir -p lib/qwindowkit lib/zlib lib/spdlog lib/libchdr
+	touch lib/qwindowkit/LICENSE lib/zlib/LICENSE lib/spdlog/LICENSE lib/libchdr/LICENSE.txt
+
+	# Patch CMake files to pull dependencies from system
+	sed -i 's/if(NOT TARGET QWindowKit::Widgets)/find_package(QWindowKit REQUIRED)\nif(NOT TARGET QWindowKit::Widgets)/' src/ui/qt/CMakeLists.txt
+	sed -i '/if(USE_SYSTEM_LIBCHDR)/,/else()/ s/find_package(libchdr REQUIRED)/find_package(PkgConfig REQUIRED)\n  pkg_check_modules(libchdr REQUIRED IMPORTED_TARGET libchdr)\n  add_library(chdr-static ALIAS PkgConfig::libchdr)/' src/main/CMakeLists.txt
+	sed -i '/if(USE_SYSTEM_MINIZIP)/,/else()/ s#find_package(minizip REQUIRED)#find_package(PkgConfig REQUIRED)\n  pkg_check_modules(minizip REQUIRED IMPORTED_TARGET minizip)\n  target_include_directories(PkgConfig::minizip INTERFACE /usr/include/minizip)\n  add_library(minizip ALIAS PkgConfig::minizip)#' src/main/CMakeLists.txt
+
+	mkdir build || true
+}
+pkgver() {
+	cd "${srcdir}/${_pkgname}"
+	printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short=7 HEAD)"
+}
+
+build() {
+	cd "${srcdir}/${_pkgname}/build"
+
+	cmake -DCMAKE_INSTALL_PREFIX=/usr \
+			-DCMAKE_INSTALL_LIBDIR="lib/${_pkgname}" \
+			-DNO_QT_DEPLOY=ON \
+			-DINSTALL_SHELL=ON \
+			-DUSE_SYSTEM_FMT=ON \
+			-DUSE_SYSTEM_SPDLOG=ON \
+			-DUSE_SYSTEM_ZLIB=ON \
+			-DUSE_SYSTEM_LIBCHDR=ON \
+			-DUSE_SYSTEM_MINIZIP=ON \
+			..
+	make
+}
+
+package() {
+	cd "${srcdir}/${_pkgname}/build"
+
+	make DESTDIR="${pkgdir}" install
+
+	# Move the licenses to the right place
+	mv "${pkgdir}/usr/share/licenses/${_pkgname}" "${pkgdir}/usr/share/licenses/${pkgname}"
+}
