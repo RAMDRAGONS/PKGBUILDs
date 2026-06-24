@@ -629,7 +629,7 @@
 +    FF_CODEC_ENCODE_CB(eb_encode_frame),
 +    .close          = eb_enc_close,
 +    .p.capabilities = AV_CODEC_CAP_DELAY,
-+    .p.pix_fmts     = (const enum AVPixelFormat[]){ AV_PIX_FMT_YUV420P,
++    .pix_fmts       = (const enum AVPixelFormat[]){ AV_PIX_FMT_YUV420P,
 +                                                    AV_PIX_FMT_YUV420P10,
 +                                                    AV_PIX_FMT_YUV422P,
 +                                                    AV_PIX_FMT_YUV422P10,
