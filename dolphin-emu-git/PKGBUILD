@@ -9,7 +9,7 @@ _noguipkgname="$_projectname-emu-nogui"
 _toolpkgname="$_projectname-emu-tool"
 pkgbase="$_mainpkgname-git"
 pkgname=("$pkgbase" "$_noguipkgname-git" "$_toolpkgname-git")
-pkgver=2603.r430.g5f011709b7
+pkgver=2603.r439.g8230647205
 pkgrel=1
 pkgdesc='A Gamecube / Wii emulator'
 _pkgdescappend=' - git version'
@@ -44,7 +44,6 @@ source=(
 	"$pkgbase-vh::git+https://github.com/KhronosGroup/Vulkan-Headers.git"
 	"$pkgbase-vma::git+https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git"
 	"$pkgbase-watcher::git+https://github.com/e-dant/watcher.git"
-	'fix-fmt11.patch'
 )
 b2sums=('SKIP'
         'SKIP'
@@ -56,16 +55,12 @@ b2sums=('SKIP'
         'SKIP'
         'SKIP'
         'SKIP'
-        'SKIP'
-        'b2d320e73b940460b9303924e07986e6bd87f9cea0877c7f8ea1b5385347f735472995169b0f37122bb6b5c0fca1a1a420aed398e3146d22e13a22fffb6c1436')
+        'SKIP')
 
 _sourcedirectory="$pkgbase"
 
 prepare() {
 	cd "$srcdir/$_sourcedirectory/"
-
-	# Apply compile fix for fmt >= 11
-	patch -Np1 -i "$srcdir/fix-fmt11.patch"
 
 	if [ -d 'build/' ]; then rm -rf 'build/'; fi
 	mkdir 'build/'
