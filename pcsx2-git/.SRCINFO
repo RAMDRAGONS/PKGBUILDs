@@ -1,6 +1,6 @@
 pkgbase = pcsx2-git
 	pkgdesc = PlayStation 2 emulator
-	pkgver = 2.7.240.r0.gdc6c4d7e4e
+	pkgver = 2.7.434.r0.g7856757087
 	pkgrel = 1
 	url = https://github.com/PCSX2/pcsx2
 	install = pcsx2-git.install
@@ -50,6 +50,8 @@ pkgbase = pcsx2-git
 	conflicts = pcsx2
 	source = git+https://github.com/PCSX2/pcsx2.git
 	source = git+https://github.com/PCSX2/pcsx2_patches.git
+	source = fix-ffmpeg7-avcodec.patch
+	sha256sums = SKIP
 	sha256sums = SKIP
 	sha256sums = SKIP
 

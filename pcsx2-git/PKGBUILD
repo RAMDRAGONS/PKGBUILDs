@@ -5,7 +5,7 @@
 # Contributor: Themaister <maister@archlinux.us>
 
 pkgname=pcsx2-git
-pkgver=2.7.341.r0.g3341514bb4
+pkgver=2.7.434.r0.g7856757087
 pkgrel=1
 pkgdesc='PlayStation 2 emulator'
 arch=(x86_64)
@@ -66,12 +66,18 @@ conflicts=(${pkgname%-git})
 source=(
     git+https://github.com/PCSX2/pcsx2.git
     git+https://github.com/PCSX2/pcsx2_patches.git
+    fix-ffmpeg7-avcodec.patch
 )
 install=pcsx2-git.install
 
 pkgver() {
     cd pcsx2
     git describe --long --tags | sed 's/\([^-]*-g\)/r\1/;s/-/./g;s/^v//'
+}
+
+prepare() {
+    cd pcsx2
+    patch -Np1 -i "${srcdir}/fix-ffmpeg7-avcodec.patch"
 }
 
 build() 
@@ -111,6 +117,7 @@ package() {
 }
 
 sha256sums=(
+    'SKIP'
     'SKIP'
     'SKIP'
 )
