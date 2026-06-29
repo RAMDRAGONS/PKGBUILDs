@@ -2,7 +2,7 @@
 # Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
 _pkgbase=azahar
 pkgname=("$_pkgbase-git")
-pkgver=2126.0.alpha2.r3.gc9d2593
+pkgver=2126.0.alpha2.r8.g7c225c6
 pkgrel=1
 arch=('x86_64')
 url="https://azahar-emu.org/"
@@ -20,7 +20,7 @@ makedepends=(
 	'cmake'
 	'cpp-jwt'
 	'cubeb'
-	'ffmpeg4.4'
+	'ffmpeg'
 	'fmt'
 	'git'
 	'libbacktrace'
@@ -61,8 +61,9 @@ source=(
 	"xbyak::git+https://github.com/herumi/xbyak.git"
 	"xxhash::git+https://github.com/Cyan4973/xxHash.git"
 	"zstd::git+https://github.com/facebook/zstd.git"
+	"ffmpeg7.patch"
 )
-b2sums=('SKIP'{,,,,,,,,,,,,,,,})
+b2sums=('SKIP'{,,,,,,,,,,,,,,,,})
 
 pkgver() {
 	cd $_pkgbase
@@ -96,6 +97,9 @@ prepare() {
 	# fix missing include of <cstring> for std::memset and std::memcpy
 	sed -i '/#include <vector>/a #include <cstring>' ../../src/audio_core/cubeb_sink.cpp
 	sed -i '/#include <vector>/a #include <cstring>' ../../src/audio_core/cubeb_input.cpp
+	# apply FFmpeg 7.0 compatibility patch
+	cd ../..
+	patch -p1 -i ../ffmpeg7.patch
 }
 
 build() {
@@ -113,7 +117,6 @@ build() {
 		-D CMAKE_CXX_COMPILER=clang++
 		-D CMAKE_C_FLAGS_NONE="-DNDEBUG"
 		-D CMAKE_CXX_FLAGS_NONE="-DNDEBUG"
-		-D CMAKE_INCLUDE_PATH="/usr/include/ffmpeg4.4"
 		-D CMAKE_INSTALL_PREFIX=/usr
 		-D DISABLE_SYSTEM_CPP_HTTPLIB=ON
 		-D DISABLE_SYSTEM_DYNARMIC=ON

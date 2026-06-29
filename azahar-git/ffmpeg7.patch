@@ -1,0 +1,226 @@
+diff --git i/src/citra_qt/dumping/option_set_dialog.cpp w/src/citra_qt/dumping/option_set_dialog.cpp
+index f6d6e4af7..23f61e55e 100644
+--- i/src/citra_qt/dumping/option_set_dialog.cpp
++++ w/src/citra_qt/dumping/option_set_dialog.cpp
+@@ -27,7 +27,11 @@ static const std::unordered_map<AVOptionType, const char*> TypeNameMap{{
+     {AV_OPT_TYPE_STRING, QT_TR_NOOP("string")},
+     {AV_OPT_TYPE_DICT, QT_TR_NOOP("dictionary")},
+     {AV_OPT_TYPE_VIDEO_RATE, QT_TR_NOOP("video rate")},
++#if LIBAVUTIL_VERSION_MAJOR >= 58
++    {AV_OPT_TYPE_CHLAYOUT, QT_TR_NOOP("channel layout")},
++#else
+     {AV_OPT_TYPE_CHANNEL_LAYOUT, QT_TR_NOOP("channel layout")},
++#endif
+ }};
+ 
+ static const std::unordered_map<AVOptionType, const char*> TypeDescriptionMap{{
+@@ -39,7 +43,11 @@ static const std::unordered_map<AVOptionType, const char*> TypeDescriptionMap{{
+     {AV_OPT_TYPE_DICT,
+      QT_TR_NOOP("Comma-splitted list of &lt;key>=&lt;value>. Do not put spaces.")},
+     {AV_OPT_TYPE_VIDEO_RATE, QT_TR_NOOP("&lt;num>/&lt;den>, or preset values like 'pal'.")},
++#if LIBAVUTIL_VERSION_MAJOR >= 58
++    {AV_OPT_TYPE_CHLAYOUT, QT_TR_NOOP("Hexadecimal channel layout mask starting with '0x'.")},
++#else
+     {AV_OPT_TYPE_CHANNEL_LAYOUT, QT_TR_NOOP("Hexadecimal channel layout mask starting with '0x'.")},
++#endif
+ }};
+ 
+ /// Get the preset values of an option. returns {display value, real value}
+diff --git i/src/common/dynamic_library/ffmpeg.cpp w/src/common/dynamic_library/ffmpeg.cpp
+index 709f887a5..ac0855db8 100644
+--- i/src/common/dynamic_library/ffmpeg.cpp
++++ w/src/common/dynamic_library/ffmpeg.cpp
+@@ -72,6 +72,9 @@ avcodec_receive_packet_func avcodec_receive_packet;
+ avcodec_send_frame_func avcodec_send_frame;
+ avcodec_send_packet_func avcodec_send_packet;
+ avcodec_version_func avcodec_version;
++#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(60, 31, 102)
++avcodec_get_supported_config_func avcodec_get_supported_config;
++#endif
+ 
+ // avfilter
+ av_buffersink_get_frame_func av_buffersink_get_frame;
+@@ -238,6 +241,9 @@ static bool LoadAVCodec() {
+     LOAD_SYMBOL(avcodec, avcodec_receive_packet);
+     LOAD_SYMBOL(avcodec, avcodec_send_frame);
+     LOAD_SYMBOL(avcodec, avcodec_send_packet);
++#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(60, 31, 102)
++    avcodec_get_supported_config = avcodec->GetSymbol<avcodec_get_supported_config_func>("avcodec_get_supported_config");
++#endif
+ 
+     if (any_failed) {
+         LOG_WARNING(Common, "Could not find all required functions in libavcodec.");
+diff --git i/src/common/dynamic_library/ffmpeg.h w/src/common/dynamic_library/ffmpeg.h
+index f79fef8da..e93187d0c 100644
+--- i/src/common/dynamic_library/ffmpeg.h
++++ w/src/common/dynamic_library/ffmpeg.h
+@@ -121,6 +121,11 @@ typedef int (*avcodec_receive_packet_func)(AVCodecContext*, AVPacket*);
+ typedef int (*avcodec_send_frame_func)(AVCodecContext*, const AVFrame*);
+ typedef int (*avcodec_send_packet_func)(AVCodecContext*, const AVPacket*);
+ typedef unsigned (*avcodec_version_func)();
++#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(60, 31, 102)
++typedef int (*avcodec_get_supported_config_func)(const AVCodecContext*, const AVCodec*,
++                                                 AVCodecConfig, unsigned,
++                                                 const void**, int*);
++#endif
+ 
+ extern av_codec_is_encoder_func av_codec_is_encoder;
+ extern av_codec_iterate_func av_codec_iterate;
+@@ -145,6 +150,9 @@ extern avcodec_receive_packet_func avcodec_receive_packet;
+ extern avcodec_send_frame_func avcodec_send_frame;
+ extern avcodec_send_packet_func avcodec_send_packet;
+ extern avcodec_version_func avcodec_version;
++#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(60, 31, 102)
++extern avcodec_get_supported_config_func avcodec_get_supported_config;
++#endif
+ 
+ // avfilter
+ typedef int (*av_buffersink_get_frame_func)(AVFilterContext*, AVFrame*);
+diff --git i/src/core/dumping/ffmpeg_backend.cpp w/src/core/dumping/ffmpeg_backend.cpp
+index b38116ed3..9640b115f 100644
+--- i/src/core/dumping/ffmpeg_backend.cpp
++++ w/src/core/dumping/ffmpeg_backend.cpp
+@@ -170,13 +170,23 @@ bool FFmpegVideoStream::Init(FFmpegMuxer& muxer, const Layout::FramebufferLayout
+     codec_context->time_base.den = 60;
+     codec_context->gop_size = 12;
+ 
++    const AVPixelFormat* pix_fmts = nullptr;
++#if LIBAVCODEC_VERSION_MAJOR >= 61
++    if (FFmpeg::avcodec_get_supported_config) {
++        FFmpeg::avcodec_get_supported_config(codec_context.get(), codec, AV_CODEC_CONFIG_PIX_FORMAT, 0,
++                                             reinterpret_cast<const void**>(&pix_fmts), nullptr);
++    }
++#else
++    pix_fmts = codec->pix_fmts;
++#endif
++
+     // Get pixel format for codec
+     auto options = ToAVDictionary(Settings::values.video_encoder_options);
+     auto pixel_format_opt = FFmpeg::av_dict_get(options, "pixel_format", nullptr, 0);
+     if (pixel_format_opt) {
+         sw_pixel_format = FFmpeg::av_get_pix_fmt(pixel_format_opt->value);
+-    } else if (codec->pix_fmts) {
+-        sw_pixel_format = GetPixelFormat(codec_context.get(), codec->pix_fmts);
++    } else if (pix_fmts) {
++        sw_pixel_format = GetPixelFormat(codec_context.get(), pix_fmts);
+     } else {
+         sw_pixel_format = AV_PIX_FMT_YUV420P;
+     }
+@@ -285,11 +295,25 @@ void FFmpegVideoStream::ProcessFrame(VideoFrame& frame) {
+ }
+ 
+ bool FFmpegVideoStream::InitHWContext(const AVCodec* codec) {
+-    for (std::size_t i = 0; codec->pix_fmts[i] != AV_PIX_FMT_NONE; ++i) {
++    const AVPixelFormat* pix_fmts = nullptr;
++#if LIBAVCODEC_VERSION_MAJOR >= 61
++    if (FFmpeg::avcodec_get_supported_config) {
++        FFmpeg::avcodec_get_supported_config(codec_context.get(), codec, AV_CODEC_CONFIG_PIX_FORMAT, 0,
++                                             reinterpret_cast<const void**>(&pix_fmts), nullptr);
++    }
++#else
++    pix_fmts = codec->pix_fmts;
++#endif
++    if (!pix_fmts) {
++        LOG_ERROR(Render, "Failed to find a usable HW pixel format");
++        return false;
++    }
++
++    for (std::size_t i = 0; pix_fmts[i] != AV_PIX_FMT_NONE; ++i) {
+         const AVCodecHWConfig* config;
+         for (int j = 0;; ++j) {
+             config = FFmpeg::avcodec_get_hw_config(codec, j);
+-            if (!config || config->pix_fmt == codec->pix_fmts[i]) {
++            if (!config || config->pix_fmt == pix_fmts[i]) {
+                 break;
+             }
+         }
+@@ -303,7 +327,7 @@ bool FFmpegVideoStream::InitHWContext(const AVCodec* codec) {
+             continue;
+         }
+ 
+-        codec_context->pix_fmt = codec->pix_fmts[i];
++        codec_context->pix_fmt = pix_fmts[i];
+ 
+         // Create HW device context
+         AVBufferRef* hw_device_context;
+@@ -351,7 +375,7 @@ bool FFmpegVideoStream::InitHWContext(const AVCodec* codec) {
+ 
+         AVHWFramesContext* hw_frames_context =
+             reinterpret_cast<AVHWFramesContext*>(hw_frames_context_ref->data);
+-        hw_frames_context->format = codec->pix_fmts[i];
++        hw_frames_context->format = pix_fmts[i];
+         hw_frames_context->sw_format = sw_pixel_format;
+         hw_frames_context->width = codec_context->width;
+         hw_frames_context->height = codec_context->height;
+@@ -399,13 +423,9 @@ bool FFmpegVideoStream::InitFilters() {
+         return false;
+     }
+ 
+-    // Point av_opt_set_int_list to correct functions.
+-#define av_int_list_length_for_size FFmpeg::av_int_list_length_for_size
+-#define av_opt_set_bin FFmpeg::av_opt_set_bin
+-
+     const AVPixelFormat pix_fmts[] = {sw_pixel_format, AV_PIX_FMT_NONE};
+-    if (av_opt_set_int_list(sink_context, "pix_fmts", pix_fmts, AV_PIX_FMT_NONE,
+-                            AV_OPT_SEARCH_CHILDREN) < 0) {
++    if (FFmpeg::av_opt_set_bin(sink_context, "pix_fmts", reinterpret_cast<const uint8_t*>(pix_fmts),
++                              sizeof(pix_fmts), AV_OPT_SEARCH_CHILDREN) < 0) {
+         LOG_ERROR(Render, "Could not set output pixel format");
+         return false;
+     }
+@@ -468,16 +488,36 @@ bool FFmpegAudioStream::Init(FFmpegMuxer& muxer) {
+     // Configure audio codec context
+     codec_context->codec_type = AVMEDIA_TYPE_AUDIO;
+     codec_context->bit_rate = Settings::values.audio_bitrate;
+-    if (codec->sample_fmts) {
+-        codec_context->sample_fmt = codec->sample_fmts[0];
++    const AVSampleFormat* sample_fmts = nullptr;
++#if LIBAVCODEC_VERSION_MAJOR >= 61
++    if (FFmpeg::avcodec_get_supported_config) {
++        FFmpeg::avcodec_get_supported_config(codec_context.get(), codec, AV_CODEC_CONFIG_SAMPLE_FORMAT, 0,
++                                             reinterpret_cast<const void**>(&sample_fmts), nullptr);
++    }
++#else
++    sample_fmts = codec->sample_fmts;
++#endif
++
++    if (sample_fmts) {
++        codec_context->sample_fmt = sample_fmts[0];
+     } else {
+         codec_context->sample_fmt = AV_SAMPLE_FMT_S16P;
+     }
+ 
+-    if (codec->supported_samplerates) {
+-        codec_context->sample_rate = codec->supported_samplerates[0];
++    const int* supported_samplerates = nullptr;
++#if LIBAVCODEC_VERSION_MAJOR >= 61
++    if (FFmpeg::avcodec_get_supported_config) {
++        FFmpeg::avcodec_get_supported_config(codec_context.get(), codec, AV_CODEC_CONFIG_SAMPLE_RATE, 0,
++                                             reinterpret_cast<const void**>(&supported_samplerates), nullptr);
++    }
++#else
++    supported_samplerates = codec->supported_samplerates;
++#endif
++
++    if (supported_samplerates) {
++        codec_context->sample_rate = supported_samplerates[0];
+         // Prefer native sample rate if supported
+-        const int* ptr = codec->supported_samplerates;
++        const int* ptr = supported_samplerates;
+         while ((*ptr)) {
+             if ((*ptr) == AudioCore::native_sample_rate) {
+                 codec_context->sample_rate = AudioCore::native_sample_rate;
+@@ -956,7 +996,12 @@ std::string FormatDefaultValue(const AVOption* option,
+     case AV_OPT_TYPE_VIDEO_RATE: {
+         return ToStdString(option->default_val.str);
+     }
+-    case AV_OPT_TYPE_CHANNEL_LAYOUT: {
++#if LIBAVUTIL_VERSION_MAJOR >= 58
++    case AV_OPT_TYPE_CHLAYOUT:
++#else
++    case AV_OPT_TYPE_CHANNEL_LAYOUT:
++#endif
++    {
+         return fmt::format("{:#x}", option->default_val.i64);
+     }
+     default:

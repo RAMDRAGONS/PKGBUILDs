@@ -1,5 +1,5 @@
 pkgbase = azahar-git
-	pkgver = 2126.0.alpha2.r3.gc9d2593
+	pkgver = 2126.0.alpha2.r8.g7c225c6
 	pkgrel = 1
 	url = https://azahar-emu.org/
 	arch = x86_64
@@ -11,7 +11,7 @@ pkgbase = azahar-git
 	makedepends = cmake
 	makedepends = cpp-jwt
 	makedepends = cubeb
-	makedepends = ffmpeg4.4
+	makedepends = ffmpeg
 	makedepends = fmt
 	makedepends = git
 	makedepends = libbacktrace
@@ -53,6 +53,8 @@ pkgbase = azahar-git
 	source = xbyak::git+https://github.com/herumi/xbyak.git
 	source = xxhash::git+https://github.com/Cyan4973/xxHash.git
 	source = zstd::git+https://github.com/facebook/zstd.git
+	source = ffmpeg7.patch
+	b2sums = SKIP
 	b2sums = SKIP
 	b2sums = SKIP
 	b2sums = SKIP
@@ -92,5 +94,5 @@ pkgname = azahar-git
 	depends = qt6-base
 	depends = qt6-multimedia
 	depends = sdl2
-	provides = azahar=2126.0.alpha2.r3.gc9d2593
+	provides = azahar=2126.0.alpha2.r8.g7c225c6
 	conflicts = azahar
