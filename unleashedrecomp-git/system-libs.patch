@@ -72,3 +72,53 @@ index d5c0858..a0b13ba 100644
  add_subdirectory("${UNLEASHED_RECOMP_THIRDPARTY_ROOT}/plume")
  
  if (APPLE)
+diff --git i/UnleashedRecomp/stdafx.h w/UnleashedRecomp/stdafx.h
+index 4c55391..dff529a 100644
+--- i/UnleashedRecomp/stdafx.h
++++ w/UnleashedRecomp/stdafx.h
+@@ -45,7 +45,7 @@ using Microsoft::WRL::ComPtr;
+ #include <cstddef>
+ #include <smolv.h>
+ #include <set>
+-#include <fmt/core.h>
++#include <fmt/format.h>
+ #include <list>
+ #include <semaphore>
+ #include <numeric>
+diff --git i/tools/XenonRecomp/XenonAnalyse/main.cpp w/tools/XenonRecomp/XenonAnalyse/main.cpp
+index d08371e..f156eab 100644
+--- i/tools/XenonRecomp/XenonAnalyse/main.cpp
++++ w/tools/XenonRecomp/XenonAnalyse/main.cpp
+@@ -4,7 +4,7 @@
+ #include <disasm.h>
+ #include <image.h>
+ #include <xbox.h>
+-#include <fmt/core.h>
++#include <fmt/format.h>
+ #include "function.h"
+ 
+ #define SWITCH_ABSOLUTE 0
+diff --git i/tools/XenonRecomp/XenonRecomp/pch.h w/tools/XenonRecomp/XenonRecomp/pch.h
+index c9f9a85..fa2007f 100644
+--- i/tools/XenonRecomp/XenonRecomp/pch.h
++++ w/tools/XenonRecomp/XenonRecomp/pch.h
+@@ -15,5 +15,5 @@
+ #include <unordered_set>
+ #include <xbox.h>
+ #include <xxhash.h>
+-#include <fmt/core.h>
++#include <fmt/format.h>
+ #include <x86/sse.h>
+diff --git i/tools/XenosRecomp/XenosRecomp/pch.h w/tools/XenosRecomp/XenosRecomp/pch.h
+index e59682c..81943ef 100644
+--- i/tools/XenosRecomp/XenosRecomp/pch.h
++++ w/tools/XenosRecomp/XenosRecomp/pch.h
+@@ -13,7 +13,7 @@
+ #include <filesystem>
+ #include <map>
+ #include <smolv.h>
+-#include <fmt/core.h>
++#include <fmt/format.h>
+ #include <string>
+ #include <unordered_map>
+ #include <xxhash.h>
