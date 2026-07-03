@@ -21,20 +21,18 @@ index 50337787..f73eb2d5 100644
  			if(!System.Diagnostics.Debugger.IsAttached) {
  				NativeLibrary.SetDllImportResolver(Assembly.GetExecutingAssembly(), DllImportResolver);
  				NativeLibrary.SetDllImportResolver(typeof(SkiaSharp.SKGraphics).Assembly, DllImportResolver);
-@@ -112,14 +121,26 @@ namespace Mesen
+@@ -120,13 +120,25 @@
  
  		// Avalonia configuration, don't remove; also used by visual designer.
  		public static AppBuilder BuildAvaloniaApp()
 -			 => AppBuilder.Configure<App>()
--					.UseReactiveUI()
 -					.UsePlatformDetect()
 +		{
-+			var builder = AppBuilder.Configure<App>()
-+					.UseReactiveUI();
++			var builder = AppBuilder.Configure<App>();
 +
 +			if (OperatingSystem.IsLinux())
 +			{
-+				builder.UseX11().UseSkia();
++				builder.UseX11().UseSkia().UseHarfBuzz();
 +			}
 +			else
 +			{
@@ -51,3 +49,4 @@ index 50337787..f73eb2d5 100644
 +		}
  	}
  }
+ 

@@ -4,12 +4,12 @@ index 513e027e..a8fd385c 100644
 +++ b/UI/ViewModels/SetupWizardViewModel.cs
 @@ -21,7 +21,7 @@ namespace Mesen.ViewModels
  
- 		[Reactive] public string InstallLocation { get; set; }
+ 		[ObservableProperty] public partial string InstallLocation { get; set; }
  
--		[Reactive] public bool CreateShortcut { get; set; } = true;
-+		[Reactive] public bool CreateShortcut { get; set; } = false;
- 		[Reactive] public bool CheckForUpdates { get; set; } = true;
- 		[Reactive] public bool IsOsx { get; set; } = OperatingSystem.IsMacOS();
+-		[ObservableProperty] public partial bool CreateShortcut { get; set; } = true;
++		[ObservableProperty] public partial bool CreateShortcut { get; set; } = false;
+ 		[ObservableProperty] public partial bool CheckForUpdates { get; set; } = true;
+ 		[ObservableProperty] public partial bool IsOsx { get; set; } = OperatingSystem.IsMacOS();
  
 diff --git a/UI/Windows/SetupWizardWindow.axaml b/UI/Windows/SetupWizardWindow.axaml
 index 3bd17561..b93d904f 100644

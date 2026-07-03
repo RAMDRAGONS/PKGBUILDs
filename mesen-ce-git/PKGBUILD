@@ -4,7 +4,7 @@
 # Contributor: kleines Filmröllchen <kleines@filmroellchen.eu>
 
 pkgname=mesen-ce-git
-pkgver=r3716.0cef745
+pkgver=r3742.40335ce
 pkgrel=1
 pkgdesc="Multi-system emulator (NES, SNES, GB, GBA, PCE, SMS/GG, WS)"
 arch=('x86_64')
@@ -19,8 +19,8 @@ source=(${pkgname%-git}::'git+https://github.com/nesdev-org/MesenCE.git'
   mesen-disable-shortcut-creation.patch
   mesen-force-x11-on-linux.patch)
 sha256sums=('SKIP'
-  'a2feb9ae42788dcc2113e606b37ac1ccff37546ee844f798ee06d507d63f2a98'
-  '014599224e7835acef87f80c339aee521e29ed5c6ffd253eff0a538c5d06de65')
+            '73910f266b02d209106e366e79bb5ef7511fd2ad2db0febaceebf805f82580fc'
+            'a2f1571e6edcece67820560eedfe9476282bcf61f09854d6c5db6ede41aa06f8')
 
 pkgver() {
 	cd "$srcdir/${pkgname%-git}"
