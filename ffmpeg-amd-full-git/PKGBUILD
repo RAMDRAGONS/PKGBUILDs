@@ -5,7 +5,7 @@
 # Contributor: Bruno Filipe < gmail-com: bmilreu >
 
 pkgname=ffmpeg-amd-full-git
-pkgver=8.2.r125255.ga02dfb1262
+pkgver=8.2.r125476.g976490dcc3
 pkgrel=1
 _svt_hevc_ver='4181c9ee0611baefb40b4c0ed10023cfd837d522'
 _whispercpp_ver='1.8.3'
@@ -92,7 +92,6 @@ depends=(
     'openapv'
     'opencolorio'
     'opencore-amr'
-    'opencv'
     'openh264'
     'openjpeg2'
     'opus'
@@ -303,7 +302,6 @@ build() {
         --enable-libopencolorio \
         --enable-libopencore-amrnb \
         --enable-libopencore-amrwb \
-        --enable-libopencv \
         --enable-libopenh264 \
         --enable-libopenjpeg \
         --enable-libopenmpt \

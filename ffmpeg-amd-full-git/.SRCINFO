@@ -1,6 +1,6 @@
 pkgbase = ffmpeg-amd-full-git
 	pkgdesc = Complete solution to record, convert and stream audio and video (all possible features for AMD, including libfdk-aac; git version)
-	pkgver = 8.2.r125255.ga02dfb1262
+	pkgver = 8.2.r125476.g976490dcc3
 	pkgrel = 1
 	url = https://ffmpeg.org/
 	arch = x86_64
@@ -94,7 +94,6 @@ pkgbase = ffmpeg-amd-full-git
 	depends = openapv
 	depends = opencolorio
 	depends = opencore-amr
-	depends = opencv
 	depends = openh264
 	depends = openjpeg2
 	depends = opus
