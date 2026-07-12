@@ -1,0 +1,14 @@
+--- a/Source/Core/VideoCommon/PerformanceMetrics.h
++++ b/Source/Core/VideoCommon/PerformanceMetrics.h
+@@ -52,8 +52,10 @@
+   struct FrameBufferSize
+   {
+-    u32 width = 0;
+-    u32 height = 0;
++    constexpr FrameBufferSize() : width(0), height(0) {}
++    constexpr FrameBufferSize(u32 w, u32 h) : width(w), height(h) {}
++    u32 width;
++    u32 height;
+   };
+ 
+   PerformanceTracker m_fps_counter{"render_times.txt"};
