@@ -20,28 +20,6 @@ index 69a5b0b0..b4bd2456 100644
  endif()
  
  if (ENABLE_CUBEB)
-diff --git i/src/CMakeLists.txt w/src/CMakeLists.txt
-index 977f48b7..b3a39844 100644
---- i/src/CMakeLists.txt
-+++ w/src/CMakeLists.txt
-@@ -211,6 +211,10 @@ set_target_properties(CemuBin PROPERTIES
- 	OUTPUT_NAME "${OUTPUT_NAME}"
- )
- 
-+if(ENABLE_SDL)
-+	target_link_libraries(CemuBin PRIVATE SDL3::SDL3)
-+endif()
-+
- target_link_libraries(CemuBin PRIVATE
- 	CemuAudio
- 	CemuCafe
-@@ -222,9 +226,6 @@ target_link_libraries(CemuBin PRIVATE
- 	CemuUtil
- )
- 
--if(ENABLE_SDL)
--	target_link_libraries(CemuBin PRIVATE SDL3::SDL3)
--endif()
  
  if(UNIX AND NOT APPLE)
  	# due to nasm output some linkers will make stack executable

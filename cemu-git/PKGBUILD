@@ -2,7 +2,7 @@
 # Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
 _pkgname=cemu
 pkgname=$_pkgname-git
-pkgver=2.6.r221.g591e721
+pkgver=2.6.r274.gacb105b
 pkgrel=1
 pkgdesc="Nintendo Wii U emulator"
 arch=('x86_64')
@@ -57,7 +57,7 @@ source=(
 )
 b2sums=('SKIP'
         'SKIP'
-        '4dcb535b3d6681e3c8390946d67a24780bd0cff234398cc19d0bcce525a134d58e74c3a497d722db7fb45f381e1c5086d73801c85db8249b9ed86b7406555ea1')
+        'be6ce99d884016a5073120acdf90b51e25404bbe49bbf73da05c25882352eb581873b9d005fdcfc2d9ea0f8c26d6d669c03d8c8e3c994e1854b8168cc5f36433')
 
 pkgver() {
 	cd $_pkgname
