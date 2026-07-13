@@ -1,0 +1,302 @@
+# Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
+# Maintainer: AltoXorg <machinademoniko AT gmail DOT com>
+
+# An N64 Majora's Mask US ROM must be provided in order to build this package.
+# Rename it to "baserom.mm.us.rev1.z64" and place it right to where this script is.
+
+_reponame=Zelda64Recomp
+_pkgname=${_reponame,,}
+pkgname=${_pkgname}-git
+pkgver=1.2.2.r4.g1a9c266
+_zrecomp_dirname="${_reponame}"
+pkgrel=1
+arch=("x86_64" "aarch64")
+depends=("sdl2-compat" "freetype2" "libx11" "libxrandr" "gtk3" "vulkan-driver" "vulkan-icd-loader")
+makedepends=("git" "cmake" "ninja" "python" "clang" "lld" "fmt" "tomlplusplus" "xxhash" "volk" "vulkan-headers" "vulkan-memory-allocator" "spirv-headers")
+pkgdesc="A port of The Legend of Zelda Majora's Mask made possible by static recompilation (git)"
+license=("GPL-3.0-only")
+provides=("${_pkgname}")
+conflicts=("${_pkgname}" "${_pkgname}-bin")
+url="https://github.com/Zelda64Recomp/${_reponame}"
+source=("git+${url}.git#branch=dev"
+
+        # main dependencies
+        "git+https://github.com/mikke89/RmlUi.git"
+        "git+https://github.com/rt64/rt64.git"
+        "mm-decomp::git+https://github.com/zeldaret/mm.git"
+        "git+https://github.com/sammycage/lunasvg.git"
+        "git+https://github.com/DLTcollab/sse2neon.git"
+        "git+https://github.com/N64Recomp/N64ModernRuntime.git"
+        "git+https://github.com/Zelda64Recomp/Zelda64RecompSyms.git"
+        "git+https://github.com/SergeyMakeev/slot_map.git"
+
+        # RT64 dependencies
+        "git+https://github.com/epezent/implot.git"
+        "git+https://github.com/redorav/hlslpp.git"
+        "git+https://github.com/ocornut/imgui.git"
+        "git+https://github.com/john-chapman/im3d.git"
+        "dxc::git+https://github.com/rt64/dxc-bin.git"
+        "git+https://github.com/nothings/stb.git"
+        "git+https://github.com/btzy/nativefiledialog-extended.git"
+        "git+https://github.com/redorav/ddspp.git"
+        "git+https://github.com/rt64/re-spirv.git"
+
+        # N64ModernRuntime dependencies
+        "git+https://github.com/richgel999/miniz.git"
+        "git+https://github.com/N64Recomp/o1heap.git"
+
+        # Tools for building MM elf and generating static recomps
+        "git+https://github.com/z64tools/z64decompress.git"
+        "git+https://github.com/N64Recomp/N64Recomp.git"
+
+        # N64Recomp dependencies
+        "git+https://github.com/Decompollaborate/rabbitizer.git"
+        "git+https://github.com/serge1/ELFIO.git"
+        "git+https://github.com/zherczeg/sljit.git"
+
+        # Misc. patches and the rom requirement
+        "zelda64recomp.desktop"
+        "file://baserom.mm.us.rev1.z64")
+sha256sums=('SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            '59443fba2781cecccf96f76772a04764477c1c57d3226baa43d8cc3c30b085ad'
+            'efb1365b3ae362604514c0f9a1a2d11f5dc8688ba5be660a37debf5e3be43f2b')
+
+PKG_PREFIX="/opt/${_pkgname}"
+
+
+_is_debug() {
+  for opt in "${OPTIONS[@]}"; do
+    if [ "$opt" = debug ]; then
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+_walk_submodules() {
+    local absdir
+    absdir="$(pwd | sed "s|^${srcdir}/||")"
+    msg2 "Entering directory <${absdir}>"
+
+    local submodules
+    submodules="$(git ls-tree -r HEAD | awk '$2 == "commit"')"
+
+    if [ -z "$submodules" ]; then
+      return
+    fi
+
+    local mode type hash dir
+    while read -r mode type hash dir; do
+        local basedir
+        basedir="$(basename "$dir")"
+        local submodule_url
+        submodule_url="$(git config -f .gitmodules "submodule.${dir}.url")"
+
+        if [ ! -e "${srcdir}/${basedir}" ]; then
+            # Silently skip submodules we intentionally fulfill using system libraries
+            continue
+        fi
+
+        msg2 "Initializing submodule ${dir}"
+
+        # Check if this specific commit exists locally within the repo
+        (
+            cd "${srcdir}/${basedir}"
+            if ! git branch -a --contains "$hash" > /dev/null 2>&1; then
+                warning "Commit ${hash} of repo ${basedir} didn't get pulled from remote (${submodule_url}). Fetching now..."
+                git fetch "$submodule_url" "$hash"
+            fi
+        )
+
+        # Initialize and update submodule
+        git submodule init "${dir}"
+        git config "submodule.${dir}.url" "${srcdir}/${basedir}"
+        git -c protocol.file.allow=always submodule update "${dir}"
+
+        ( cd "$dir" && _walk_submodules; )
+    done <<< "$submodules"
+
+    msg2 "Leaving directory <${absdir}>"
+}
+
+pkgver() {
+  cd "${srcdir}/${_reponame}"
+
+  git describe --long --tags | sed 's/\([^-]*-g\)/r\1/;s/-/./g;s/^v//'
+}
+
+prepare() {
+  msg2 "Setting up the submodules..."
+
+  cd "${srcdir}/${_zrecomp_dirname}"
+  _walk_submodules
+
+  cd "${srcdir}/N64Recomp"
+  _walk_submodules
+
+  msg2 "Setting up xxHash header mappings for system dependencies..."
+  # Create headers mappings for system xxHash
+  mkdir -p "${srcdir}/${_zrecomp_dirname}/lib/rt64/src/xxHash"
+  ln -sf /usr/include/xxh3.h "${srcdir}/${_zrecomp_dirname}/lib/rt64/src/xxHash/xxh3.h"
+  ln -sf /usr/include/xxhash.h "${srcdir}/${_zrecomp_dirname}/lib/rt64/src/xxHash/xxhash.h"
+
+  mkdir -p "${srcdir}/${_zrecomp_dirname}/lib/rt64/src/contrib/xxHash"
+  ln -sf /usr/include/xxh3.h "${srcdir}/${_zrecomp_dirname}/lib/rt64/src/contrib/xxHash/xxh3.h"
+  ln -sf /usr/include/xxhash.h "${srcdir}/${_zrecomp_dirname}/lib/rt64/src/contrib/xxHash/xxhash.h"
+
+  # Create header mappings for system volk (Vulkan meta-loader)
+  mkdir -p "${srcdir}/${_zrecomp_dirname}/lib/rt64/src/contrib/volk"
+  ln -sf /usr/include/volk.h "${srcdir}/${_zrecomp_dirname}/lib/rt64/src/contrib/volk/volk.h"
+  ln -sf /usr/include/volk.c "${srcdir}/${_zrecomp_dirname}/lib/rt64/src/contrib/volk/volk.c"
+
+  # Create header mappings for system xxHash in N64ModernRuntime thirdparty
+  ln -sf /usr/include/xxh3.h "${srcdir}/${_zrecomp_dirname}/lib/N64ModernRuntime/thirdparty/xxHash/xxh3.h"
+  ln -sf /usr/include/xxhash.h "${srcdir}/${_zrecomp_dirname}/lib/N64ModernRuntime/thirdparty/xxHash/xxhash.h"
+
+  msg2 "Patching N64Recomp and rt64 CMake lists for system dependencies..."
+  
+  # 1. Patch both copies of N64Recomp for system fmt and tomlplusplus, and modern clang compatibility
+  for dir in "${srcdir}/N64Recomp" "${srcdir}/${_zrecomp_dirname}/lib/N64ModernRuntime/N64Recomp"; do
+    cd "$dir"
+    sed -i 's|add_subdirectory(lib/fmt)|find_package(fmt REQUIRED)|' CMakeLists.txt
+    sed -i '/set(TOML_ENABLE_FORMATTERS OFF)/d' CMakeLists.txt
+    sed -i 's|add_subdirectory(lib/tomlplusplus)|find_package(tomlplusplus REQUIRED)|' CMakeLists.txt
+    
+    sed -i 's/\bSymbolLists fmt\b/SymbolLists fmt::fmt/g' CMakeLists.txt
+    sed -i 's/\bN64RecompElf fmt\b/N64RecompElf fmt::fmt/g' CMakeLists.txt
+    sed -i 's/\bN64RecompCLI fmt\b/N64RecompCLI fmt::fmt/g' CMakeLists.txt
+    sed -i 's/\bRSPRecomp fmt\b/RSPRecomp fmt::fmt/g' CMakeLists.txt
+    sed -i 's/\bRecompModTool fmt\b/RecompModTool fmt::fmt/g' CMakeLists.txt
+    sed -i 's/\bOfflineModRecomp fmt\b/OfflineModRecomp fmt::fmt/g' CMakeLists.txt
+    
+    [[ -f src/mdebug.cpp ]] && sed -i '1s|^|#include <cstring>\n|' src/mdebug.cpp
+  done
+
+  # 2. Patch rt64 for system zstd and compiler warning fixes
+  cd "${srcdir}/${_zrecomp_dirname}/lib/rt64"
+  sed -i 's/add_compile_options(-Werror)//g' CMakeLists.txt
+  sed -i 's|add_subdirectory(src/contrib/zstd/build/cmake)||g' CMakeLists.txt
+  sed -i 's|target_link_libraries(rt64 libzstd_static)|find_library(ZSTD_LIBRARY NAMES zstd REQUIRED)\ntarget_link_libraries(rt64 ${ZSTD_LIBRARY})|g' CMakeLists.txt
+  # Also patch texture_packer tool which links zstd separately
+  sed -i 's|target_link_libraries(texture_packer PRIVATE libzstd_static)|target_link_libraries(texture_packer PRIVATE ${ZSTD_LIBRARY})|g' \
+    src/tools/texture_packer/CMakeLists.txt
+  
+  # 3. Patch re-spirv (submodule of rt64) for system SPIRV-Headers
+  cd "${srcdir}/${_zrecomp_dirname}/lib/rt64/src/contrib/re-spirv"
+  sed -i '/if (NOT DEFINED SPIRV-Headers_SOURCE_DIR)/,/endif()/d' CMakeLists.txt
+  sed -i '/set(SPIRV_HEADER_DIR ${SPIRV-Headers_SOURCE_DIR})/d' CMakeLists.txt
+  sed -i 's|target_include_directories(re-spirv PUBLIC ${SPIRV_HEADER_DIR}/include)|find_package(SPIRV-Headers REQUIRED)\ntarget_link_libraries(re-spirv PUBLIC SPIRV-Headers::SPIRV-Headers)|g' CMakeLists.txt
+  # 4. Patch MIPS patches Makefile for newer Clang compatibility
+  # Clang 16+ treats -Wincompatible-pointer-types as an error by default
+  cd "${srcdir}/${_zrecomp_dirname}/patches"
+  sed -i 's/-Wno-unsupported-floating-point-opt/-Wno-unsupported-floating-point-opt -Wno-error=incompatible-pointer-types/' Makefile
+
+  # 5. Patch RmlUi robin_hood.h for missing <cstdint> (needed by newer compilers)
+  sed -i '/#include <cstring>/a #include <cstdint>' \
+    "${srcdir}/${_zrecomp_dirname}/lib/RmlUi/Include/RmlUi/Core/Containers/robin_hood.h"
+
+  # 6. Patch Zelda64Recomp CMakeLists.txt to dynamically link libstdc++ and respect user's CPU target flag
+  # Mixing static libstdc++ with system C++ shared libraries (fmt, tomlplusplus) causes segmentation faults.
+  # Hardcoding -march=nehalem on the main executable causes alignment mismatches (GPF) with static libraries compiled under native/v3 instruction sets.
+  cd "${srcdir}/${_zrecomp_dirname}"
+  sed -i 's|-latomic -static-libstdc++|-latomic|g' CMakeLists.txt
+  sed -i '/-march=nehalem/d' CMakeLists.txt
+}
+
+build() {
+  if _is_debug; then
+    BUILD_TYPE=Debug
+  else
+    BUILD_TYPE=None
+    # Apply flags that Release would use, without clashing with user's makepkg optimization flags
+    export CFLAGS="$CFLAGS -DNDEBUG"
+    export CXXFLAGS="$CXXFLAGS -DNDEBUG"
+  fi
+
+  msg2 "Building the N64Recomp & RSPRecomp tools..."
+
+  cd "${srcdir}/N64Recomp"
+
+  cmake -B build -DCMAKE_BUILD_TYPE=$BUILD_TYPE .
+  cmake --build build --target N64RecompCLI
+  cmake --build build --target RSPRecomp
+
+  cp build/{N64Recomp,RSPRecomp} "${srcdir}/${_zrecomp_dirname}"
+
+
+  msg2 "Building z64decompress and decompressing the MM rom"
+
+  cd "${srcdir}/z64decompress"
+  make
+  ./z64decompress "${srcdir}/baserom.mm.us.rev1.z64" mm.us.rev1.rom_uncompressed.z64
+  cp mm.us.rev1.rom_uncompressed.z64 "${srcdir}/${_zrecomp_dirname}/"
+
+
+  cd "${srcdir}/${_zrecomp_dirname}"
+
+  msg2 "Generating recomp functions..."
+  ./RSPRecomp aspMain.us.rev1.toml
+  ./RSPRecomp njpgdspMain.us.rev1.toml
+  ./N64Recomp us.rev1.toml
+
+
+  msg2 "Building the game..."
+
+  # The entirety of the codebase doesn't care about security at all so we'll remove this flag
+  export CFLAGS="${CFLAGS/-Werror=format-security/}"
+  export CXXFLAGS="${CXXFLAGS/-Werror=format-security/}"
+
+  # Use system clang compiler
+  cmake -B build -GNinja . \
+    -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
+    -DCMAKE_CXX_COMPILER=clang++ \
+    -DCMAKE_C_COMPILER=clang
+
+  cmake --build build $NINJAFLAGS
+}
+
+package() {
+  cd "${srcdir}"
+
+  bin_name=Zelda64Recompiled
+
+  cat << SHELL > launch.sh
+#!/usr/bin/env bash
+cd "${PKG_PREFIX}"
+exec ./${bin_name}
+SHELL
+
+  install -Dm755 "${_zrecomp_dirname}/build/${bin_name}" "${pkgdir}/${PKG_PREFIX}/${bin_name}"
+
+  cp -r --preserve=mode "${_zrecomp_dirname}/assets" "${pkgdir}/${PKG_PREFIX}/"
+  install -Dm644 "${_zrecomp_dirname}/recompcontrollerdb.txt" "${pkgdir}/${PKG_PREFIX}/"
+
+  install -Dm755 launch.sh "${pkgdir}/usr/bin/${bin_name}"
+  install -Dm644 zelda64recomp.desktop -t "${pkgdir}/usr/share/applications"
+  install -Dm644 "${_zrecomp_dirname}/icons/512.png" "${pkgdir}/usr/share/icons/hicolor/512x512/apps/zelda64recomp.png"
+}
