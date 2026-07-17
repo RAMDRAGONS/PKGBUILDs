@@ -9,7 +9,7 @@ _noguipkgname="$_projectname-emu-nogui"
 _toolpkgname="$_projectname-emu-tool"
 pkgbase="$_mainpkgname-git"
 pkgname=("$pkgbase" "$_noguipkgname-git" "$_toolpkgname-git")
-pkgver=2606.r143.gfc9fd6952a
+pkgver=2606.r184.gb6d8bc299e
 pkgrel=1
 pkgdesc='A Gamecube / Wii emulator'
 _pkgdescappend=' - git version'
@@ -43,10 +43,8 @@ source=(
 	"$pkgbase-vh::git+https://github.com/KhronosGroup/Vulkan-Headers.git"
 	"$pkgbase-vma::git+https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git"
 	"$pkgbase-watcher::git+https://github.com/e-dant/watcher.git"
-	'fix-gcc16-atomic.patch'
 )
 b2sums=('SKIP'
-        'SKIP'
         'SKIP'
         'SKIP'
         'SKIP'
@@ -86,9 +84,6 @@ prepare() {
 		git config "submodule.$_path.url" "$srcdir/$pkgbase-$_submod/"
 		git -c protocol.file.allow=always submodule update "$_path"
 	done
-
-	# Fix GCC 16 std::atomic requiring explicit default constructor
-	patch -Np1 -i "$srcdir/fix-gcc16-atomic.patch"
 }
 
 pkgver() {
