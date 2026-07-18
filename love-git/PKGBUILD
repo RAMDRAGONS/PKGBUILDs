@@ -1,0 +1,38 @@
+# Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
+
+pkgname=love-git
+pkgver=20260718.8cd9cdd3a
+pkgrel=1
+pkgdesc="An open-source 2D game engine which uses the versatile Lua scripting language to create dynamic gaming experiences (git version)"
+arch=('x86_64' 'aarch64')
+url="http://love2d.org/"
+license=('zlib')
+depends=('desktop-file-utils' 'freetype2' 'harfbuzz' 'hicolor-icon-theme' 'libmodplug' 'libtheora' 'libvorbis' 'luajit' 'openal' 'sdl3' 'shared-mime-info')
+makedepends=('cmake' 'git')
+provides=('love')
+conflicts=('love')
+replaces=('love-hg')
+options=(!strip)
+source=('git+https://github.com/love2d/love')
+sha256sums=('SKIP')
+
+pkgver() {
+  cd "$srcdir/love"
+  git log -1 --format='%cd.%h' --date=short | tr -d -
+}
+
+build() {
+  cmake -B build -S "$srcdir/love" \
+    -DCMAKE_BUILD_TYPE='None' \
+    -DCMAKE_INSTALL_PREFIX='/usr' \
+    -DCMAKE_SKIP_INSTALL_RPATH=YES \
+    -Wno-dev
+  cmake --build build
+}
+
+package() {
+  DESTDIR="$pkgdir" cmake --install build
+
+  install -Dm0644 "$srcdir/love/license.txt" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}
+
