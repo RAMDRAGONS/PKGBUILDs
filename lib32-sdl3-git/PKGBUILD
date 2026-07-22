@@ -5,7 +5,7 @@
 # Contributor: Christer Solskogen <christer.solskogen@gmail.com>
 
 pkgname=lib32-sdl3-git
-pkgver=3.4.0.r688.gf6a1eb9ba9
+pkgver=3.4.0.r1196.g0d21a1aa7a
 pkgrel=1
 pkgdesc="Simple Directmedia Layer (Version 3)"
 arch=('x86_64' 'i686')
@@ -25,6 +25,12 @@ sha512sums=('SKIP')
 pkgver() {
   cd SDL
   git describe --long --tags | sed 's/^release-//;s/\([^-]*-g\)/r\1/;s/-/./g' | sed 's/preview.//'
+}
+
+prepare() {
+  cd SDL
+  sed -i '/CMAKE_REQUIRED_FLAGS.*-D_GNU_SOURCE=1/a \  list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D_GNU_SOURCE=1")' CMakeLists.txt
+  sed -i 's/static inline int getresgid(uid_t \*ruid, uid_t \*euid, uid_t \*suid)/static inline int getresgid(gid_t \*rgid, gid_t \*egid, gid_t \*sgid)/' src/video/wayland/SDL_waylandvideo.c
 }
 
 build() {
