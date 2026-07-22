@@ -3,7 +3,7 @@
 _reponame=2ship2harkinian
 pkgbase=2s2h-git
 pkgname=(2s2h-git 2s2h-otr-exporter-git)
-pkgver=4.0.2.r136.ged47d2ec9
+pkgver=4.0.2.r139.g65fb1b6e3
 pkgrel=1
 arch=("x86_64" "i686" "armv7h" "aarch64")
 #url="https://shipofharkinian.com/"
@@ -66,9 +66,17 @@ prepare() {
   # Init all submodules
   _init_submodules "" "${_main_submodules[@]}"
 
+  # Fix Context.cpp error: use of undeclared identifier 'GetInstance'; did you mean 'GetRawInstance'?
+  sed -i 's/GetInstance()/GetRawInstance()/g' libultraship/src/ship/Context.cpp
+
   # Fix ABI incompatibility crash (free(): invalid size) with system spdlog by compiling spdlog header-only
   sed -i 's/spdlog::spdlog)/spdlog::spdlog_header_only)/g' libultraship/src/CMakeLists.txt
   sed -i 's/spdlog::spdlog)/spdlog::spdlog_header_only)/g' OTRExporter/OTRExporter/CMakeLists.txt
+
+  # Sync updated libultraship shaders to custom assets directory and remove outdated split shaders
+  mkdir -p mm/assets/custom/shaders
+  cp -r libultraship/src/fast/shaders/* mm/assets/custom/shaders/
+  rm -f mm/assets/custom/shaders/opengl/*.vs mm/assets/custom/shaders/opengl/*.fs
 }
 
 build() {
