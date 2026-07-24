@@ -1,0 +1,21 @@
+pkgbase = nxapi-git
+	pkgdesc = Electron app and CLI for Nintendo Switch Online and Parental Controls app APIs (git version)
+	pkgver = 1.6.0.r277.gec69f58
+	pkgrel = 1
+	url = https://gitlab.fancy.org.uk/samuel/nxapi
+	install = nxapi-git.install
+	arch = any
+	license = AGPL-3.0-or-later
+	makedepends = git
+	makedepends = npm
+	depends = electron
+	depends = hicolor-icon-theme
+	depends = libnotify
+	provides = nxapi=1.6.0.r277.gec69f58
+	provides = nxapi-app=1.6.0.r277.gec69f58
+	conflicts = nxapi
+	conflicts = nxapi-app
+	source = nxapi::git+https://gitlab.fancy.org.uk/samuel/nxapi.git
+	sha256sums = SKIP
+
+pkgname = nxapi-git

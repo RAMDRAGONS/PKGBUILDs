@@ -1,0 +1,23 @@
+post_install() {
+  echo ""
+  echo "==> nxapi: Client authentication setup required"
+  echo ""
+  echo "    nxapi built from source does not include a bundled OAuth client ID"
+  echo "    for the nxapi-znca-api (used to authenticate to Nintendo's API)."
+  echo ""
+  echo "    To fix 'Client authentication not configured' errors:"
+  echo ""
+  echo "    1. Register a client at https://nxapi-auth.fancy.org.uk/oauth/clients"
+  echo "       with scope: ca:gf ca:er ca:dr"
+  echo ""
+  echo "    2. Add your client ID to nxapi's .env file:"
+  echo "       echo 'NXAPI_AUTH_CLIENT_ID=your-client-id-here' >> \${XDG_DATA_HOME:-\$HOME/.local/share}/nxapi-nodejs/.env"
+  echo ""
+  echo "    This is only needed for Coral API access (Discord presence, friend"
+  echo "    notifications, web services). Parental Controls data does not need this."
+  echo ""
+}
+
+post_upgrade() {
+  post_install
+}

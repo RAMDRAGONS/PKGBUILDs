@@ -1,0 +1,143 @@
+# Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
+
+pkgname=nxapi-git
+_pkgname=nxapi
+pkgver=1.6.0.r277.gec69f58
+pkgrel=1
+pkgdesc="Electron app and CLI for Nintendo Switch Online and Parental Controls app APIs (git version)"
+arch=('any')
+url="https://gitlab.fancy.org.uk/samuel/nxapi"
+install="${pkgname}.install"
+license=('AGPL-3.0-or-later')
+depends=(
+  'electron'
+  'hicolor-icon-theme'
+  'libnotify'
+)
+makedepends=(
+  'git'
+  'npm'
+)
+provides=(
+  "nxapi=${pkgver}"
+  "nxapi-app=${pkgver}"
+)
+conflicts=(
+  'nxapi'
+  'nxapi-app'
+)
+source=("${_pkgname}::git+https://gitlab.fancy.org.uk/samuel/nxapi.git")
+sha256sums=('SKIP')
+
+pkgver() {
+  cd "${_pkgname}"
+  git describe --long --tags --abbrev=7 | sed 's/^v//;s/\([^-]*-g\)/r\1/;s/-/./g'
+}
+
+prepare() {
+  cd "${_pkgname}"
+
+  # Set isolated cache directory inside srcdir
+  export npm_config_cache="${srcdir}/npm-cache"
+}
+
+build() {
+  cd "${_pkgname}"
+
+  # Isolate HOME and npm cache during build
+  export HOME="${srcdir}/home"
+  export npm_config_cache="${srcdir}/npm-cache"
+
+  # Install Node dependencies
+  npm ci || npm install --no-audit --no-fund
+
+  # Compile TypeScript source
+  npx tsc
+
+  # Bundle assets with Rollup in production mode
+  NODE_ENV=production npx rollup --config
+
+  # Determine installed system Electron version
+  local _electron_dist="/usr/lib/electron"
+  local _electron_ver
+  if [ -f "${_electron_dist}/version" ]; then
+    _electron_ver=$(cat "${_electron_dist}/version" | sed 's/^v//')
+  else
+    _electron_ver="30.0.1"
+  fi
+
+  # Run electron-builder configured to use system electron
+  npx electron-builder --linux --dir \
+    -c.electronDist="${_electron_dist}" \
+    -c.electronVersion="${_electron_ver}"
+}
+
+package() {
+  cd "${_pkgname}"
+
+  # Install Electron app bundle to /usr/share/nxapi
+  install -d "${pkgdir}/usr/share/nxapi"
+
+  local _unpacked_app="dist/app/package/linux-unpacked/resources/app"
+  if [ -d "${_unpacked_app}" ]; then
+    cp -r "${_unpacked_app}"/* "${pkgdir}/usr/share/nxapi/"
+  else
+    cp -r dist/bundle "${pkgdir}/usr/share/nxapi/"
+    install -d "${pkgdir}/usr/share/nxapi/dist/app"
+    cp -r dist/app/bundle "${pkgdir}/usr/share/nxapi/dist/app/"
+    cp -r resources/app resources/common resources/cli "${pkgdir}/usr/share/nxapi/"
+    install -m644 package.json "${pkgdir}/usr/share/nxapi/"
+  fi
+
+  install -d "${pkgdir}/usr/bin"
+
+  # 1. Electron GUI App Launcher (nxapi-app)
+  cat << 'EOF' > "${pkgdir}/usr/bin/nxapi-app"
+#!/bin/bash
+XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+FLAGS_FILE="$XDG_CONFIG_HOME/nxapi-flags.conf"
+
+declare -a FLAGS
+if [[ -f "$FLAGS_FILE" ]]; then
+    mapfile -t FLAGS < <(grep -v '^#' "$FLAGS_FILE" | grep -v '^$')
+fi
+
+export NODE_ENV=production
+export ELECTRON_DISABLE_SECURITY_WARNINGS=true
+exec /usr/bin/electron /usr/share/nxapi "${FLAGS[@]}" "$@"
+EOF
+  chmod 0755 "${pkgdir}/usr/bin/nxapi-app"
+
+  # 2. CLI Executable Launcher (nxapi)
+  cat << 'EOF' > "${pkgdir}/usr/bin/nxapi"
+#!/bin/bash
+export ELECTRON_RUN_AS_NODE=1
+exec /usr/lib/electron/electron /usr/share/nxapi/dist/bundle/cli-bundle.js "$@"
+EOF
+  chmod 0755 "${pkgdir}/usr/bin/nxapi"
+
+  # Install Desktop Launcher Entry (nxapi-app.desktop matches Wayland app_id "nxapi-app")
+  install -d "${pkgdir}/usr/share/applications"
+  cat << 'EOF' > "${pkgdir}/usr/share/applications/nxapi-app.desktop"
+[Desktop Entry]
+Name=Nintendo Switch Online
+Comment=Nintendo Switch Online and Parental Controls app APIs client
+Exec=nxapi-app %u
+Icon=nxapi-app
+Terminal=false
+Type=Application
+Categories=Utility;
+MimeType=x-scheme-handler/com.nintendo.znca;x-scheme-handler/npf71b963c1b7b6d119;x-scheme-handler/npf54789befb391a838;
+StartupWMClass=nxapi-app
+EOF
+  ln -sf nxapi-app.desktop "${pkgdir}/usr/share/applications/uk.org.fancy.nxapi.app.desktop"
+
+  # Install Desktop Icons (covers Wayland app_id, desktop filename, and X11 WM_CLASS lookups)
+  install -Dm644 resources/app/menu-icon.png "${pkgdir}/usr/share/icons/hicolor/512x512/apps/nxapi-app.png"
+  install -Dm644 resources/app/menu-icon.png "${pkgdir}/usr/share/pixmaps/nxapi-app.png"
+  ln -sf nxapi-app.png "${pkgdir}/usr/share/icons/hicolor/512x512/apps/uk.org.fancy.nxapi.app.png"
+  ln -sf nxapi-app.png "${pkgdir}/usr/share/pixmaps/uk.org.fancy.nxapi.app.png"
+
+  # Install License File
+  install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}
