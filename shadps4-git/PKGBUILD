@@ -1,7 +1,7 @@
 # Maintainer: Alexandre Bouvier <contact@amb.tf>
 _pkgname=shadps4
 pkgname=$_pkgname-git
-pkgver=0.16.0.r85.g32bd28e
+pkgver=0.16.0.r163.g9894036
 pkgrel=1
 pkgdesc="Sony PlayStation 4 emulator (CLI)"
 arch=('aarch64' 'x86_64')
@@ -46,6 +46,7 @@ makedepends=(
 	'xbyak>=7.07'
 	'xxhash>=0.8.2'
 	'zlib'
+	'zstd'
 	'zycore-c' # zydis dependency
 )
 optdepends=(
@@ -66,12 +67,14 @@ source=(
 	"$_pkgname-protobuf::git+https://github.com/shadexternals/protobuf.git"
 	"$_pkgname-sirit::git+https://github.com/shadps4-emu/sirit.git"
 	"$_pkgname-tracy::git+https://github.com/shadps4-emu/tracy.git"
+	"$_pkgname-zarchive::git+https://github.com/shadexternals/ZArchive.git"
+	"$_pkgname-zstd::git+https://github.com/shadexternals/zstd.git"
 	"aac::git+https://android.googlesource.com/platform/external/aac.git"
 	"minimp3::git+https://github.com/lieff/minimp3.git"
 	"spdlog::git+https://github.com/gabime/spdlog.git"
 	"zydis::git+https://github.com/zyantific/zydis.git"
 )
-b2sums=('SKIP'{,,,,,,,,,,,,,})
+b2sums=('SKIP'{,,,,,,,,,,,,,,,})
 
 pkgver() {
 	cd $_pkgname
@@ -92,6 +95,8 @@ prepare() {
 	git config submodule.externals/sirit.url ../$_pkgname-sirit
 	git config submodule.externals/spdlog.url ../spdlog
 	git config submodule.externals/tracy.url ../$_pkgname-tracy
+	git config submodule.externals/zarchive.url ../$_pkgname-zarchive
+	git config submodule.externals/zstd.url ../$_pkgname-zstd
 	git config submodule.externals/zydis.url ../zydis
 	git -c protocol.file.allow=always submodule update
 	# use makepkg.conf flags
@@ -106,6 +111,8 @@ prepare() {
 	sed -i '/find_package(pugixml/a find_package(protobuf CONFIG REQUIRED)\nadd_library(libprotobuf ALIAS protobuf::libprotobuf)' CMakeLists.txt
 	sed -i '/add_subdirectory(protobuf/i if(NOT TARGET libprotobuf)' externals/CMakeLists.txt
 	sed -i '/add_subdirectory(protobuf/a endif()' externals/CMakeLists.txt
+	# use system zstd
+	sed -i '/# zstd (dependency of ZArchive)/i find_library(ZSTD_LIB zstd REQUIRED)\nadd_library(libzstd_static UNKNOWN IMPORTED)\nset_target_properties(libzstd_static PROPERTIES IMPORTED_LOCATION "${ZSTD_LIB}")' externals/CMakeLists.txt
 }
 
 build() {
@@ -145,6 +152,7 @@ package() {
 		'libuuid.so'
 		'libxxhash.so'
 		'libz.so'
+		'libzstd.so'
 		# 'libZydis.so'
 	)
 

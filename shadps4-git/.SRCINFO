@@ -1,6 +1,6 @@
 pkgbase = shadps4-git
 	pkgdesc = Sony PlayStation 4 emulator (CLI)
-	pkgver = 0.16.0.r85.g32bd28e
+	pkgver = 0.16.0.r163.g9894036
 	pkgrel = 1
 	url = https://shadps4.net/
 	arch = aarch64
@@ -36,6 +36,7 @@ pkgbase = shadps4-git
 	makedepends = xbyak>=7.07
 	makedepends = xxhash>=0.8.2
 	makedepends = zlib
+	makedepends = zstd
 	makedepends = zycore-c
 	depends = abseil-cpp
 	depends = glibc
@@ -46,7 +47,7 @@ pkgbase = shadps4-git
 	optdepends = renderdoc: for graphics debugging
 	optdepends = shadps4-qtlauncher: for official Qt GUI
 	optdepends = vulkan-validation-layers: for vulkan debugging
-	provides = shadps4=0.16.0.r85.g32bd28e
+	provides = shadps4=0.16.0.r163.g9894036
 	conflicts = shadps4
 	source = shadps4::git+https://github.com/shadps4-emu/shadPS4.git
 	source = shadps4-discord-rpc::git+https://github.com/shadps4-emu/ext-discord-rpc.git
@@ -58,10 +59,14 @@ pkgbase = shadps4-git
 	source = shadps4-protobuf::git+https://github.com/shadexternals/protobuf.git
 	source = shadps4-sirit::git+https://github.com/shadps4-emu/sirit.git
 	source = shadps4-tracy::git+https://github.com/shadps4-emu/tracy.git
+	source = shadps4-zarchive::git+https://github.com/shadexternals/ZArchive.git
+	source = shadps4-zstd::git+https://github.com/shadexternals/zstd.git
 	source = aac::git+https://android.googlesource.com/platform/external/aac.git
 	source = minimp3::git+https://github.com/lieff/minimp3.git
 	source = spdlog::git+https://github.com/gabime/spdlog.git
 	source = zydis::git+https://github.com/zyantific/zydis.git
+	b2sums = SKIP
+	b2sums = SKIP
 	b2sums = SKIP
 	b2sums = SKIP
 	b2sums = SKIP
@@ -102,3 +107,4 @@ pkgname = shadps4-git
 	depends = libuuid.so
 	depends = libxxhash.so
 	depends = libz.so
+	depends = libzstd.so
