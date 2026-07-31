@@ -1,7 +1,7 @@
 # Maintainer: Alexandre Bouvier <contact@amb.tf>
 _pkgname=shadps4-qtlauncher
 pkgname=$_pkgname-git
-pkgver=r272.6487f9b
+pkgver=r334.ed013e9
 pkgrel=1
 pkgdesc="Sony PlayStation 4 emulator (Qt GUI)"
 arch=('aarch64' 'x86_64')
@@ -33,8 +33,10 @@ source=(
 	"nlohmann-json::git+https://github.com/nlohmann/json.git"
 	"spdlog::git+https://github.com/gabime/spdlog.git"
 	"volk::git+https://github.com/zeux/volk.git"
+	"zarchive::git+https://github.com/shadexternals/ZArchive.git"
+	"zstd::git+https://github.com/shadexternals/zstd.git"
 )
-b2sums=('SKIP'{,,,})
+b2sums=('SKIP'{,,,,,} )
 
 pkgver() {
 	cd $_pkgname
@@ -46,6 +48,8 @@ prepare() {
 	git config submodule.externals/json.url ../nlohmann-json
 	git config submodule.externals/spdlog.url ../spdlog
 	git config submodule.externals/volk.url ../volk
+	git config submodule.externals/zarchive.url ../zarchive
+	git config submodule.externals/zstd.url ../zstd
 	git -c protocol.file.allow=always submodule update
 	# remove hardcoded flag
 	sed -i '/-march=/d' CMakeLists.txt
