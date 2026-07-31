@@ -13,6 +13,7 @@ source=('git+https://github.com/sonicnext-dev/MarathonRecomp.git'
         '215.patch'
         'system-libs.patch'
         'x11-none.patch'
+        'fmt-10-compat.patch'
         'default.xex'
         'shader.arc'
         'shader_lt.arc')
@@ -20,6 +21,7 @@ sha256sums=('SKIP'
             '29b60a2400b43441ea90db72bb54896fdb5345abfcb834b08342909e487f4e1e'
             '4515f869aad0c4276f12acc5bc402917f8d1f2f228f54beca4e5653680da3cc5'
             'eb37ea0b2926f00c198725e48fe5469b27c18728aa2264f7870b7aac90687028'
+            'd4864aaf284d80bd2773640af58e1313157b3997ed74ab6bd369ecf149cdee56'
             '373689b7c8bc839fbc00f55f756da7a1ff55d786d043423606db8bf7f3905c94'
             '1bc8fd8d7a879ec6dcef4321ff19b8cbb05fabfc127f063ad56c9a7214e52ae2'
             'ca08119e9ee97e6a6fc4e2d48ad9492412d710f6ee8480e6a5318aa922659011')
@@ -35,10 +37,12 @@ pkgver() {
 
 prepare() {
   cd MarathonRecomp
-  git submodule update --init --recursive
+  git submodule update --init --recursive --force
+  git submodule foreach --recursive git reset --hard
   patch -Np1 -i "$srcdir/215.patch"
   patch -Np1 -i "$srcdir/system-libs.patch"
   patch -Np1 -i "$srcdir/x11-none.patch"
+  patch -Np1 -i "$srcdir/fmt-10-compat.patch"
   mkdir -p MarathonRecompLib/private
   cp "$srcdir/default.xex" "$srcdir/shader.arc" "$srcdir/shader_lt.arc" MarathonRecompLib/private/
 }

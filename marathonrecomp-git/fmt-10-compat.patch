@@ -1,0 +1,46 @@
+diff --git a/MarathonRecomp/stdafx.h b/MarathonRecomp/stdafx.h
+index 4489026..0123456 100644
+--- a/MarathonRecomp/stdafx.h
++++ b/MarathonRecomp/stdafx.h
+@@ -49,7 +49,7 @@ using Microsoft::WRL::ComPtr;
+ #include <cstddef>
+ #include <smolv.h>
+ #include <set>
+-#include <fmt/core.h>
++#include <fmt/format.h>
+ #include <list>
+ #include <semaphore>
+ #include <numeric>
+diff --git a/tools/XenonRecomp/XenonRecomp/pch.h b/tools/XenonRecomp/XenonRecomp/pch.h
+index 1234567..89abcdef 100644
+--- a/tools/XenonRecomp/XenonRecomp/pch.h
++++ b/tools/XenonRecomp/XenonRecomp/pch.h
+@@ -16,4 +16,4 @@
+ #include <xbox.h>
+ #include <xxhash.h>
+-#include <fmt/core.h>
++#include <fmt/format.h>
+ #include <x86/sse.h>
+diff --git a/tools/XenosRecomp/XenosRecomp/pch.h b/tools/XenosRecomp/XenosRecomp/pch.h
+index 1234567..89abcdef 100644
+--- a/tools/XenosRecomp/XenosRecomp/pch.h
++++ b/tools/XenosRecomp/XenosRecomp/pch.h
+@@ -16,7 +16,7 @@
+ #include <filesystem>
+ #include <map>
+ #include <smolv.h>
+-#include <fmt/core.h>
++#include <fmt/format.h>
+ #include <string>
+ #include <unordered_map>
+ #include <xxhash.h>
+diff --git a/tools/XenosRecomp/XenosRecomp/shader_recompiler.h b/tools/XenosRecomp/XenosRecomp/shader_recompiler.h
+index aaaaaaa..bbbbbbb 100644
+--- a/tools/XenosRecomp/XenosRecomp/shader_recompiler.h
++++ b/tools/XenosRecomp/XenosRecomp/shader_recompiler.h
+@@ -1,3 +1,4 @@
+ #pragma once
+ 
++#include <fmt/format.h>
+ #include "shader.h"
+ #include "shader_code.h"
