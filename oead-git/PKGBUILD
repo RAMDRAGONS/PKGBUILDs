@@ -4,14 +4,14 @@ pkgname=oead-git
 _name=oead
 pkgver=1.2.9.4.r4.ga7cb4e0
 pkgrel=1
-pkgdesc="Library for recent Nintendo EAD formats in first-party games (C++ shared library)"
+pkgdesc="Library for recent Nintendo EAD formats in first-party games (C++ shared library and Python module)"
 arch=('x86_64')
 url="https://github.com/zeldamods/oead"
 license=('GPL2')
-depends=('abseil-cpp' 'libyaml')
-makedepends=('git' 'cmake' 'pkgconf')
-provides=('oead')
-conflicts=('oead')
+depends=('abseil-cpp' 'libyaml' 'python')
+makedepends=('git' 'cmake' 'pkgconf' 'python-build' 'python-installer' 'python-wheel' 'python-setuptools')
+provides=('oead' 'python-oead')
+conflicts=('oead' 'python-oead')
 source=("git+https://github.com/zeldamods/oead.git")
 sha256sums=('SKIP')
 
@@ -71,10 +71,14 @@ if target in content:
 else:
     print("Warning: Could not patch CMakeLists.txt, target string not found")
 '
+
+  # Patch setup.py to pass CMAKE_POLICY_VERSION_MINIMUM for modern CMake compat
+  # (the Python build invokes cmake internally but doesn't pass this flag)
+  sed -i "s|'-DPYTHON_EXECUTABLE=' + sys.executable]|'-DPYTHON_EXECUTABLE=' + sys.executable,\n                      '-DCMAKE_POLICY_VERSION_MINIMUM=3.5']|" setup.py
 }
 
 build() {
-  # Build shared library using standard CMake guidelines for Arch
+  # Build C++ shared library
   cmake -B build -S "${_name}" \
     -DCMAKE_BUILD_TYPE=None \
     -DCMAKE_INSTALL_PREFIX=/usr \
@@ -82,10 +86,14 @@ build() {
     -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
     -Wno-dev
   cmake --build build
+
+  # Build Python wheel
+  cd "${srcdir}/${_name}"
+  python -m build --wheel --no-isolation
 }
 
 package() {
-  # Install the shared library
+  # Install the C++ shared library
   install -Dm755 build/liboead.so "${pkgdir}/usr/lib/liboead.so"
 
   # Install public headers
@@ -101,6 +109,10 @@ package() {
   # Ensure correct directory & file permissions
   find "${pkgdir}/usr/include" -type f -exec chmod 644 {} +
   find "${pkgdir}/usr/include" -type d -exec chmod 755 {} +
+
+  # Install Python module
+  cd "${srcdir}/${_name}"
+  python -m installer --destdir="${pkgdir}" dist/*.whl
 
   # Install license
   install -Dm644 "${srcdir}/${_name}/LICENSE.md" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE.md"
