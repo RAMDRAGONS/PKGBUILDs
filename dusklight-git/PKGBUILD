@@ -3,22 +3,24 @@
 
 _pkgname=dusklight
 pkgname=${_pkgname}-git
-pkgver=1.4.1.r106.g9560843
+pkgver=1.4.1.r121.g13b3b68
 pkgrel=1
 pkgdesc="Dusklight brings a classic adventure to PC and mobile platforms with a variety of fixes and improvements."
 arch=('x86_64')
 url="https://github.com/TwilitRealm/dusklight"
 license=('CC0-1.0')
 depends=(libpng zlib libjpeg-turbo glibc libgcc sdl3 abseil-cpp freetype2 libstdc++ fmt sqlite)
-makedepends=(git cmake ninja llvm vulkan-headers python python-markupsafe clang lld alsa-lib libpulse libxrandr)
+makedepends=(git cmake ninja llvm vulkan-headers python python-markupsafe clang lld alsa-lib libpulse libxrandr cxxopts)
 replaces=(tp-dusk-git)
 conflicts=(dusklight dusklight-bin)
 source=(
   "git+$url"
   "git+https://github.com/encounter/aurora.git"
+  "git+https://github.com/encounter/borealis.git"
 )
 
 sha256sums=('SKIP'
+            'SKIP'
             'SKIP')
 
 pkgver() {
@@ -31,6 +33,7 @@ prepare() {
 
   git submodule init
   git config submodule.extern/aurora.url "${srcdir}/aurora"
+  git config submodule.extern/borealis.url "${srcdir}/borealis"
   git -c protocol.file.allow=always submodule update
 }
 
@@ -47,7 +50,8 @@ build() {
     -DCMAKE_C_FLAGS="${CFLAGS} -flto=thin -DNDEBUG" \
     -DCMAKE_CXX_FLAGS="${CXXFLAGS} -flto=thin -DNDEBUG" \
     -DDUSK_ENABLE_UPDATE_CHECKER=OFF \
-    -DDUSK_PACKAGE_INSTALL=ON
+    -DDUSK_PACKAGE_INSTALL=ON \
+    -DCMAKE_FIND_PACKAGE_TARGETS_GLOBAL=ON
 
   cmake --build build
 }
