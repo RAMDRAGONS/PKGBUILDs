@@ -1,6 +1,6 @@
 # Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
 pkgname=duckstation-git
-pkgver=0.1.r12093.ad7519d72
+pkgver=0.1.r12171.8778034bf
 pkgrel=1
 pkgdesc="Fast PlayStation 1 emulator for PC and Android (Git version)"
 arch=('x86_64' 'aarch64')
@@ -30,7 +30,7 @@ b2sums=('SKIP'
         'f653a3177e0910fc156a792d5522fc2a0c04ce0bb43eabb68e06922303dcf6062d8f9b570440bfe1a94ac1b901ef6e9c32b6882d0f4a406e5a9090ea3396f89a'
         'f74156fba9dab6c466393ff2fc340b6929aec30d1af0f586046f6ad2f4f85b17d331de7e6a2f8047d51728976e000adf01fde4478a36ea3e4bea33833f1aa40e'
         '7a568dc568e3271007a15ad04ca5501a885bf4430049447d362a70124b0ef5bd3d0be6a3fb23ff48d640d205cfb7bacd1aada28b037f8f29ff5f611946aeb239'
-        '4b465c50cc63450e48c0aadb04c6cc96a1d7cdb502cfdaa2548610d9ab2cf81956be4c601e29875e3ac04227c495c473f1bfe3081cbcac61967f618bb50cfe53'
+        'c491713a4d7aa88a1f756a3d21b07a50ffe422cf2781a91390a813d953265c4e7ccd6e9727214f1056dd7da32298dfc2a825c0b71d23c7c672ec0c262132b593'
         '39215976258577b31938a356e5abe465eb78324ad84830cbc5039048a0ed462c4d00b6b20a6105451b4e44209a7e165e0dd163e2e9a82a3157a5a48710500fa3'
         '58886455499a02b4c2635395031218372be68ae71b3cccc00db352b96be6a704ff87b79e088df8bc23542035aae30adecbb546da1702d56f3ab827637ad0cc23')
 
@@ -41,10 +41,15 @@ pkgver() {
 
 prepare() {
   # Download cheats.zip and patches.zip and update them conditionally
+  local_cheats=""
+  [ -f "$srcdir/cheats.zip" ] && local_cheats="-z $srcdir/cheats.zip"
   msg2 "Checking/downloading cheats.zip..."
-  curl -R -L -z "$srcdir/cheats.zip" -o "$srcdir/cheats.zip" "https://github.com/duckstation/chtdb/releases/download/latest/cheats.zip" || [ -f "$srcdir/cheats.zip" ]
+  curl -R -L $local_cheats -o "$srcdir/cheats.zip" "https://github.com/duckstation/chtdb/releases/download/latest/cheats.zip" || [ -f "$srcdir/cheats.zip" ]
+
+  local_patches=""
+  [ -f "$srcdir/patches.zip" ] && local_patches="-z $srcdir/patches.zip"
   msg2 "Checking/downloading patches.zip..."
-  curl -R -L -z "$srcdir/patches.zip" -o "$srcdir/patches.zip" "https://github.com/duckstation/chtdb/releases/download/latest/patches.zip" || [ -f "$srcdir/patches.zip" ]
+  curl -R -L $local_patches -o "$srcdir/patches.zip" "https://github.com/duckstation/chtdb/releases/download/latest/patches.zip" || [ -f "$srcdir/patches.zip" ]
 
   cd duckstation
   patch -p1 -i ../bypass-checks.patch
