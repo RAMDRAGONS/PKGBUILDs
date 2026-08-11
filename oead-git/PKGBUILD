@@ -46,10 +46,9 @@ find_package(absl REQUIRED CONFIG)
 add_subdirectory(lib/EasyIterator)
 
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(YAML REQUIRED yaml-0.1)
+pkg_check_modules(YAML REQUIRED IMPORTED_TARGET yaml-0.1)
 add_library(yaml INTERFACE IMPORTED)
-target_link_libraries(yaml INTERFACE ${YAML_LIBRARIES})
-target_include_directories(yaml INTERFACE ${YAML_INCLUDE_DIRS})
+target_link_libraries(yaml INTERFACE PkgConfig::YAML)
 
 add_library(tsl::ordered_map INTERFACE IMPORTED)
 set_target_properties(tsl::ordered_map PROPERTIES
