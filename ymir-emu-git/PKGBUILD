@@ -2,7 +2,7 @@
 
 _pkgname="ymir-emu"
 pkgname="$_pkgname-git"
-pkgver=0.3.3.r179.g2f135da
+pkgver=0.3.3.r283.g75ed2cf
 pkgrel=1
 pkgdesc="Sega Saturn emulator"
 url="https://github.com/StrikerX3/Ymir"
@@ -90,6 +90,16 @@ END
   # don't force libzstd_static
   sed -E -e 's&(zstd::libzstd)_static\b&\1&' \
     -i vendor/libchdr/CMakeLists.txt
+
+  # WIL is Windows-only
+  sed -E -e '/WIL::WIL/d' -i apps/ymir-sdl3/CMakeLists.txt
+
+  # D3D12 HLSL quad shaders are Windows-only
+  sed -E -e '/gctx\/(vs|ps)_quad\.hlsl/d' -i apps/ymir-sdl3/CMakeLists.txt
+
+  # fix platform macro checks in gfx_types.hpp
+  sed -E -e 's&defined\((YMIR_PLATFORM_HAS_[A-Z0-9]+)\)&\1&g' \
+    -i apps/ymir-sdl3/src/app/services/gfx/gfx_types.hpp
 
   # fix type mismatch
   sed -E -e '/m_m68kClockShift = std::min/s&4ull&uint64{4}&' -i libs/ymir-core/include/ymir/hw/scsp/scsp.hpp
