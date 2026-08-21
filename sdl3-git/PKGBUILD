@@ -4,7 +4,7 @@
 # Contributor: Christer Solskogen <christer.solskogen@gmail.com>
 
 pkgname=sdl3-git
-pkgver=3.4.0.r1196.g0d21a1aa7a
+pkgver=3.4.0.r1311.g36b7ce3b4e
 pkgrel=1
 pkgdesc="Simple Directmedia Layer (Version 3)"
 arch=('x86_64' 'aarch64' 'armv7h')
@@ -28,6 +28,7 @@ prepare() {
   cd SDL
   sed -i '/CMAKE_REQUIRED_FLAGS.*-D_GNU_SOURCE=1/a \  list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D_GNU_SOURCE=1")' CMakeLists.txt
   sed -i 's/static inline int getresgid(uid_t \*ruid, uid_t \*euid, uid_t \*suid)/static inline int getresgid(gid_t \*rgid, gid_t \*egid, gid_t \*sgid)/' src/video/wayland/SDL_waylandvideo.c
+  sed -i 's/find_package(FFmpeg)/find_package(FFmpeg COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE)/' test/CMakeLists.txt
 }
 
 build() {
