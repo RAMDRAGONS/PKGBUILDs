@@ -6,7 +6,7 @@
 _pkgname=eden
 pkgname=$_pkgname-git
 epoch=1
-pkgver=0.2.0.r218.g13d39f3
+pkgver=0.2.0.r233.gdf05d3d
 pkgrel=1
 pkgdesc="Nintendo Switch emulator forked from yuzu."
 arch=('x86_64' 'aarch64')
@@ -24,21 +24,12 @@ makedepends=('git' 'cmake' 'catch2' 'boost' 'spirv-headers' 'vulkan-headers'
 	     'renderdoc' 'qt6-tools' 'nasm' 'opencl-headers' 'doxygen'
 		 'cpp-httplib' 'cpp-jwt')
 optdepends=('gamemode: Gamemoded support')
-source=("git+https://git.eden-emu.dev/eden-emu/eden.git"
-	'httplib-0.52-headers-contains.patch')
-sha256sums=('SKIP'
-            '3e508dc35e9e64f8d22d01f2237fe21108b8858c097de513a4a13938c48c4162')
+source=("git+https://git.eden-emu.dev/eden-emu/eden.git")
+sha256sums=('SKIP')
 pkgver() {
   cd "$_pkgname"
   git describe --long --tags --abbrev=7 | sed 's/^v//;s/-\(rc[0-9]*\)/\1/;s/\([^-]*-g\)/r\1/;s/-/./g;s/.git//'
  }
-
-prepare() {
-	patch -d "$_pkgname" -p1 -i "$srcdir/httplib-0.52-headers-contains.patch"
-
-	cd "$_pkgname"
-	sed -i 's|#include "input_common/main.h"|#include "input_common/main.h"\n#include "input_common/drivers/camera.h"|' src/yuzu/bootmanager.cpp
-}
 
 build() {
 	cd "$srcdir"
