@@ -3,7 +3,7 @@
 
 _pkgname=dusklight
 pkgname=${_pkgname}-git
-pkgver=1.4.1.r145.gc880d46
+pkgver=1.4.1.r197.ga775418
 pkgrel=1
 pkgdesc="Dusklight brings a classic adventure to PC and mobile platforms with a variety of fixes and improvements."
 arch=('x86_64')
@@ -36,6 +36,17 @@ prepare() {
   git config submodule.extern/borealis.url "${srcdir}/borealis"
   git -c protocol.file.allow=always submodule update
   sed -i 's/std::memcpy/memcpy/g' extern/aurora/lib/internal.hpp
+
+  python3 -c "
+with open('CMakeLists.txt', 'r') as f:
+    content = f.read()
+target_str = '''    set_property(SOURCE \${_game_abi_files} APPEND PROPERTY\n            COMPILE_OPTIONS \${DUSK_GAME_ABI_INLINE_OPTIONS})'''
+repl_str = '''    target_compile_options(dusklight PRIVATE \${DUSK_GAME_ABI_INLINE_OPTIONS})'''
+if target_str in content:
+    content = content.replace(target_str, repl_str, 1)
+    with open('CMakeLists.txt', 'w') as f:
+        f.write(content)
+"
 }
 
 build() {
@@ -44,8 +55,12 @@ build() {
   cmake -B build -GNinja \
     -DCMAKE_INSTALL_PREFIX=/usr \
     -DCMAKE_BUILD_TYPE=None \
-    -DCMAKE_C_FLAGS="${CFLAGS} -DNDEBUG" \
-    -DCMAKE_CXX_FLAGS="${CXXFLAGS} -DNDEBUG" \
+    -DCMAKE_C_COMPILER=clang \
+    -DCMAKE_CXX_COMPILER=clang++ \
+    -DCMAKE_EXE_LINKER_FLAGS="${LDFLAGS} -fuse-ld=lld" \
+    -DCMAKE_SHARED_LINKER_FLAGS="${LDFLAGS} -fuse-ld=lld" \
+    -DCMAKE_C_FLAGS="${CFLAGS} -flto=thin -DNDEBUG" \
+    -DCMAKE_CXX_FLAGS="${CXXFLAGS} -flto=thin -DNDEBUG" \
     -DDUSK_PACKAGE_INSTALL=ON \
     -DCMAKE_FIND_PACKAGE_TARGETS_GLOBAL=ON
 
