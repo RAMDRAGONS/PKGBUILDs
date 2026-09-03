@@ -1,0 +1,109 @@
+# Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
+# Original Arch Linux kwin package:
+#
+# Maintainer: Felix Yan <felixonmars@archlinux.org>
+# Maintainer: Antonio Rojas <arojas@archlinux.org>
+# Contributor: Andrea Scarpino <andrea@archlinux.org>
+
+pkgname=kwin-wineland
+pkgver=6.7.5.r31121.gc389bfb
+pkgrel=1
+pkgdesc='An easy to use, but flexible, Wayland compositor (wineland branch)'
+arch=(x86_64)
+url='https://invent.kde.org/erhanbilgili/kwin'
+license=(LGPL-2.0-or-later)
+depends=(aurorae
+         breeze
+         glibc
+         iio-sensor-proxy
+         plasma-activities
+         kauth
+         kcmutils
+         kcolorscheme
+         kconfig
+         kcoreaddons
+         kcrash
+         kdbusaddons
+         kdeclarative
+         kdecoration
+         kglobalaccel
+         kglobalacceld
+         kguiaddons
+         ki18n
+         kidletime
+         kirigami
+         kitemmodels
+         knewstuff
+         knighttime
+         knotifications
+         kpackage
+         kquickcharts
+         kscreenlocker
+         kservice
+         ksvg
+         kwayland
+         kwidgetsaddons
+         kwindowsystem
+         kxmlgui
+         lcms2
+         libcanberra
+         libdisplay-info
+         libdrm
+         libei
+         libepoxy
+         libevdev
+         libgcc
+         libinput
+         libpipewire
+         libqaccessibilityclient-qt6
+         libstdc++
+         libxcb
+         libxcvt
+         libxkbcommon
+         mesa
+         milou
+         pipewire-session-manager
+         libplasma
+         qt6-5compat
+         qt6-base
+         qt6-declarative
+         qt6-svg
+         qt6-tools
+         systemd-libs
+         vulkan-icd-loader
+         wayland
+         xcb-util-keysyms
+         xcb-util-wm)
+makedepends=(extra-cmake-modules
+             git
+             kdoctools
+             krunner
+             plasma-wayland-protocols
+             python
+             vulkan-headers
+             wayland-protocols
+             xorg-xwayland)
+optdepends=('plasma-keyboard: virtual keyboard')
+provides=(kwin)
+conflicts=(kwin)
+groups=(plasma)
+source=("kwin::git+https://invent.kde.org/erhanbilgili/kwin.git#branch=wineland_6.7")
+sha256sums=('SKIP')
+
+pkgver() {
+  cd kwin
+  _ver="$(grep -m1 'set(PROJECT_VERSION' CMakeLists.txt | cut -d '"' -f2 | tr - .)"
+  echo "${_ver}.r$(git rev-list --count HEAD).g$(git rev-parse --short=7 HEAD)"
+}
+
+build() {
+  cmake -B build -S kwin \
+    -DCMAKE_INSTALL_LIBEXECDIR=lib \
+    -DBUILD_TESTING=OFF
+  cmake --build build
+}
+
+package() {
+  DESTDIR="$pkgdir" cmake --install build
+  setcap CAP_SYS_NICE=+ep "$pkgdir"/usr/bin/kwin_wayland
+}
