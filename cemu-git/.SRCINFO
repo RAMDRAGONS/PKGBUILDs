@@ -47,10 +47,8 @@ pkgbase = cemu-git
 	conflicts = cemu
 	source = cemu::git+https://github.com/cemu-project/Cemu.git
 	source = imgui::git+https://github.com/ocornut/imgui.git
-	source = wx32.patch
 	b2sums = SKIP
 	b2sums = SKIP
-	b2sums = be6ce99d884016a5073120acdf90b51e25404bbe49bbf73da05c25882352eb581873b9d005fdcfc2d9ea0f8c26d6d669c03d8c8e3c994e1854b8168cc5f36433
 
 pkgname = cemu-git
 	depends = glibc

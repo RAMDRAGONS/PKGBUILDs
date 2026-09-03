@@ -2,7 +2,7 @@
 # Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
 _pkgname=cemu
 pkgname=$_pkgname-git
-pkgver=2.6.r274.gacb105b
+pkgver=2.6.r289.g5f7f0a8
 pkgrel=1
 pkgdesc="Nintendo Wii U emulator"
 arch=('x86_64')
@@ -53,11 +53,9 @@ conflicts=("$_pkgname")
 source=(
 	"$_pkgname::git+https://github.com/cemu-project/Cemu.git"
 	'imgui::git+https://github.com/ocornut/imgui.git'
-	'wx32.patch'
 )
 b2sums=('SKIP'
-        'SKIP'
-        'be6ce99d884016a5073120acdf90b51e25404bbe49bbf73da05c25882352eb581873b9d005fdcfc2d9ea0f8c26d6d669c03d8c8e3c994e1854b8168cc5f36433')
+        'SKIP')
 
 pkgver() {
 	cd $_pkgname
@@ -68,7 +66,6 @@ prepare() {
 	cd $_pkgname
 	git config submodule.dependencies/imgui.url ../imgui
 	git -c protocol.file.allow=always submodule update
-	patch -p1 < "$srcdir/wx32.patch"
 }
 
 build() {
