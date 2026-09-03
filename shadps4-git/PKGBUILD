@@ -1,7 +1,7 @@
 # Maintainer: Alexandre Bouvier <contact@amb.tf>
 _pkgname=shadps4
 pkgname=$_pkgname-git
-pkgver=0.16.0.r163.g9894036
+pkgver=0.18.0.r57.g2eca0b5
 pkgrel=1
 pkgdesc="Sony PlayStation 4 emulator (CLI)"
 arch=('aarch64' 'x86_64')
@@ -60,7 +60,7 @@ source=(
 	"$_pkgname::git+https://github.com/shadps4-emu/shadPS4.git"
 	"$_pkgname-discord-rpc::git+https://github.com/shadps4-emu/ext-discord-rpc.git"
 	"$_pkgname-hwinfo::git+https://github.com/shadps4-emu/ext-hwinfo.git"
-	"$_pkgname-imgui::git+https://github.com/shadps4-emu/ext-imgui.git"
+	"$_pkgname-imgui::git+https://github.com/shadexternals/imgui.git#branch=docking"
 	"$_pkgname-imguifiledialog::git+https://github.com/shadexternals/ImGuiFileDialog.git"
 	"$_pkgname-libatrac9::git+https://github.com/shadps4-emu/ext-LibAtrac9.git"
 	"$_pkgname-libusb::git+https://github.com/shadexternals/libusb.git"
@@ -84,7 +84,7 @@ pkgver() {
 prepare() {
 	cd $_pkgname
 	git config submodule.externals/aacdec/fdk-aac.url ../aac
-	git config submodule.externals/dear_imgui.url ../$_pkgname-imgui
+	git config submodule.externals/imgui.url ../$_pkgname-imgui
 	git config submodule.externals/discord-rpc.url ../$_pkgname-discord-rpc
 	git config submodule.externals/hwinfo.url ../$_pkgname-hwinfo
 	git config submodule.externals/ImGuiFileDialog.url ../$_pkgname-imguifiledialog
