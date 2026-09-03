@@ -1,0 +1,57 @@
+--- a/src/interface/LocalTreeView.cpp	2026-09-02 22:12:44.297239621 -0400
++++ b/src/interface/LocalTreeView.cpp	2026-09-02 22:12:44.298018660 -0400
+@@ -1510,7 +1510,7 @@
+ 				type = fz::local_filesys::get_file_info(fz::to_native(path + pData->m_known_subdir), was_link, 0, &date, &attributes);
+ 			}
+ 			else {
+-				type = fz::local_filesys::get_file_info(fz::to_native(path + fz::local_filesys::path_separator + pData->m_known_subdir), was_link, 0, &date, &attributes);
++				type = fz::local_filesys::get_file_info(fz::to_native(path + wchar_t(fz::local_filesys::path_separator) + pData->m_known_subdir), was_link, 0, &date, &attributes);
+ 			}
+ 			if (type == fz::local_filesys::dir) {
+ 				CFilterManager filter;
+--- a/src/interface/settings/optionspage_filetype.cpp	2026-09-02 22:12:44.298535755 -0400
++++ b/src/interface/settings/optionspage_filetype.cpp	2026-09-02 22:12:44.299251925 -0400
+@@ -126,7 +126,7 @@
+ 			ext.clear();
+ 		}
+ 		else {
+-			ext += extensions.substr(0, pos - 1) + '|';
++			ext += extensions.substr(0, pos - 1) + L'|';
+ 		}
+ 		extensions = extensions.substr(pos + 1);
+ 		pos = extensions.find('|');
+--- a/src/interface/sitemanager_controls.cpp	2026-09-02 22:12:44.299678770 -0400
++++ b/src/interface/sitemanager_controls.cpp	2026-09-02 22:12:44.300434916 -0400
+@@ -1683,10 +1683,10 @@
+ 		if (sse_algorithm.empty()) {
+ 			xrc_call(parent_, "ID_S3_NOENCRYPTION", &wxRadioButton::SetValue, true);
+ 		}
+-		else if (sse_algorithm == "AES256") {
++		else if (sse_algorithm == L"AES256") {
+ 			xrc_call(parent_, "ID_S3_AES256", &wxRadioButton::SetValue, true);
+ 		}
+-		else if (sse_algorithm == "aws:kms") {
++		else if (sse_algorithm == L"aws:kms") {
+ 			xrc_call(parent_, "ID_S3_AWSKMS", &wxRadioButton::SetValue, true);
+ 			auto sse_kms_key = site.server.GetExtraParameter("ssekmskey");
+ 			if (!sse_kms_key.empty()) {
+@@ -1697,7 +1697,7 @@
+ 				xrc_call(parent_, "ID_S3_KMSKEY", &wxChoice::SetSelection, static_cast<int>(s3_sse::KmsKey::DEFAULT));
+ 			}
+ 		}
+-		else if (sse_algorithm == "customer") {
++		else if (sse_algorithm == L"customer") {
+ 			xrc_call(parent_, "ID_S3_CUSTOMER_ENCRYPTION", &wxRadioButton::SetValue, true);
+ 			auto customer_key = server.GetExtraParameter("ssecustomerkey");
+ 			xrc_call(parent_, "ID_S3_CUSTOMER_KEY", &wxTextCtrl::ChangeValue, customer_key);
+--- a/src/interface/state.cpp	2026-09-02 22:12:44.301003358 -0400
++++ b/src/interface/state.cpp	2026-09-02 22:12:44.301747651 -0400
+@@ -1015,7 +1015,7 @@
+ 				dirsToVisit.push_back(subDir);
+ 			}
+ 			else {
+-				wxCopyFile(source.GetPath() + dirname + file, target.GetPath() + dirname + file);
++				wxCopyFile(source.GetPath() + dirname + fz::to_wstring(file), target.GetPath() + dirname + fz::to_wstring(file));
+ 			}
+ 		}
+ 	}

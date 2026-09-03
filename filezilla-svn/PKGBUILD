@@ -1,0 +1,47 @@
+# Maintainer:  Peter Mattern <pmattern at arcor dot de>
+
+_pkgname=filezilla
+pkgname=$_pkgname-svn
+pkgver=11557
+pkgrel=1
+pkgdesc='Free, open source FTP, FTPS and SFTP client'
+arch=('i686' 'x86_64')
+url='https://filezilla-project.org'
+license=('GPL')
+depends=('libfilezilla-svn' 'wxwidgets-gtk3' 'xdg-utils')
+makedepends=('subversion' 'pugixml' 'boost')
+provides=("$_pkgname")
+conflicts=("$_pkgname")
+source=("$_pkgname::svn+https://svn.filezilla-project.org/svn/FileZilla3/trunk"
+        "wxwidgets-3.3.patch"
+        "gcc-16.patch")
+sha256sums=('SKIP'
+            '3fe4d46dc196b9ad1b07fc4649c7b093e955c94e76ddfd6bc2470778fbcbba7c'
+            '5c3be846d67e7918005fa66753cc9e37d3bfed86d86779923a18741e26d47ec0')
+
+prepare() {
+    cd "$srcdir/$_pkgname"
+
+    patch -Np1 -i "$srcdir/wxwidgets-3.3.patch"
+    patch -Np1 -i "$srcdir/gcc-16.patch"
+
+    # Complement desktop entry file with key MimeTypes, https://trac.filezilla-project.org/ticket/10724
+    grep --quiet MimeType data/filezilla.desktop || echo 'MimeType=x-scheme-handler/ftp;' >> data/filezilla.desktop
+}
+
+pkgver() {
+    cd "$srcdir/$_pkgname"
+    svnversion | sed 's:M$::'
+}
+
+build() {
+    cd "$srcdir/$_pkgname"
+    autoreconf -i
+    ./configure --prefix=/usr
+    make
+}
+
+package() {
+    cd "$srcdir/$_pkgname"
+    make DESTDIR="$pkgdir" install
+}

@@ -1,0 +1,24 @@
+pkgbase = filezilla-svn
+	pkgdesc = Free, open source FTP, FTPS and SFTP client
+	pkgver = 11557
+	pkgrel = 1
+	url = https://filezilla-project.org
+	arch = i686
+	arch = x86_64
+	license = GPL
+	makedepends = subversion
+	makedepends = pugixml
+	makedepends = boost
+	depends = libfilezilla-svn
+	depends = wxwidgets-gtk3
+	depends = xdg-utils
+	provides = filezilla
+	conflicts = filezilla
+	source = filezilla::svn+https://svn.filezilla-project.org/svn/FileZilla3/trunk
+	source = wxwidgets-3.3.patch
+	source = gcc-16.patch
+	sha256sums = SKIP
+	sha256sums = 3fe4d46dc196b9ad1b07fc4649c7b093e955c94e76ddfd6bc2470778fbcbba7c
+	sha256sums = 5c3be846d67e7918005fa66753cc9e37d3bfed86d86779923a18741e26d47ec0
+
+pkgname = filezilla-svn

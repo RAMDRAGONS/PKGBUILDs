@@ -1,0 +1,50 @@
+--- a/configure.ac	2026-09-02 22:12:34.499550046 -0400
++++ b/configure.ac	2026-09-02 22:12:34.500262830 -0400
+@@ -226,9 +226,6 @@
+         equivalent variable and wxWidgets version is $MIN_WX_VERSION or above.
+       ])
+     fi
+-    if test "${WX_VERSION_MAJOR}.${WX_VERSION_MINOR}" = "3.3"; then
+-      AC_MSG_ERROR([You must use wxWidgets 3.2.x, development versions of wxWidgets are not supported.])
+-    fi
+ 
+     # --universal=no doesn't work correctly, it still accepts universal builds. Reject it manually here.
+     if echo "$WX_CPPFLAGS" | grep __WXUNIVERSAL__ > /dev/null; then
+--- a/src/interface/aui_notebook_ex.cpp	2026-09-02 22:12:34.501235093 -0400
++++ b/src/interface/aui_notebook_ex.cpp	2026-09-02 22:12:34.503099579 -0400
+@@ -73,7 +73,11 @@
+ #endif
+ 
+ #ifdef __WXGTK__
++#if wxCHECK_VERSION(3, 3, 0)
++typedef wxAuiGenericTabArt TabArtBase;
++#else
+ typedef wxAuiDefaultTabArt TabArtBase;
++#endif
+ #else
+ typedef wxAuiGenericTabArt TabArtBase;
+ #endif
+@@ -99,7 +103,11 @@
+ 		return art;
+ 	}
+ 
++	#if wxCHECK_VERSION(3, 3, 0)
++	virtual wxSize GetTabSize(wxReadOnlyDC& dc, wxWindow* wnd, const wxString& caption, const wxBitmapBundle& bitmap, bool active, int close_button_state, int* x_extent) override
++#else
+ 	virtual wxSize GetTabSize(wxDC& dc, wxWindow* wnd, const wxString& caption, const wxBitmapBundle& bitmap, bool active, int close_button_state, int* x_extent) override
++#endif
+ 	{
+ 		wxSize size = TabArtBase::GetTabSize(dc, wnd, caption, bitmap, active, close_button_state, x_extent);
+ 
+@@ -219,7 +227,11 @@
+ 
+ void wxAuiNotebookEx::OnTabDragMotion(wxAuiNotebookEvent& evt)
+ {
++	#if wxCHECK_VERSION(3, 3, 0)
++	evt.Skip();
++#else
+ 	wxAuiNotebook::OnTabDragMotion(evt);
++#endif
+ 
+ 	int active = m_tabs.GetActivePage();
+ 	if (active != wxNOT_FOUND) {
