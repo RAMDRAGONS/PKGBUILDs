@@ -76,6 +76,7 @@ build() {
 		-D ALLOW_PORTABLE=OFF
 		-D CMAKE_BUILD_TYPE=None
 		-D ENABLE_VCPKG=OFF
+		-D ENABLE_FERAL_GAMEMODE=OFF
 		-W no-dev
 	)
 	cmake "${options[@]}" $_pkgname
