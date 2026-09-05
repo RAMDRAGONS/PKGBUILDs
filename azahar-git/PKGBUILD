@@ -2,7 +2,7 @@
 # Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
 _pkgbase=azahar
 pkgname=("$_pkgbase-git")
-pkgver=2126.0.alpha2.r8.g7c225c6
+pkgver=2126.1.rc3.r0.gac95f6f
 pkgrel=1
 arch=('x86_64')
 url="https://azahar-emu.org/"
@@ -12,12 +12,15 @@ depends=(
 	'enet'
 	'glibc'
 	'glslang'
+	'soundtouch'
+	'zstd'
 )
 makedepends=(
 	'boost'
 	'boost-libs'
 	'clang'
 	'cmake'
+	'cpp-httplib'
 	'cpp-jwt'
 	'cubeb'
 	'ffmpeg'
@@ -29,6 +32,7 @@ makedepends=(
 	'libstdc++'
 	'libusb'
 	'lld'
+	'lodepng'
 	'nlohmann-json'
 	'openal'
 	'openssl'
@@ -41,6 +45,7 @@ makedepends=(
 	'spirv-headers'
 	'vulkan-headers'
 	'vulkan-memory-allocator'
+	'xbyak'
 	'zydis'
 )
 checkdepends=('catch2')
@@ -51,19 +56,15 @@ source=(
 	"$_pkgbase-dynarmic::git+https://github.com/azahar-emu/dynarmic.git"
 	"$_pkgbase-mcl::git+https://github.com/azahar-emu/mcl.git"
 	"$_pkgbase-sirit::git+https://github.com/azahar-emu/sirit.git"
-	"$_pkgbase-soundtouch::git+https://github.com/azahar-emu/soundtouch.git"
 	"dds-ktx::git+https://github.com/septag/dds-ktx.git"
 	"faad2::git+https://github.com/knik0/faad2.git"
 	"libretro-common::git+https://github.com/libretro/libretro-common.git"
-	"lodepng::git+https://github.com/lvandeve/lodepng.git"
 	"nihstro::git+https://github.com/neobrain/nihstro.git"
 	"teakra::git+https://github.com/wwylele/teakra.git"
-	"xbyak::git+https://github.com/herumi/xbyak.git"
 	"xxhash::git+https://github.com/Cyan4973/xxHash.git"
-	"zstd::git+https://github.com/facebook/zstd.git"
 	"ffmpeg7.patch"
 )
-b2sums=('SKIP'{,,,,,,,,,,,,,,,,})
+b2sums=('SKIP'{,,,,,,,,,,,,})
 
 pkgver() {
 	cd $_pkgbase
@@ -79,13 +80,9 @@ prepare() {
 	git config submodule.externals/libretro-common.url ../libretro-common
 	git config submodule.externals/xxHash.url ../xxhash
 	git config submodule.faad2.url ../faad2
-	git config submodule.lodepng.url ../lodepng
 	git config submodule.nihstro.url ../nihstro
 	git config submodule.sirit.url ../$_pkgbase-sirit
-	git config submodule.soundtouch.url ../$_pkgbase-soundtouch
 	git config submodule.teakra.url ../teakra
-	git config submodule.xbyak.url ../xbyak
-	git config submodule.zstd.url ../zstd
 	git -c protocol.file.allow=always submodule update
 	cd externals/dynarmic
 	git config submodule.mcl.url ../../../$_pkgbase-mcl
@@ -118,12 +115,7 @@ build() {
 		-D CMAKE_C_FLAGS_NONE="-DNDEBUG"
 		-D CMAKE_CXX_FLAGS_NONE="-DNDEBUG"
 		-D CMAKE_INSTALL_PREFIX=/usr
-		-D DISABLE_SYSTEM_CPP_HTTPLIB=ON
 		-D DISABLE_SYSTEM_DYNARMIC=ON
-		-D DISABLE_SYSTEM_LODEPNG=ON
-		-D DISABLE_SYSTEM_SOUNDTOUCH=ON
-		-D DISABLE_SYSTEM_XBYAK=ON
-		-D DISABLE_SYSTEM_ZSTD=ON
 		-D ENABLE_LTO=ON
 		-D ENABLE_QT_TRANSLATION=ON
 		-D ENABLE_ROOM_STANDALONE=OFF
@@ -159,9 +151,11 @@ package() {
 		'libfmt.so'
 		'libgcc_s.so'
 		'libopenal.so'
+		'soundtouch'
 		'libssl.so'
 		'libstdc++.so'
 		'libusb-1.0.so'
+		'libzstd.so'
 		'libZydis.so'
 		'qt6-base'
 		'qt6-multimedia'
