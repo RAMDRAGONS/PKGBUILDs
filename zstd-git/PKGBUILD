@@ -1,0 +1,93 @@
+# Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
+#
+# Adapted from original Arch PKGBUILD
+
+pkgname=zstd-git
+_pkgname=zstd
+pkgver=1.4.7.r3050.gd9c0c7e2c
+pkgrel=1
+pkgdesc='Zstandard - Fast real-time compression algorithm'
+url='https://facebook.github.io/zstd/'
+arch=(x86_64)
+license=(
+  BSD-3-Clause
+  GPL-2.0-only
+)
+depends=(
+  glibc
+  libgcc
+  libstdc++
+  zlib
+  xz
+  lz4
+)
+makedepends=(
+  cmake
+  git
+  gtest
+  ninja
+)
+provides=(
+  zstd
+  libzstd.so
+)
+conflicts=(zstd)
+# Use the dev branch by default; upstream merges only full releases to master.
+source=("$_pkgname::git+https://github.com/facebook/zstd.git#branch=dev")
+b2sums=('SKIP')
+
+pkgver() {
+  cd "$_pkgname"
+  git describe --long --tags --match="v[0-9]*" | sed 's/\([^-]*-g\)/r\1/;s/-/./g;s/^v//g'
+}
+
+prepare() {
+  cd "$_pkgname"
+  # avoid error on tests without static libs, we use LD_LIBRARY_PATH
+  sed -i '/Static library required to build test suite/d' build/cmake/CMakeModules/ZstdBuild.cmake 2>/dev/null || true
+  sed -i '/build static library to build tests/d' build/cmake/CMakeLists.txt 2>/dev/null || true
+  sed -i 's/libzstd_static/libzstd_shared/g' build/cmake/tests/CMakeLists.txt
+
+  # enable zstd_seekable in libzstd and install its public header
+  sed -i '/# Explicitly set the language to C/i \
+option(ZSTD_SEEKABLE_SUPPORT "BUILD SEEKABLE FORMAT MODULE" ON)\
+if(ZSTD_SEEKABLE_SUPPORT)\
+    set(SEEKABLE_DIR ${ZSTD_SOURCE_DIR}/contrib/seekable_format)\
+    set(Sources ${Sources} ${SEEKABLE_DIR}/zstdseek_compress.c ${SEEKABLE_DIR}/zstdseek_decompress.c)\
+    set(PublicHeaders ${PublicHeaders} ${SEEKABLE_DIR}/zstd_seekable.h)\
+    include_directories(${SEEKABLE_DIR} ${LIBRARY_DIR}/common)\
+endif()' build/cmake/lib/CMakeLists.txt
+}
+
+build() {
+  cd "$_pkgname"
+  export CFLAGS+=' -ffat-lto-objects'
+  export CXXFLAGS+=' -ffat-lto-objects'
+
+  cmake -S build/cmake -B build -G Ninja \
+    -DCMAKE_BUILD_TYPE=None \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DZSTD_ZLIB_SUPPORT=ON \
+    -DZSTD_LZMA_SUPPORT=ON \
+    -DZSTD_LZ4_SUPPORT=ON \
+    -DZSTD_BUILD_CONTRIB=ON \
+    -DZSTD_BUILD_STATIC=OFF \
+    -DZSTD_BUILD_TESTS=OFF \
+    -DZSTD_PROGRAMS_LINK_SHARED=ON
+  cmake --build build
+}
+
+check() {
+  cd "$_pkgname"
+  LD_LIBRARY_PATH="$(pwd)/build/lib" \
+    ctest -VV --test-dir build
+}
+
+package() {
+  cd "$_pkgname"
+  DESTDIR="$pkgdir" cmake --install build
+  ln -sf libzstd.so "$pkgdir/usr/lib/libzstd_seekable.so"
+  install -Dm 644 LICENSE -t "$pkgdir/usr/share/licenses/$pkgname"
+}
+
+# vim: ts=2 sw=2 et:

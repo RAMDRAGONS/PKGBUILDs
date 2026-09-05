@@ -1,0 +1,25 @@
+pkgbase = zstd-git
+	pkgdesc = Zstandard - Fast real-time compression algorithm
+	pkgver = 1.4.7.r3050.gd9c0c7e2c
+	pkgrel = 1
+	url = https://facebook.github.io/zstd/
+	arch = x86_64
+	license = BSD-3-Clause
+	license = GPL-2.0-only
+	makedepends = cmake
+	makedepends = git
+	makedepends = gtest
+	makedepends = ninja
+	depends = glibc
+	depends = libgcc
+	depends = libstdc++
+	depends = zlib
+	depends = xz
+	depends = lz4
+	provides = zstd
+	provides = libzstd.so
+	conflicts = zstd
+	source = zstd::git+https://github.com/facebook/zstd.git#branch=dev
+	b2sums = SKIP
+
+pkgname = zstd-git
