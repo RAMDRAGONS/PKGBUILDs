@@ -1,7 +1,7 @@
 # Maintainer: Alexandre Bouvier <contact@amb.tf>
 _pkgname=shadps4
 pkgname=$_pkgname-git
-pkgver=0.18.0.r57.g2eca0b5
+pkgver=0.18.0.r64.g256546c
 pkgrel=1
 pkgdesc="Sony PlayStation 4 emulator (CLI)"
 arch=('aarch64' 'x86_64')
@@ -10,7 +10,7 @@ license=('GPL-2.0-or-later')
 depends=(
 	'abseil-cpp' # protobuf dependency
 	'glibc'
-	'glslang>=15'
+	'glslang'
 	'miniz>=3.1'
 	'pugixml>=1.14'
 	'sdl3>=3.3.5'
