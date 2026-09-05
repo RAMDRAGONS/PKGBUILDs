@@ -43,12 +43,12 @@ prepare() {
   # Download cheats.zip and patches.zip and update them conditionally
   local_cheats=""
   [ -f "$srcdir/cheats.zip" ] && local_cheats="-z $srcdir/cheats.zip"
-  msg2 "Checking/downloading cheats.zip..."
+  echo "Checking/downloading cheats.zip..."
   curl -R -L $local_cheats -o "$srcdir/cheats.zip" "https://github.com/duckstation/chtdb/releases/download/latest/cheats.zip" || [ -f "$srcdir/cheats.zip" ]
 
   local_patches=""
   [ -f "$srcdir/patches.zip" ] && local_patches="-z $srcdir/patches.zip"
-  msg2 "Checking/downloading patches.zip..."
+  echo "Checking/downloading patches.zip..."
   curl -R -L $local_patches -o "$srcdir/patches.zip" "https://github.com/duckstation/chtdb/releases/download/latest/patches.zip" || [ -f "$srcdir/patches.zip" ]
 
   cd duckstation
