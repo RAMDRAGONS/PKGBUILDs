@@ -1,6 +1,6 @@
 pkgbase = cemu-git
 	pkgdesc = Nintendo Wii U emulator
-	pkgver = 2.6.r274.gacb105b
+	pkgver = 2.6.r290.g51250c0
 	pkgrel = 1
 	url = https://cemu.info/
 	arch = x86_64
@@ -37,7 +37,7 @@ pkgbase = cemu-git
 	makedepends = libwebp
 	makedepends = gst-plugins-bad-libs
 	depends = glibc
-	depends = glslang>=14
+	depends = glslang
 	depends = hicolor-icon-theme
 	depends = libx11
 	depends = pugixml
@@ -52,7 +52,7 @@ pkgbase = cemu-git
 
 pkgname = cemu-git
 	depends = glibc
-	depends = glslang>=14
+	depends = glslang
 	depends = hicolor-icon-theme
 	depends = libx11
 	depends = pugixml

@@ -2,7 +2,7 @@
 # Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
 _pkgname=cemu
 pkgname=$_pkgname-git
-pkgver=2.6.r289.g5f7f0a8
+pkgver=2.6.r290.g51250c0
 pkgrel=1
 pkgdesc="Nintendo Wii U emulator"
 arch=('x86_64')
@@ -10,7 +10,7 @@ url="https://cemu.info/"
 license=('MPL-2.0')
 depends=(
 	'glibc'
-	'glslang>=14'
+	'glslang'
 	'hicolor-icon-theme'
 	'libx11'
 	'pugixml'
