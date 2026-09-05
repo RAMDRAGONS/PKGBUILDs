@@ -1,6 +1,6 @@
 pkgbase = rpcs3-git
 	pkgdesc = A Sony PlayStation 3 emulator
-	pkgver = 0.0.40.r19347.6b5a2f781a
+	pkgver = 0.0.42.r19931.de6c1b526d
 	pkgrel = 1
 	url = https://github.com/RPCS3/rpcs3
 	arch = x86_64
@@ -54,8 +54,6 @@ pkgbase = rpcs3-git
 	options = !emptydirs
 	options = !strip
 	source = git+https://github.com/RPCS3/rpcs3.git
-	source = git+https://github.com/KhronosGroup/glslang.git
-	sha256sums = SKIP
 	sha256sums = SKIP
 
 pkgname = rpcs3-git

@@ -3,7 +3,7 @@
 # Submitter: Maxime Gauduin <alucryd@archlinux.org>
 
 pkgname=rpcs3-git
-pkgver=0.0.40.r19347.6b5a2f781a
+pkgver=0.0.42.r19931.de6c1b526d
 pkgrel=1
 pkgdesc='A Sony PlayStation 3 emulator'
 arch=(x86_64 aarch64)
@@ -64,10 +64,8 @@ conflicts=(rpcs3)
 options=(!emptydirs !strip)
 source=(
   git+https://github.com/RPCS3/rpcs3.git
-  git+https://github.com/KhronosGroup/glslang.git
 )
 sha256sums=(
-  SKIP
   SKIP
 )
 
@@ -82,10 +80,7 @@ pkgver() {
 
 prepare() {
   cd rpcs3
-  
-  git submodule init 3rdparty/glslang/glslang
-  git config submodule.3rdparty/glslang.url ../glslang
-  
+
   SUBMODULES=($(git config --file .gitmodules --get-regexp path | \
     awk '!/libpng/ && !/zlib/ && !/curl/ && !/llvm/ && !/glslang/ && !/pugixml/ && !/SDL/'))
 
@@ -104,8 +99,6 @@ prepare() {
     git config $urlid https://github.com/$url
     git -c protocol.file.allow=always submodule update --init --filter=tree:0 $path
   done
-  
-  git -c protocol.file.allow=always submodule update 3rdparty/glslang/glslang
 
   # Force-allow LTO by downgrading FATAL_ERROR to a STATUS message
   sed -i "s/FATAL_ERROR \"RPCS3 doesn't support building with LTO/STATUS \"RPCS3 doesn't support building with LTO/" CMakeLists.txt
@@ -142,7 +135,6 @@ build() {
     -DUSE_SYSTEM_PROTOBUF=ON \
     -DUSE_SYSTEM_GLSLANG=ON \
     -DUSE_SYSTEM_HIDAPI=ON \
-    -DUSE_SYSTEM_PUGIXML=ON \
     -DUSE_SYSTEM_OPENCV=ON \
     -DUSE_DISCORD_RPC=ON \
     -DUSE_SDL=ON \
