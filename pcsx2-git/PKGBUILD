@@ -5,7 +5,7 @@
 # Contributor: Themaister <maister@archlinux.us>
 
 pkgname=pcsx2-git
-pkgver=2.9.22.r0.g969c3b54b8
+pkgver=2.9.31.r0.g4e9c5dcc88
 pkgrel=1
 pkgdesc='PlayStation 2 emulator'
 arch=(x86_64)
@@ -95,7 +95,7 @@ build()
     -DWAYLAND_API=ON \
     -DCMAKE_INSTALL_PREFIX="/usr" \
     -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON \
-    -DDISABLE_ADVANCE_SIMD=ON \
+    -DDISABLE_ADVANCE_SIMD=OFF \
     -DCMAKE_PREFIX_PATH="${srcdir}/deps-build" \
     -DPACKAGE_MODE=ON
 
