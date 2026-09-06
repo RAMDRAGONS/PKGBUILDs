@@ -1,6 +1,6 @@
 pkgbase = msbt-editor-git
 	pkgdesc = A modern editor for MSBT and BMG files. (Git version)
-	pkgver = 3.1.0.r3.g9fbf178
+	pkgver = 3.3.4.r1.gef3dc89
 	pkgrel = 1
 	url = https://gitlab.com/AeonSake/msbt-editor
 	arch = x86_64
@@ -30,10 +30,10 @@ pkgbase = msbt-editor-git
 	provides = msbt-editor
 	conflicts = msbt-editor
 	source = git+https://gitlab.com/AeonSake/msbt-editor.git
-	source = msbteditor-app.desktop
+	source = msbt-editor.desktop
 	source = msbt-editor.sh
 	sha256sums = SKIP
-	sha256sums = abbeb95b2ff0f2c8ae7f89d42fbc799b0ffffc2c9b2ab40ba45d76dc5d688c4c
+	sha256sums = 4e0e2ca8b8e1f0db160a872b783dc76612ede3372e9240c5e7fbed5d9102ba5c
 	sha256sums = 7cb5f1a894ba3d3a4e328f23e8e99f0ddb68f6171e483cb8b706e1f50712ad48
 
 pkgname = msbt-editor-git
