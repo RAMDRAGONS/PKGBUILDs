@@ -1,50 +1,25 @@
-From e8dbfa97e5564d7473dcf0f73200fa219588241b Mon Sep 17 00:00:00 2001
-From: David Hummel <hummeltech@sherpaguru.com>
-Date: Wed, 21 May 2025 22:47:10 +0200
-Subject: [PATCH] Use system dependencies
-
----
- .gitmodules                               | 34 -----------------------
- src/xenia/cpu/backend/assembler.h         |  1 +
- src/xenia/emulator.cc                     |  2 +-
- third_party/SDL2                          |  1 -
- third_party/SDL2/include                  |  1 +
- third_party/SPIRV-Tools                   |  1 -
- third_party/SPIRV-Tools/include           |  1 +
- third_party/Vulkan-Headers                |  1 -
- third_party/Vulkan-Headers/include/vulkan |  1 +
- third_party/cxxopts                       |  1 -
- third_party/cxxopts/include/cxxopts.hpp   |  1 +
- third_party/date                          |  2 +-
- third_party/imgui                         |  2 +-
- third_party/libusb                        |  2 +-
- third_party/rapidcsv                      |  2 +-
- third_party/tabulate                      |  2 +-
- third_party/tomlplusplus                  |  1 -
- third_party/tomlplusplus/impl             |  1 +
- third_party/tomlplusplus/include          |  1 +
- third_party/tomlplusplus/toml.hpp         |  1 +
- third_party/utfcpp                        |  2 +-
- third_party/xbyak                         |  2 +-
- 22 files changed, 16 insertions(+), 47 deletions(-)
- delete mode 160000 third_party/SDL2
- create mode 120000 third_party/SDL2/include
- delete mode 160000 third_party/SPIRV-Tools
- create mode 120000 third_party/SPIRV-Tools/include
- delete mode 160000 third_party/Vulkan-Headers
- create mode 120000 third_party/Vulkan-Headers/include/vulkan
- delete mode 160000 third_party/cxxopts
- create mode 120000 third_party/cxxopts/include/cxxopts.hpp
- delete mode 160000 third_party/tomlplusplus
- create mode 120000 third_party/tomlplusplus/impl
- create mode 120000 third_party/tomlplusplus/include
- create mode 120000 third_party/tomlplusplus/toml.hpp
-
 diff --git a/.gitmodules b/.gitmodules
-index efae2de45..21edd1a74 100644
+index efae2de45..bcc8ceff8 100644
 --- a/.gitmodules
 +++ b/.gitmodules
-@@ -20,24 +20,9 @@
+@@ -1,16 +1,9 @@
+-[submodule "third_party/xbyak"]
+-	path = third_party/xbyak
+-	url = https://github.com/herumi/xbyak.git
+ [submodule "third_party/imgui"]
+ 	path = third_party/imgui
+ 	url = https://github.com/ocornut/imgui.git
+ [submodule "third_party/catch"]
+ 	path = third_party/catch
+ 	url = https://github.com/catchorg/Catch2.git
+-[submodule "third_party/snappy"]
+-	path = third_party/snappy
+-	url = https://github.com/google/snappy.git
+-	ignore = dirty
+ [submodule "third_party/discord-rpc"]
+ 	path = third_party/discord-rpc
+ 	url = https://github.com/discordapp/discord-rpc.git
+@@ -20,36 +13,12 @@
  [submodule "third_party/aes_128"]
  	path = third_party/aes_128
  	url = https://github.com/openluopworld/aes_128.git
@@ -60,26 +35,28 @@ index efae2de45..21edd1a74 100644
 -[submodule "third_party/SDL2"]
 -	path = third_party/SDL2
 -	url = https://github.com/libsdl-org/SDL.git
- [submodule "third_party/utfcpp"]
- 	path = third_party/utfcpp
- 	url = https://github.com/nemtrif/utfcpp.git
+-[submodule "third_party/utfcpp"]
+-	path = third_party/utfcpp
+-	url = https://github.com/nemtrif/utfcpp.git
 -[submodule "third_party/fmt"]
 -	path = third_party/fmt
 -	url = https://github.com/fmtlib/fmt.git
  [submodule "third_party/disruptorplus"]
  	path = third_party/disruptorplus
  	url = https://github.com/xenia-canary/disruptorplus.git
-@@ -47,9 +32,6 @@
- [submodule "third_party/date"]
- 	path = third_party/date
- 	url = https://github.com/HowardHinnant/date.git
+ [submodule "third_party/DirectXShaderCompiler"]
+ 	path = third_party/DirectXShaderCompiler
+ 	url = https://github.com/microsoft/DirectXShaderCompiler.git
+-[submodule "third_party/date"]
+-	path = third_party/date
+-	url = https://github.com/HowardHinnant/date.git
 -[submodule "third_party/xxhash"]
 -	path = third_party/xxhash
 -	url = https://github.com/Cyan4973/xxHash.git
  [submodule "third_party/FFmpeg"]
  	path = third_party/FFmpeg
  	url = https://github.com/has207/FFmpeg.git
-@@ -60,37 +42,21 @@
+@@ -60,37 +29,12 @@
  [submodule "third_party/FidelityFX-FSR"]
  	path = third_party/FidelityFX-FSR
  	url = https://github.com/GPUOpen-Effects/FidelityFX-FSR.git
@@ -92,21 +69,21 @@ index efae2de45..21edd1a74 100644
 -[submodule "third_party/SPIRV-Tools"]
 -	path = third_party/SPIRV-Tools
 -	url = https://github.com/KhronosGroup/SPIRV-Tools.git
- [submodule "third_party/VulkanMemoryAllocator"]
- 	path = third_party/VulkanMemoryAllocator
- 	url = https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git
- [submodule "third_party/zstd"]
- 	path = third_party/zstd
- 	url = https://github.com/facebook/zstd.git
+-[submodule "third_party/VulkanMemoryAllocator"]
+-	path = third_party/VulkanMemoryAllocator
+-	url = https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git
+-[submodule "third_party/zstd"]
+-	path = third_party/zstd
+-	url = https://github.com/facebook/zstd.git
 -[submodule "third_party/zarchive"]
 -	path = third_party/zarchive
 -	url = https://github.com/exzap/ZArchive.git
  [submodule "third_party/tabulate"]
  	path = third_party/tabulate
  	url = https://github.com/p-ranav/tabulate.git
- [submodule "third_party/rapidcsv"]
- 	path = third_party/rapidcsv
- 	url = https://github.com/d99kris/rapidcsv.git
+-[submodule "third_party/rapidcsv"]
+-	path = third_party/rapidcsv
+-	url = https://github.com/d99kris/rapidcsv.git
 -[submodule "third_party/zlib-ng"]
 -	path = third_party/zlib-ng
 -	url = https://github.com/zlib-ng/zlib-ng.git
@@ -118,7 +95,7 @@ index efae2de45..21edd1a74 100644
  	path = third_party/libusb
  	url = https://github.com/libusb/libusb.git
 diff --git a/src/xenia/emulator.cc b/src/xenia/emulator.cc
-index 6345e0f60..9efd5ff2a 100644
+index cf1856972..6f0d9a747 100644
 --- a/src/xenia/emulator.cc
 +++ b/src/xenia/emulator.cc
 @@ -16,7 +16,7 @@
@@ -130,13 +107,269 @@ index 6345e0f60..9efd5ff2a 100644
  #include "xenia/apu/audio_system.h"
  #include "xenia/base/assert.h"
  #include "xenia/base/byte_stream.h"
-diff --git a/third_party/SDL2 b/third_party/SDL2
-deleted file mode 160000
-index e11183ea6..000000000
---- a/third_party/SDL2
-+++ /dev/null
-@@ -1 +0,0 @@
--Subproject commit e11183ea6caa3ae4895f4bc54cad2bbb0e365417
+diff --git a/third_party/CMakeLists.txt b/third_party/CMakeLists.txt
+index 808f0ee9f..1135e6321 100644
+--- a/third_party/CMakeLists.txt
++++ b/third_party/CMakeLists.txt
+@@ -39,44 +39,9 @@ target_include_directories(aes_128 PUBLIC aes_128)
+ # ==============================================================================
+ # capstone
+ # ==============================================================================
+-add_library(capstone STATIC
+-  capstone/cs.c
+-  capstone/MCInst.c
+-  capstone/MCInstPrinter.c
+-  capstone/MCInstrDesc.c
+-  capstone/MCRegisterInfo.c
+-  capstone/SStream.c
+-  capstone/utils.c
+-  capstone/Mapping.c
+-)
+-# Architecture-specific capstone files
+-if(XE_TARGET_AARCH64)
+-  file(GLOB _capstone_arch_c "capstone/arch/AArch64/*.c")
+-  file(GLOB _capstone_arch_h "capstone/arch/AArch64/*.h")
+-  file(GLOB _capstone_arch_inc "capstone/arch/AArch64/*.inc")
+-  target_sources(capstone PRIVATE ${_capstone_arch_c} ${_capstone_arch_h} ${_capstone_arch_inc})
+-  target_compile_definitions(capstone PRIVATE
+-    CAPSTONE_HAS_ARM64
+-    CAPSTONE_HAS_AARCH64
+-    CAPSTONE_USE_SYS_DYN_MEM
+-  )
+-else()
+-  file(GLOB _capstone_x86_c "capstone/arch/X86/*.c")
+-  file(GLOB _capstone_x86_h "capstone/arch/X86/*.h")
+-  file(GLOB _capstone_x86_inc "capstone/arch/X86/*.inc")
+-  list(FILTER _capstone_x86_c EXCLUDE REGEX "X86ATTInstPrinter\\.c$")
+-  list(FILTER _capstone_x86_inc EXCLUDE REGEX "reduce\\.inc$")
+-  target_sources(capstone PRIVATE ${_capstone_x86_c} ${_capstone_x86_h} ${_capstone_x86_inc})
+-  target_compile_definitions(capstone PRIVATE
+-    CAPSTONE_X86_ATT_DISABLE
+-    CAPSTONE_HAS_X86
+-    CAPSTONE_USE_SYS_DYN_MEM
+-  )
+-endif()
+-target_include_directories(capstone PUBLIC capstone/include PRIVATE capstone)
+-# Force all capstone sources to compile as C
+-file(GLOB_RECURSE _capstone_all_c "capstone/*.c")
+-set_source_files_properties(${_capstone_all_c} PROPERTIES LANGUAGE C)
++add_library(capstone INTERFACE)
++target_include_directories(capstone INTERFACE capstone/include)
++target_link_libraries(capstone INTERFACE -lcapstone)
+ 
+ # ==============================================================================
+ # cxxopts (header-only)
+@@ -137,11 +102,9 @@ endif()
+ # ==============================================================================
+ # fmt
+ # ==============================================================================
+-add_library(fmt STATIC
+-  fmt/src/format.cc
+-  fmt/src/os.cc
+-)
+-target_include_directories(fmt PUBLIC fmt/include)
++add_library(fmt INTERFACE)
++target_include_directories(fmt INTERFACE fmt/include)
++target_link_libraries(fmt INTERFACE -lfmt)
+ 
+ # ==============================================================================
+ # glslang-spirv (not needed on macOS — no Vulkan/SPIR-V backend)
+@@ -187,176 +150,44 @@ target_link_libraries(mspack PUBLIC xenia-base)
+ # ==============================================================================
+ # pugixml
+ # ==============================================================================
+-add_library(pugixml STATIC
+-  pugixml/src/pugixml.cpp
+-)
+-target_include_directories(pugixml PUBLIC pugixml/src)
++add_library(pugixml INTERFACE)
++target_include_directories(pugixml INTERFACE pugixml/src)
++target_link_libraries(pugixml INTERFACE -lpugixml)
+ 
+ # ==============================================================================
+ # snappy
+ # ==============================================================================
+-# Generate snappy-stubs-public.h if missing
+-if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/snappy/snappy-stubs-public.h")
+-  if(XE_TARGET_X86_64)
+-    set(_snappy_avx_flag "-DSNAPPY_REQUIRE_AVX=ON")
+-  else()
+-    set(_snappy_avx_flag "-DSNAPPY_REQUIRE_AVX=OFF")
+-  endif()
+-  execute_process(
+-    COMMAND ${CMAKE_COMMAND}
+-      -DSNAPPY_BUILD_TESTS=OFF
+-      -DSNAPPY_BUILD_BENCHMARKS=OFF
+-      ${_snappy_avx_flag}
+-      ${CMAKE_CURRENT_SOURCE_DIR}/snappy
+-      -B${CMAKE_CURRENT_SOURCE_DIR}/snappy
+-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+-  )
+-endif()
+-add_library(snappy STATIC
+-  snappy/snappy-internal.h
+-  snappy/snappy-sinksource.cc
+-  snappy/snappy-sinksource.h
+-  snappy/snappy-stubs-internal.cc
+-  snappy/snappy-stubs-internal.h
+-  snappy/snappy-stubs-public.h
+-  snappy/snappy.cc
+-  snappy/snappy.h
+-)
+-target_include_directories(snappy PUBLIC snappy)
++add_library(snappy INTERFACE)
++target_include_directories(snappy INTERFACE snappy)
++target_link_libraries(snappy INTERFACE -lsnappy)
+ 
+ # ==============================================================================
+ # xxhash
+ # ==============================================================================
+-add_library(xxhash STATIC
+-  xxhash/xxhash.c
+-)
+-target_include_directories(xxhash PUBLIC xxhash)
++add_library(xxhash INTERFACE)
++target_include_directories(xxhash INTERFACE xxhash)
++target_link_libraries(xxhash INTERFACE -lxxhash)
+ 
+ # ==============================================================================
+ # zstd
+ # ==============================================================================
+-file(GLOB_RECURSE _zstd_common "zstd/lib/common/*.c" "zstd/lib/common/*.h")
+-list(FILTER _zstd_common EXCLUDE REGEX "threading\\.c$")
+-file(GLOB_RECURSE _zstd_compress "zstd/lib/compress/*.c" "zstd/lib/compress/*.h")
+-file(GLOB_RECURSE _zstd_decompress "zstd/lib/decompress/*.c" "zstd/lib/decompress/*.h")
+-add_library(zstd STATIC
+-  zstd/lib/zstd.h
+-  ${_zstd_common}
+-  ${_zstd_compress}
+-  ${_zstd_decompress}
+-)
+-target_include_directories(zstd PUBLIC zstd/lib PRIVATE zstd/lib/common)
+-target_compile_definitions(zstd PRIVATE
+-  XXH_NAMESPACE=ZSTD_
+-  ZSTD_LEGACY_SUPPORT=0
+-)
+-if(XE_TARGET_X86_64 AND NOT MSVC)
+-  enable_language(ASM)
+-  target_sources(zstd PRIVATE zstd/lib/decompress/huf_decompress_amd64.S)
+-else()
+-  target_compile_definitions(zstd PRIVATE ZSTD_DISABLE_ASM)
+-endif()
++add_library(zstd INTERFACE)
++target_include_directories(zstd INTERFACE /usr/include)
++target_link_libraries(zstd INTERFACE -lzstd)
+ 
+ # ==============================================================================
+ # zarchive
+ # ==============================================================================
+-add_library(zarchive STATIC
+-  zarchive/include/zarchive/zarchivecommon.h
+-  zarchive/include/zarchive/zarchivereader.h
+-  zarchive/include/zarchive/zarchivewriter.h
+-  zarchive/src/zarchivereader.cpp
+-  zarchive/src/zarchivewriter.cpp
+-  zarchive/src/sha_256.c
+-  zarchive/src/sha_256.h
+-)
+-target_include_directories(zarchive PUBLIC zarchive/include PRIVATE zstd/lib)
+-target_link_libraries(zarchive PUBLIC zstd)
++add_library(zarchive INTERFACE)
++target_include_directories(zarchive INTERFACE zarchive/include)
++target_link_libraries(zarchive INTERFACE -lzarchive)
+ 
+ # ==============================================================================
+ # zlib-ng
+ # ==============================================================================
+-# Generate headers if missing
+-set(_zlibng_needs_configure FALSE)
+-foreach(_hdr zlib-ng.h zconf-ng.h zlib_name_mangling-ng.h gzread.c)
+-  if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/zlib-ng/${_hdr}")
+-    set(_zlibng_needs_configure TRUE)
+-    break()
+-  endif()
+-endforeach()
+-if(_zlibng_needs_configure)
+-  execute_process(
+-    COMMAND ${CMAKE_COMMAND}
+-      -DZLIB_ENABLE_TESTS=OFF
+-      -DWITH_GTEST=OFF
+-      ${CMAKE_CURRENT_SOURCE_DIR}/zlib-ng
+-      -B${CMAKE_CURRENT_SOURCE_DIR}/zlib-ng
+-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+-  )
+-endif()
+-file(GLOB _zlibng_c "zlib-ng/*.c")
+-file(GLOB _zlibng_generic "zlib-ng/arch/generic/*.c")
+-if(XE_TARGET_AARCH64)
+-  file(GLOB _zlibng_arch "zlib-ng/arch/arm/*.c")
+-  list(FILTER _zlibng_arch EXCLUDE REGEX "armv6")
+-  add_library(zlib-ng STATIC
+-    ${_zlibng_c}
+-    ${_zlibng_arch}
+-    ${_zlibng_generic}
+-  )
+-  target_compile_definitions(zlib-ng PRIVATE
+-    ARM_FEATURES
+-    ARM_NEON
+-    ARM_NEON_HASLD4
+-    ARM_ACLE
+-    HAVE_ARM_ACLE_H
+-    WITH_GZFILEOP
+-  )
+-  if(NOT MSVC)
+-    target_compile_definitions(zlib-ng PRIVATE HAVE_BUILTIN_CTZ HAVE_BUILTIN_CTZLL HAVE_ATTRIBUTE_ALIGNED)
+-  endif()
+-else()
+-  file(GLOB _zlibng_x86 "zlib-ng/arch/x86/*.c")
+-  add_library(zlib-ng STATIC
+-    ${_zlibng_c}
+-    ${_zlibng_x86}
+-    ${_zlibng_generic}
+-  )
+-  target_compile_definitions(zlib-ng PRIVATE
+-    X86_FEATURES
+-    X86_HAVE_XSAVE_INTRIN
+-    X86_SSE2
+-    X86_SSSE3
+-    X86_SSE42
+-    X86_AVX2
+-    X86_AVX512
+-    X86_AVX512VNNI
+-    WITH_GZFILEOP
+-  )
+-  if(NOT MSVC)
+-    # GCC/Clang have native __builtin_ctz/__builtin_ctzll (MSVC gets these
+-    # from fallback_builtins.h). Defining these enables optimized compare256
+-    # and longest_match codepaths.
+-    target_compile_definitions(zlib-ng PRIVATE HAVE_BUILTIN_CTZ HAVE_BUILTIN_CTZLL HAVE_ATTRIBUTE_ALIGNED)
+-    # GCC/Clang need per-file ISA flags; MSVC handles this via runtime dispatch
+-    set_source_files_properties(
+-      zlib-ng/arch/x86/adler32_avx2.c
+-      zlib-ng/arch/x86/chunkset_avx2.c
+-      zlib-ng/arch/x86/compare256_avx2.c
+-      zlib-ng/arch/x86/slide_hash_avx2.c
+-      PROPERTIES COMPILE_OPTIONS "-mavx2;-mbmi2"
+-    )
+-    set_source_files_properties(
+-      zlib-ng/arch/x86/adler32_avx512.c
+-      zlib-ng/arch/x86/chunkset_avx512.c
+-      PROPERTIES COMPILE_OPTIONS "-mavx512f;-mavx512dq;-mavx512vl;-mavx512bw;-mbmi2"
+-    )
+-    set_source_files_properties(
+-      zlib-ng/arch/x86/adler32_avx512_vnni.c
+-      PROPERTIES COMPILE_OPTIONS "-mavx512f;-mavx512dq;-mavx512vl;-mavx512bw;-mavx512vnni;-mbmi2"
+-    )
+-  endif()
+-endif()
+-target_include_directories(zlib-ng PUBLIC zlib-ng)
++add_library(zlib-ng INTERFACE)
++target_include_directories(zlib-ng INTERFACE zlib-ng)
++target_link_libraries(zlib-ng INTERFACE -lz-ng)
+ 
+ # ==============================================================================
+ # libusb (Windows only)
+Submodule third_party/SDL2 e11183ea6...000000000 (submodule deleted)
 diff --git a/third_party/SDL2/include b/third_party/SDL2/include
 new file mode 120000
 index 000000000..38776340f
@@ -145,13 +378,7 @@ index 000000000..38776340f
 @@ -0,0 +1 @@
 +/usr/include/SDL2
 \ No newline at end of file
-diff --git a/third_party/SPIRV-Tools b/third_party/SPIRV-Tools
-deleted file mode 160000
-index 33e025681..000000000
---- a/third_party/SPIRV-Tools
-+++ /dev/null
-@@ -1 +0,0 @@
--Subproject commit 33e02568181e3312f49a3cf33df470bf96ef293a
+Submodule third_party/SPIRV-Tools 33e025681...000000000 (submodule deleted)
 diff --git a/third_party/SPIRV-Tools/include b/third_party/SPIRV-Tools/include
 new file mode 120000
 index 000000000..408ea0f82
@@ -160,13 +387,7 @@ index 000000000..408ea0f82
 @@ -0,0 +1 @@
 +/usr/include
 \ No newline at end of file
-diff --git a/third_party/Vulkan-Headers b/third_party/Vulkan-Headers
-deleted file mode 160000
-index 2cd90f9d2..000000000
---- a/third_party/Vulkan-Headers
-+++ /dev/null
-@@ -1 +0,0 @@
--Subproject commit 2cd90f9d20df57eac214c148f3aed885372ddcfe
+Submodule third_party/Vulkan-Headers 2cd90f9d2...000000000 (submodule deleted)
 diff --git a/third_party/Vulkan-Headers/include/vulkan b/third_party/Vulkan-Headers/include/vulkan
 new file mode 120000
 index 000000000..b1548a777
@@ -175,13 +396,25 @@ index 000000000..b1548a777
 @@ -0,0 +1 @@
 +/usr/include/vulkan
 \ No newline at end of file
-diff --git a/third_party/cxxopts b/third_party/cxxopts
-deleted file mode 160000
-index f029892da..000000000
---- a/third_party/cxxopts
-+++ /dev/null
-@@ -1 +0,0 @@
--Subproject commit f029892dab60526184ee42ae63a7f6d19a6b0e49
+Submodule third_party/VulkanMemoryAllocator 1d8f600fd...000000000 (submodule deleted)
+diff --git a/third_party/VulkanMemoryAllocator/include/vk_mem_alloc.h b/third_party/VulkanMemoryAllocator/include/vk_mem_alloc.h
+new file mode 120000
+index 000000000..aff7ba796
+--- /dev/null
++++ b/third_party/VulkanMemoryAllocator/include/vk_mem_alloc.h
+@@ -0,0 +1 @@
++/usr/include/vk_mem_alloc.h
+\ No newline at end of file
+Submodule third_party/capstone 66b08439a...000000000 (submodule deleted)
+diff --git a/third_party/capstone/include b/third_party/capstone/include
+new file mode 120000
+index 000000000..408ea0f82
+--- /dev/null
++++ b/third_party/capstone/include
+@@ -0,0 +1 @@
++/usr/include
+\ No newline at end of file
+Submodule third_party/cxxopts f029892da...000000000 (submodule deleted)
 diff --git a/third_party/cxxopts/include/cxxopts.hpp b/third_party/cxxopts/include/cxxopts.hpp
 new file mode 120000
 index 000000000..9b8b3dc8a
@@ -190,48 +423,87 @@ index 000000000..9b8b3dc8a
 @@ -0,0 +1 @@
 +/usr/include/cxxopts.hpp
 \ No newline at end of file
-diff --git a/third_party/date b/third_party/date
-index f94b8f36c..e32a0d809 160000
---- a/third_party/date
-+++ b/third_party/date
-@@ -1 +1 @@
--Subproject commit f94b8f36c6180be0021876c4a397a054fe50c6f2
-+Subproject commit e32a0d809c3d3c4797826825dc2d0b287281e3b2
-diff --git a/third_party/imgui b/third_party/imgui
-index 4806a1924..c0d02e5ae 160000
---- a/third_party/imgui
-+++ b/third_party/imgui
-@@ -1 +1 @@
--Subproject commit 4806a1924ff6181180bf5e4b8b79ab4394118875
-+Subproject commit c0d02e5ae42d26dbe9b31f76233f1c96c3407162
-diff --git a/third_party/libusb b/third_party/libusb
-index a61afe5f7..3dbfa16f0 160000
---- a/third_party/libusb
-+++ b/third_party/libusb
-@@ -1 +1 @@
--Subproject commit a61afe5f75d969c4561a1d0ad753aa23cee6329a
-+Subproject commit 3dbfa16f0cd9e8ed4fec916c6c00f41c738cb8f4
-diff --git a/third_party/rapidcsv b/third_party/rapidcsv
-index a98b85e66..d76cf1c08 160000
---- a/third_party/rapidcsv
-+++ b/third_party/rapidcsv
-@@ -1 +1 @@
--Subproject commit a98b85e663114b8fdc9c0dc03abf22c296f38241
-+Subproject commit d76cf1c08e79be1eb04c9d4d8eb7893221127991
-diff --git a/third_party/tabulate b/third_party/tabulate
-index 3a5830106..b9026bf1e 160000
---- a/third_party/tabulate
-+++ b/third_party/tabulate
-@@ -1 +1 @@
--Subproject commit 3a58301067bbc03da89ae5a51b3e05b7da719d38
-+Subproject commit b9026bf1e31dd561680e20cfda2a37716161aac1
-diff --git a/third_party/tomlplusplus b/third_party/tomlplusplus
-deleted file mode 160000
-index 708fff700..000000000
---- a/third_party/tomlplusplus
-+++ /dev/null
-@@ -1 +0,0 @@
--Subproject commit 708fff700f36ab3c2ab107b984ec9f3b8be5f055
+Submodule third_party/date f94b8f36c...000000000 (submodule deleted)
+diff --git a/third_party/date/include b/third_party/date/include
+new file mode 120000
+index 000000000..408ea0f82
+--- /dev/null
++++ b/third_party/date/include
+@@ -0,0 +1 @@
++/usr/include
+\ No newline at end of file
+Submodule third_party/fmt 407c905e4...000000000 (submodule deleted)
+diff --git a/third_party/fmt/include b/third_party/fmt/include
+new file mode 120000
+index 000000000..408ea0f82
+--- /dev/null
++++ b/third_party/fmt/include
+@@ -0,0 +1 @@
++/usr/include
+\ No newline at end of file
+Submodule third_party/imgui 4806a1924...c0d02e5ae (commits not present)
+Submodule third_party/libusb a61afe5f7...3dbfa16f0 (commits not present)
+Submodule third_party/pugixml b2b466403...000000000 (submodule deleted)
+diff --git a/third_party/pugixml/src/pugiconfig.hpp b/third_party/pugixml/src/pugiconfig.hpp
+new file mode 120000
+index 000000000..26c71bcc9
+--- /dev/null
++++ b/third_party/pugixml/src/pugiconfig.hpp
+@@ -0,0 +1 @@
++/usr/include/pugiconfig.hpp
+\ No newline at end of file
+diff --git a/third_party/pugixml/src/pugixml.hpp b/third_party/pugixml/src/pugixml.hpp
+new file mode 120000
+index 000000000..2dc728a92
+--- /dev/null
++++ b/third_party/pugixml/src/pugixml.hpp
+@@ -0,0 +1 @@
++/usr/include/pugixml.hpp
+\ No newline at end of file
+Submodule third_party/rapidcsv a98b85e66...000000000 (submodule deleted)
+diff --git a/third_party/rapidcsv/src/rapidcsv.h b/third_party/rapidcsv/src/rapidcsv.h
+new file mode 120000
+index 000000000..67db65c1d
+--- /dev/null
++++ b/third_party/rapidcsv/src/rapidcsv.h
+@@ -0,0 +1 @@
++/usr/include/rapidcsv.h
+\ No newline at end of file
+Submodule third_party/snappy 6af9287fb...000000000 (submodule deleted)
+diff --git a/third_party/snappy/snappy-c.h b/third_party/snappy/snappy-c.h
+new file mode 120000
+index 000000000..b43e9e936
+--- /dev/null
++++ b/third_party/snappy/snappy-c.h
+@@ -0,0 +1 @@
++/usr/include/snappy-c.h
+\ No newline at end of file
+diff --git a/third_party/snappy/snappy-sinksource.h b/third_party/snappy/snappy-sinksource.h
+new file mode 120000
+index 000000000..eb4351bd9
+--- /dev/null
++++ b/third_party/snappy/snappy-sinksource.h
+@@ -0,0 +1 @@
++/usr/include/snappy-sinksource.h
+\ No newline at end of file
+diff --git a/third_party/snappy/snappy-stubs-public.h b/third_party/snappy/snappy-stubs-public.h
+new file mode 120000
+index 000000000..8317789da
+--- /dev/null
++++ b/third_party/snappy/snappy-stubs-public.h
+@@ -0,0 +1 @@
++/usr/include/snappy-stubs-public.h
+\ No newline at end of file
+diff --git a/third_party/snappy/snappy.h b/third_party/snappy/snappy.h
+new file mode 120000
+index 000000000..11e1cc05b
+--- /dev/null
++++ b/third_party/snappy/snappy.h
+@@ -0,0 +1 @@
++/usr/include/snappy.h
+\ No newline at end of file
+Submodule third_party/tabulate 3a5830106...b9026bf1e (commits not present)
+Submodule third_party/tomlplusplus 708fff700...000000000 (submodule deleted)
 diff --git a/third_party/tomlplusplus/impl b/third_party/tomlplusplus/impl
 new file mode 120000
 index 000000000..77969bc9d
@@ -256,20 +528,73 @@ index 000000000..a07398185
 @@ -0,0 +1 @@
 +/usr/include/toml++/toml.hpp
 \ No newline at end of file
-diff --git a/third_party/utfcpp b/third_party/utfcpp
-index 65701fe00..da71cf910 160000
---- a/third_party/utfcpp
-+++ b/third_party/utfcpp
-@@ -1 +1 @@
--Subproject commit 65701fe00700577f9f4e9b96d682bd7cfcc0b76e
-+Subproject commit da71cf91038973df102d19510d0be3cc9f730eeb
-diff --git a/third_party/xbyak b/third_party/xbyak
-index 4e44f4614..e09816e75 160000
---- a/third_party/xbyak
-+++ b/third_party/xbyak
-@@ -1 +1 @@
--Subproject commit 4e44f4614ddbf038f2a6296f5b906d5c72691e0f
-+Subproject commit e09816e752b0c9d93a4abc4fd045d89c8a3a825d
--- 
-2.54.0
-
+Submodule third_party/utfcpp 65701fe00...000000000 (submodule deleted)
+diff --git a/third_party/utfcpp/source b/third_party/utfcpp/source
+new file mode 120000
+index 000000000..84cd55d33
+--- /dev/null
++++ b/third_party/utfcpp/source
+@@ -0,0 +1 @@
++/usr/include/utf8cpp
+\ No newline at end of file
+Submodule third_party/xbyak 4e44f4614...000000000 (submodule deleted)
+diff --git a/third_party/xbyak/xbyak b/third_party/xbyak/xbyak
+new file mode 120000
+index 000000000..26ded48e3
+--- /dev/null
++++ b/third_party/xbyak/xbyak
+@@ -0,0 +1 @@
++/usr/include/xbyak
+\ No newline at end of file
+Submodule third_party/xxhash e626a72bc...000000000 (submodule deleted)
+diff --git a/third_party/xxhash/xxh3.h b/third_party/xxhash/xxh3.h
+new file mode 120000
+index 000000000..3f1b2718d
+--- /dev/null
++++ b/third_party/xxhash/xxh3.h
+@@ -0,0 +1 @@
++/usr/include/xxh3.h
+\ No newline at end of file
+diff --git a/third_party/xxhash/xxhash.h b/third_party/xxhash/xxhash.h
+new file mode 120000
+index 000000000..ce079552f
+--- /dev/null
++++ b/third_party/xxhash/xxhash.h
+@@ -0,0 +1 @@
++/usr/include/xxhash.h
+\ No newline at end of file
+Submodule third_party/zarchive b467f7aa3...000000000 (submodule deleted)
+diff --git a/third_party/zarchive/include b/third_party/zarchive/include
+new file mode 120000
+index 000000000..408ea0f82
+--- /dev/null
++++ b/third_party/zarchive/include
+@@ -0,0 +1 @@
++/usr/include
+\ No newline at end of file
+Submodule third_party/zlib-ng 860e4cff7...000000000 (submodule deleted)
+diff --git a/third_party/zlib-ng/zconf-ng.h b/third_party/zlib-ng/zconf-ng.h
+new file mode 120000
+index 000000000..41cb513e9
+--- /dev/null
++++ b/third_party/zlib-ng/zconf-ng.h
+@@ -0,0 +1 @@
++/usr/include/zconf-ng.h
+\ No newline at end of file
+diff --git a/third_party/zlib-ng/zlib-ng.h b/third_party/zlib-ng/zlib-ng.h
+new file mode 120000
+index 000000000..0199e157c
+--- /dev/null
++++ b/third_party/zlib-ng/zlib-ng.h
+@@ -0,0 +1 @@
++/usr/include/zlib-ng.h
+\ No newline at end of file
+diff --git a/third_party/zlib-ng/zlib_name_mangling-ng.h b/third_party/zlib-ng/zlib_name_mangling-ng.h
+new file mode 120000
+index 000000000..c6b23bff2
+--- /dev/null
++++ b/third_party/zlib-ng/zlib_name_mangling-ng.h
+@@ -0,0 +1 @@
++/usr/include/zlib_name_mangling-ng.h
+\ No newline at end of file
+Submodule third_party/zstd 20707e371...000000000 (submodule deleted)

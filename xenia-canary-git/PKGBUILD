@@ -1,55 +1,56 @@
-# Maintainer: David Hummel <hummeltech@sherpaguru.com>
+# Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
 
 _binname=xenia_canary
 _branchname=canary_experimental
 pkgname=xenia-canary-git
-pkgver=r8537.f3086cfce
+pkgver=r8722.66af56ed7
 pkgrel=1
 pkgdesc='An experimental emulator for the Xbox 360.'
 arch=('x86_64')
 url='https://github.com/xenia-canary/xenia-canary'
 license=('BSD-3-Clause')
-makedepends=('clang'
+makedepends=('chrono-date'
+             'clang'
              'cmake'
              'cxxopts'
              'git'
+             'ninja'
+             'rapidcsv'
              'rapidjson'
              'tomlplusplus'
-             'vulkan-headers')
+             'utf8cpp'
+             'vulkan-headers'
+             'vulkan-memory-allocator'
+             'xbyak')
 depends=('alsa-lib'
+         'capstone'
+         'fmt'
          'gtk3'
          'hicolor-icon-theme'
-         'sdl2')
+         'pugixml'
+         'sdl2'
+         'snappy'
+         'xxhash'
+         'zarchive'
+         'zlib-ng'
+         'zstd')
 conflicts=('xenia' 'xenia-git')
 provides=('xenia')
-# TODO: Use system installed deps for non-forked libs
 source=("${pkgname}::git+https://github.com/xenia-canary/xenia-canary.git#branch=${_branchname}"
         'FFmpeg::git+https://github.com/has207/FFmpeg.git#branch=xmaframes'
         'FidelityFX-CAS::git+https://github.com/GPUOpen-Effects/FidelityFX-CAS.git'
         'FidelityFX-FSR::git+https://github.com/GPUOpen-Effects/FidelityFX-FSR.git'
-        'VulkanMemoryAllocator::git+https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git'
         'aes_128::git+https://github.com/openluopworld/aes_128.git'
-        'capstone::git+https://github.com/capstone-engine/capstone.git'
         'catch::git+https://github.com/catchorg/Catch2.git'
-        'date::git+https://github.com/HowardHinnant/date.git'
         'discord-rpc::git+https://github.com/discordapp/discord-rpc.git'
         'disruptorplus::git+https://github.com/xenia-canary/disruptorplus.git'
-        'fmt::git+https://github.com/fmtlib/fmt.git'
         'glslang::git+https://github.com/KhronosGroup/glslang.git'
         'imgui::git+https://github.com/ocornut/imgui.git'
-        'pugixml::git+https://github.com/zeux/pugixml.git'
-        'rapidcsv::git+https://github.com/d99kris/rapidcsv.git'
-        'snappy::git+https://github.com/google/snappy.git'
         'tabulate::git+https://github.com/p-ranav/tabulate.git'
-        'utfcpp::git+https://github.com/nemtrif/utfcpp.git'
-        'xbyak::git+https://github.com/herumi/xbyak.git'
-        'xxhash::git+https://github.com/Cyan4973/xxHash.git'
-        'zarchive::git+https://github.com/exzap/ZArchive.git'
-        'zlib-ng::git+https://github.com/zlib-ng/zlib-ng.git'
-        'zstd::git+https://github.com/facebook/zstd.git'
         "${pkgname}.desktop"
         '0001-Use-system-dependencies.patch'
-        '0002-Fix-physical-heap-test-alignment-on-Linux.patch')
+        '0002-Fix-physical-heap-test-alignment-on-Linux.patch'
+        '0003-support-none-build-type.patch')
 sha256sums=('SKIP'
             'SKIP'
             'SKIP'
@@ -61,22 +62,10 @@ sha256sums=('SKIP'
             'SKIP'
             'SKIP'
             'SKIP'
-            'SKIP'
-            'SKIP'
-            'SKIP'
-            'SKIP'
-            'SKIP'
-            'SKIP'
-            'SKIP'
-            'SKIP'
-            'SKIP'
-            'SKIP'
-            'SKIP'
-            'SKIP'
-            'SKIP'
             '6df34559e1bb42e1c0a67152a8f1ebd8c59bd890f6d7625f711ae80859165822'
-            '3c902aa18f2863f9046e4497fa8b273d8e9bad0b4db5ea2c041c1a7f548a3b19'
-            '51f3ec6c06d2cbb7e27f8235c1aa2fc2ca99123462d9580f868104fef603068d')
+            '0060f567eaa6820055a480d36ec68b6371829668986dc77d65eda44e8fc7df0a'
+            '51f3ec6c06d2cbb7e27f8235c1aa2fc2ca99123462d9580f868104fef603068d'
+            'd56f9c3e4cebb3816c2fc18fab3f7c1bc7c3f24820c2e2e34e23d9dbcc0741f0')
 
 pkgver() {
   printf 'r%s.%s' "$(git -C ${pkgname} rev-list --count HEAD)" "$(git -C ${pkgname} rev-parse --short HEAD)"
@@ -101,56 +90,56 @@ prepare() {
   # Fix physical heap test alignment on Linux
   git -C "${pkgname}" apply --verbose "${srcdir}"/0002-Fix-physical-heap-test-alignment-on-Linux.patch
 
-  CFLAGS="${CFLAGS} -Wno-incompatible-pointer-types"
-  CXXFLAGS="${CXXFLAGS} -Wno-unused-result"
-  export CFLAGS CXXFLAGS LDFLAGS
-  cmake \
-    -B "${pkgname}"-build \
-    -D CMAKE_BUILD_TYPE:STRING=Release \
-    -D CMAKE_CXX_COMPILER:STRING=clang++ \
-    -D CMAKE_C_COMPILER:STRING=clang \
-    -S "${pkgname}"
-  echo "#ifndef GENERATED_VERSION_H_" > "${pkgname}"-build/version.h
-  echo "#define GENERATED_VERSION_H_" >> "${pkgname}"-build/version.h
-  echo "#define XE_BUILD_BRANCH \"${_branchname}\"" >> "${pkgname}"-build/version.h
-  echo "#define XE_BUILD_COMMIT \"$(git -C ${pkgname} rev-parse HEAD)\"" >> "${pkgname}"-build/version.h
-  echo "#define XE_BUILD_COMMIT_SHORT \"$(git -C ${pkgname} rev-parse --short HEAD)\"" >> "${pkgname}"-build/version.h
-  echo "#define XE_BUILD_DATE __DATE__" >> "${pkgname}"-build/version.h
-  echo "#endif" >> "${pkgname}"-build/version.h
+  # Support CMAKE_BUILD_TYPE=None
+  git -C "${pkgname}" apply --verbose "${srcdir}"/0003-support-none-build-type.patch
 }
 
 build() {
-  export MAKEFLAGS
-  cmake \
-    --build "${pkgname}"-build \
-    --target xenia-app
+  CFLAGS+=" -Wno-incompatible-pointer-types"
+  CXXFLAGS+=" -Wno-unused-result"
+  export CFLAGS CXXFLAGS
+
+  local cmake_options=(
+    -B build
+    -S "${pkgname}"
+    -G Ninja
+    -D CMAKE_BUILD_TYPE=None
+    -D CMAKE_INSTALL_PREFIX=/usr
+    -D CMAKE_C_COMPILER=clang
+    -D CMAKE_CXX_COMPILER=clang++
+    -D XENIA_BUILD_TESTS=ON
+    -Wno-dev
+  )
+
+  cmake "${cmake_options[@]}"
+
+  echo "#ifndef GENERATED_VERSION_H_" > build/version.h
+  echo "#define GENERATED_VERSION_H_" >> build/version.h
+  echo "#define XE_BUILD_BRANCH \"${_branchname}\"" >> build/version.h
+  echo "#define XE_BUILD_COMMIT \"$(git -C ${pkgname} rev-parse HEAD)\"" >> build/version.h
+  echo "#define XE_BUILD_COMMIT_SHORT \"$(git -C ${pkgname} rev-parse --short HEAD)\"" >> build/version.h
+  echo "#define XE_BUILD_DATE __DATE__" >> build/version.h
+  echo "#endif" >> build/version.h
+
+  cmake --build build --target xenia-app
 }
 
 check() {
-  cmake \
-    -B "${pkgname}"-build \
-    -D CMAKE_BUILD_TYPE:STRING=Release \
-    -D CMAKE_CXX_COMPILER:STRING=clang++ \
-    -D CMAKE_C_COMPILER:STRING=clang \
-    -D XENIA_BUILD_TESTS:BOOL=ON \
-    -S "${pkgname}"
-  cmake \
-    --build "${pkgname}"-build \
-    --target xenia-base-tests \
-    --target xenia-cpu-ppc-tests
+  cmake --build build --target xenia-base-tests --target xenia-cpu-ppc-tests
 
-  pushd "${srcdir}"/"${pkgname}"
-  "${srcdir}"/"${pkgname}"-build/bin/Linux/xenia-base-tests
-  "${srcdir}"/"${pkgname}"-build/bin/Linux/xenia-cpu-ppc-tests
-  popd
+  (
+    cd "${pkgname}"
+    "${srcdir}"/build/bin/Linux/xenia-base-tests
+    "${srcdir}"/build/bin/Linux/xenia-cpu-ppc-tests
+  )
 }
 
 package() {
-  install -Dm755 "${pkgname}"-build/bin/Linux/"${_binname}" "${pkgdir}"/usr/bin/xenia
+  install -Dm755 build/bin/Linux/"${_binname}" "${pkgdir}"/usr/bin/xenia
   install -Dm644 "${pkgname}"/LICENSE "${pkgdir}"/usr/share/licenses/"${pkgname}"/LICENSE
 
   # Desktop file
-  install -Dm755 "${pkgname}".desktop "${pkgdir}"/usr/share/applications/"${pkgname}".desktop
+  install -Dm644 "${pkgname}".desktop "${pkgdir}"/usr/share/applications/"${pkgname}".desktop
 
   # Icons
   install -Dm644 "${pkgname}"/assets/icon/16.png "${pkgdir}"/usr/share/icons/hicolor/16x16/apps/jp.xenia.Xenia.png
