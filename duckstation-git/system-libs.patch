@@ -1,7 +1,7 @@
-diff --git a/CMakeModules/DuckStationDependencies.cmake b/CMakeModules/DuckStationDependencies.cmake
-index 128da4770..804704cae 100644
---- a/CMakeModules/DuckStationDependencies.cmake
-+++ b/CMakeModules/DuckStationDependencies.cmake
+diff --git i/CMakeModules/DuckStationDependencies.cmake w/CMakeModules/DuckStationDependencies.cmake
+index 12e075ba2..c832626ac 100644
+--- i/CMakeModules/DuckStationDependencies.cmake
++++ w/CMakeModules/DuckStationDependencies.cmake
 @@ -5,33 +5,9 @@
  # packages or build recipes without explicit permission from the copyright holder.
  
@@ -28,17 +28,17 @@ index 128da4770..804704cae 100644
 -  endif()
 -else()
 -  message(FATAL_ERROR "Unsupported platform")
--endif()
--if(NOT EXISTS "${DEPS_PATH}")
--  message(FATAL_ERROR "Prebuilt dependencies not found for the current platform and architecture.")
 +if(NOT DEPS_PATH)
 +  set(DEPS_PATH "${CMAKE_SOURCE_DIR}/../../deps-install")
  endif()
+-if(NOT EXISTS "${DEPS_PATH}")
+-  message(FATAL_ERROR "Prebuilt dependencies not found for the current platform and architecture.")
+-endif()
 -set(CMAKE_PREFIX_PATH "${DEPS_PATH}")
  
  # Enable threads everywhere.
  set(THREADS_PREFER_PTHREAD_FLAG ON)
-@@ -44,66 +20,86 @@ if(NOT APPLE)
+@@ -44,66 +20,94 @@ if(NOT APPLE)
  endif()
  
  # libpng relies on zlib, which we need the system version for on Mac.
@@ -47,40 +47,8 @@ index 128da4770..804704cae 100644
 -else()
 -  find_package(ZLIB 1.3.1 REQUIRED
 -               NO_DEFAULT_PATH PATHS "${DEPS_PATH}/lib/cmake/ZLIB")
--endif()
 +find_package(ZLIB REQUIRED)
- 
--# Enforce use of bundled dependencies to avoid conflicts with system libraries.
--find_package(zstd 1.5.7 REQUIRED
--             NO_DEFAULT_PATH PATHS "${DEPS_PATH}/lib/cmake/zstd")
--find_package(WebP 1.6.0 REQUIRED
--             NO_DEFAULT_PATH PATHS "${DEPS_PATH}/share/WebP/cmake")
--find_package(PNG 1.6.58 REQUIRED
--             NO_DEFAULT_PATH PATHS "${DEPS_PATH}/lib/cmake/PNG")
--find_package(libjpeg-turbo 3.2.0 REQUIRED
--             NO_DEFAULT_PATH PATHS "${DEPS_PATH}/lib/cmake/libjpeg-turbo")
--find_package(freetype 2.14.3 REQUIRED
--             NO_DEFAULT_PATH PATHS "${DEPS_PATH}/lib/cmake/freetype")
--find_package(harfbuzz REQUIRED
--             NO_DEFAULT_PATH PATHS "${DEPS_PATH}/lib/cmake/harfbuzz")
--find_package(SQLite3 3.53.4 REQUIRED
--             NO_DEFAULT_PATH PATHS "${DEPS_PATH}/lib/cmake/SQLite3")
--find_package(plutosvg 0.0.8 REQUIRED
--             NO_DEFAULT_PATH PATHS "${DEPS_PATH}/lib/cmake/plutosvg")
--find_package(cpuinfo REQUIRED
--             NO_DEFAULT_PATH PATHS "${DEPS_PATH}/lib/cmake/cpuinfo")
--find_package(DiscordRPC 3.4.0 REQUIRED
--             NO_DEFAULT_PATH PATHS "${DEPS_PATH}/lib/cmake/DiscordRPC")
--find_package(SoundTouch 2.3.3 REQUIRED
--             NO_DEFAULT_PATH PATHS "${DEPS_PATH}/lib/cmake/SoundTouch")
--find_package(libzip 1.11.4 REQUIRED
--             NO_DEFAULT_PATH PATHS "${DEPS_PATH}/lib/cmake/libzip")
--find_package(Shaderc 2026.3 REQUIRED
--             NO_DEFAULT_PATH PATHS "${DEPS_PATH}/lib/cmake/Shaderc")
--find_package(spirv_cross_c_shared REQUIRED
--             NO_DEFAULT_PATH PATHS "${DEPS_PATH}/share/spirv_cross_c_shared/cmake")
--find_package(SDL3 3.4.16 REQUIRED
--             NO_DEFAULT_PATH PATHS "${DEPS_PATH}/lib/cmake/SDL3")
++
 +# FORCE LINKING FOR FORKED DEPS
 +macro(import_static_dep NAME TARGET LIB_NAME)
 +  add_library(${TARGET} STATIC IMPORTED)
@@ -131,20 +99,59 @@ index 128da4770..804704cae 100644
 +    IMPORTED_LOCATION "${ZSTD_LIB}"
 +    INTERFACE_INCLUDE_DIRECTORIES "${ZSTD_INCLUDE_DIRS}"
 +  )
-+endif()
-+
+ endif()
+ 
+-# Enforce use of bundled dependencies to avoid conflicts with system libraries.
+-find_package(zstd 1.5.7 REQUIRED
+-             NO_DEFAULT_PATH PATHS "${DEPS_PATH}/lib/cmake/zstd")
+-find_package(WebP 1.6.0 REQUIRED
+-             NO_DEFAULT_PATH PATHS "${DEPS_PATH}/share/WebP/cmake")
+-find_package(PNG 1.6.58 REQUIRED
+-             NO_DEFAULT_PATH PATHS "${DEPS_PATH}/lib/cmake/PNG")
+-find_package(libjpeg-turbo 3.2.0 REQUIRED
+-             NO_DEFAULT_PATH PATHS "${DEPS_PATH}/lib/cmake/libjpeg-turbo")
+-find_package(freetype 2.14.3 REQUIRED
+-             NO_DEFAULT_PATH PATHS "${DEPS_PATH}/lib/cmake/freetype")
+-find_package(harfbuzz REQUIRED
+-             NO_DEFAULT_PATH PATHS "${DEPS_PATH}/lib/cmake/harfbuzz")
+-find_package(SQLite3 3.53.4 REQUIRED
+-             NO_DEFAULT_PATH PATHS "${DEPS_PATH}/lib/cmake/SQLite3")
+-find_package(plutosvg 0.0.8 REQUIRED
+-             NO_DEFAULT_PATH PATHS "${DEPS_PATH}/lib/cmake/plutosvg")
+-find_package(cpuinfo REQUIRED
+-             NO_DEFAULT_PATH PATHS "${DEPS_PATH}/lib/cmake/cpuinfo")
+-find_package(DiscordRPC 3.4.0 REQUIRED
+-             NO_DEFAULT_PATH PATHS "${DEPS_PATH}/lib/cmake/DiscordRPC")
+-find_package(SoundTouch 2.3.3 REQUIRED
+-             NO_DEFAULT_PATH PATHS "${DEPS_PATH}/lib/cmake/SoundTouch")
+-find_package(libzip 1.11.4 REQUIRED
+-             NO_DEFAULT_PATH PATHS "${DEPS_PATH}/lib/cmake/libzip")
+-find_package(Shaderc 2026.3 REQUIRED
+-             NO_DEFAULT_PATH PATHS "${DEPS_PATH}/lib/cmake/Shaderc")
+-find_package(spirv_cross_c_shared REQUIRED
+-             NO_DEFAULT_PATH PATHS "${DEPS_PATH}/share/spirv_cross_c_shared/cmake")
+-find_package(SDL3 3.4.16 REQUIRED
+-             NO_DEFAULT_PATH PATHS "${DEPS_PATH}/lib/cmake/SDL3")
 +find_package(WebP REQUIRED)
 +
 +find_package(JPEG REQUIRED)
 +if(NOT TARGET libjpeg-turbo::jpeg)
-+  add_library(libjpeg-turbo::jpeg INTERFACE IMPORTED)
-+  target_link_libraries(libjpeg-turbo::jpeg INTERFACE JPEG::JPEG)
++  add_library(libjpeg-turbo::jpeg ALIAS JPEG::JPEG)
 +endif()
 +
 +find_package(Freetype REQUIRED)
++if(NOT TARGET freetype)
++  add_library(freetype ALIAS Freetype::Freetype)
++endif()
++
 +find_package(harfbuzz REQUIRED)
 +find_package(SQLite3 REQUIRED)
 +find_package(plutosvg REQUIRED)
++if(TARGET plutovg::plutovg)
++  get_target_property(PLUTOVG_INCLUDE_DIRS plutovg::plutovg INTERFACE_INCLUDE_DIRECTORIES)
++  set_property(TARGET plutosvg::plutosvg APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${PLUTOVG_INCLUDE_DIRS}")
++endif()
++
 +find_package(libzip REQUIRED)
 +find_package(spirv_cross_c_shared REQUIRED)
 +find_package(SDL3 REQUIRED)
@@ -175,7 +182,7 @@ index 128da4770..804704cae 100644
  # Libraries that are pulled in from host.
  find_package(CURL REQUIRED)
  if(LINUX)
-@@ -125,7 +121,7 @@ if(NOT APPLE)
+@@ -125,7 +129,7 @@ if(NOT APPLE)
    endif()
  endif()
  
@@ -184,15 +191,15 @@ index 128da4770..804704cae 100644
  if(NOT FFMPEG_FOUND)
    message(WARNING "FFmpeg not found, using bundled headers.")
    set(FFMPEG_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/dep/ffmpeg/include")
-diff --git a/CMakeModules/DuckStationUtils.cmake b/CMakeModules/DuckStationUtils.cmake
-index c3f606bcd..ab3056f9b 100644
---- a/CMakeModules/DuckStationUtils.cmake
-+++ b/CMakeModules/DuckStationUtils.cmake
-@@ -371,6 +371,7 @@ function(add_resources TARGET DEST_SUBDIR SOURCE_DIR)
+diff --git i/CMakeModules/DuckStationUtils.cmake w/CMakeModules/DuckStationUtils.cmake
+index 2bd7d72ed..f4d079b21 100644
+--- i/CMakeModules/DuckStationUtils.cmake
++++ w/CMakeModules/DuckStationUtils.cmake
+@@ -382,6 +382,7 @@ function(add_resources TARGET DEST_SUBDIR SOURCE_DIR)
  endfunction()
  
- function(bundle_libraries TARGET)
+ function(add_runtime_libraries TARGET)
 +  return()
    unset(LIBRARY_SOURCES)
+   unset(LIBRARY_RPATHS)
    foreach(NAME IN LISTS ARGN)
-     get_target_property(dyn_lib_path ${NAME} IMPORTED_LOCATION_RELEASE)
