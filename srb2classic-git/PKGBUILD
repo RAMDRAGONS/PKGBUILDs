@@ -1,7 +1,7 @@
 # Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
 
 pkgname=srb2classic-git
-pkgver=2.2.17.beta12.r9.d02dc93
+pkgver=2.2.17.beta12.r104.2aba45e
 pkgrel=1
 pkgdesc="A fork of SRB2 2.2, with the aim of continuing its development (Git version)"
 arch=('x86_64' 'aarch64')
@@ -23,28 +23,28 @@ pkgver() {
 }
 
 build() {
-  msg2 "Compiling assets... This might take some time."
+  echo "Compiling assets... This might take some time."
   cd "$srcdir/srb2classic-assets"
   python3 assemble.py srb2.pk3
   python3 assemble.py characters.pk3
   python3 assemble.py music.pk3
   python3 assemble.py zones.pk3
 
-  msg2 "Calculating asset hashes and updating config.h.in..."
+  echo "Calculating asset hashes and updating config.h.in..."
   local hash_srb2=$(md5sum srb2.pk3 | cut -d' ' -f1)
   local hash_characters=$(md5sum characters.pk3 | cut -d' ' -f1)
   local hash_zones=$(md5sum zones.pk3 | cut -d' ' -f1)
 
-  msg2 "Compiled srb2.pk3 hash: $hash_srb2"
-  msg2 "Compiled characters.pk3 hash: $hash_characters"
-  msg2 "Compiled zones.pk3 hash: $hash_zones"
+  echo "Compiled srb2.pk3 hash: $hash_srb2"
+  echo "Compiled characters.pk3 hash: $hash_characters"
+  echo "Compiled zones.pk3 hash: $hash_zones"
 
   cd "$srcdir/srb2classic"
   sed -i "s/#define ASSET_HASH_SRB2_PK3.*/#define ASSET_HASH_SRB2_PK3       \"$hash_srb2\"/" src/config.h.in
   sed -i "s/#define ASSET_HASH_ZONES_PK3.*/#define ASSET_HASH_ZONES_PK3      \"$hash_zones\"/" src/config.h.in
   sed -i "s/#define ASSET_HASH_CHARACTERS_PK3.*/#define ASSET_HASH_CHARACTERS_PK3 \"$hash_characters\"/" src/config.h.in
 
-  msg2 "Configuring and building the srb2classic engine..."
+  echo "Configuring and building the srb2classic engine..."
   cmake -B build \
     -DCMAKE_INSTALL_PREFIX=/usr \
     -DCMAKE_BUILD_TYPE=None \
