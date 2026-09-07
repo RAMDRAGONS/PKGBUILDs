@@ -10,11 +10,12 @@ url="https://cemu.info/"
 license=('MPL-2.0')
 depends=(
 	'glibc'
-	'glslang'
 	'hicolor-icon-theme'
 	'libx11'
 	'pugixml'
-	'sdl2'
+	'sdl3'
+	'spirv-tools'
+	'wxwidgets-common'
 	'wxwidgets-gtk3'
 )
 makedepends=(
@@ -24,13 +25,13 @@ makedepends=(
 	'cmake'
 	'cubeb'
 	'curl'
-	'fmt>=9'
+	'fmt>=12.1'
 	'git'
 	'glib2'
 	'glm'
+	'glslang'
 	'glu'
 	'gtk3'
-	'hidapi'
 	'libgcc'
 	'libgl'
 	'libpng'
@@ -66,6 +67,13 @@ prepare() {
 	cd $_pkgname
 	git config submodule.dependencies/imgui.url ../imgui
 	git -c protocol.file.allow=always submodule update
+
+	# Fix non-standard characters in Arabic translation filename
+	for _mo in bin/resources/*/*cemu.mo; do
+		if [[ -f "$_mo" && "${_mo##*/}" != "cemu.mo" ]]; then
+			mv "$_mo" "${_mo%/*}/cemu.mo"
+		fi
+	done
 }
 
 build() {
@@ -90,12 +98,10 @@ package() {
 		'libcrypto.so'
 		'libcubeb.so'
 		'libcurl.so'
-		'libfmt.so'
 		'libgcc_s.so'
 		'libgdk-3.so'
 		'libgobject-2.0.so'
 		'libgtk-3.so'
-		'libhidapi-hidraw.so'
 		'libssl.so'
 		'libstdc++.so'
 		'libusb-1.0.so'
