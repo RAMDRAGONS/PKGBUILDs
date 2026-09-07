@@ -2,8 +2,9 @@
 # Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
 _pkgbase=azahar
 pkgname=("$_pkgbase-git")
-pkgver=2126.1.rc3.r0.gac95f6f
+pkgver=2126.1.rc3.r2.gb0d6d9a
 pkgrel=1
+pkgdesc="Nintendo 3DS emulator based on Citra"
 arch=('x86_64')
 url="https://azahar-emu.org/"
 license=('GPL-2.0-or-later')
@@ -11,8 +12,8 @@ depends=(
 	'crypto++'
 	'enet'
 	'glibc'
-	'glslang'
 	'soundtouch'
+	'spirv-tools'
 	'zstd'
 )
 makedepends=(
@@ -26,7 +27,7 @@ makedepends=(
 	'ffmpeg'
 	'fmt'
 	'git'
-	'libbacktrace'
+	'glslang'
 	'libgcc'
 	'libinih'
 	'libstdc++'
@@ -140,10 +141,8 @@ check() {
 }
 
 package() {
-	pkgdesc="Nintendo 3DS emulator based on Citra"
 	depends+=(
 		'hicolor-icon-theme'
-		'libbacktrace.so'
 		'libboost_iostreams.so'
 		'libboost_serialization.so'
 		'libcrypto.so'
@@ -151,7 +150,6 @@ package() {
 		'libfmt.so'
 		'libgcc_s.so'
 		'libopenal.so'
-		'soundtouch'
 		'libssl.so'
 		'libstdc++.so'
 		'libusb-1.0.so'
