@@ -6,11 +6,20 @@ pkgdesc="Fast PlayStation 1 emulator for PC and Android (Git version)"
 arch=('x86_64' 'aarch64')
 url="https://github.com/stenzek/duckstation"
 license=('CC-BY-NC-ND-4.0')
-depends=('qt6-base' 'qt6-svg' 'qt6-wayland' 'sdl3' 'curl' 'libzip' 'libwebp' 'zstd' 'libjpeg-turbo' 'freetype2' 'harfbuzz' 'spirv-cross' 'dbus' 'libbacktrace')
-makedepends=('git' 'cmake' 'ninja' 'qt6-tools' 'extra-cmake-modules' 'vulkan-headers' 'clang')
+depends=('qt6-base' 'curl' 'zstd' 'libbacktrace' 'glibc' 'systemd-libs' 'libstdc++' 'libgcc' 'zlib')
+makedepends=('git' 'cmake' 'ninja' 'qt6-tools' 'extra-cmake-modules' 'vulkan-headers' 'clang'
+             'sdl3' 'libzip' 'libwebp' 'libjpeg-turbo' 'freetype2' 'harfbuzz' 'spirv-cross')
 optdepends=('discord-rpc: for Discord integration'
             'libcpuinfo: for better CPU detection'
-            'plutosvg: for SVG support')
+            'plutosvg: for SVG support'
+            'qt6-svg: for SVG icon rendering'
+            'qt6-wayland: for Wayland display support'
+            'sdl3: for gamepad/controller and SDL audio support'
+            'libzip: for loading ZIP archives (cheats, patches, zipped games)'
+            'libwebp: for WebP image support'
+            'libjpeg-turbo: for JPEG image support'
+            'freetype2: for on-screen display font rendering'
+            'spirv-cross: for runtime shader translation')
 source=('duckstation::git+https://github.com/stenzek/duckstation.git'
         'cpuinfo::git+https://github.com/stenzek/cpuinfo.git'
         'shaderc::git+https://github.com/stenzek/shaderc.git'
