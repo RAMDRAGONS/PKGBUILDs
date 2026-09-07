@@ -1,18 +1,19 @@
 # Maintainer: AltoXorg <atrl101 AT yahoo DOT com>
+# Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
 
 _reponame=2ship2harkinian
 pkgbase=2s2h-git
 pkgname=(2s2h-git 2s2h-otr-exporter-git)
-pkgver=4.0.2.r139.g65fb1b6e3
+pkgver=5.0.1.r30.g14cdcf679
 pkgrel=1
 arch=("x86_64" "i686" "armv7h" "aarch64")
 #url="https://shipofharkinian.com/"
 url="https://github.com/HarbourMasters/${_reponame}"
-_depends_2s2h=("sdl2" "zenity" "libpng" "libogg" "libvorbis" "opus" "opusfile")
-_depends_2s2h_otr_exporter=("libpng")
-_depends_lus=("libzip" "fmt" "spdlog" "tinyxml2")
-depends=("${_depends_2s2h[@]}" "${_depends_2s2h_otr_exporter[@]}" "${_depends_lus[@]}")
-makedepends=("git" "cmake" "ninja" "python" "curl" "lsb-release" "boost" "nlohmann-json")
+_depends_common=("glibc" "gcc-libs" "bzip2" "zlib" "libpng" "libzip" "fmt" "tinyxml2")
+_depends_2s2h=("${_depends_common[@]}" "sdl2" "zenity" "libogg" "libvorbis" "opusfile" "libglvnd")
+_depends_2s2h_otr_exporter=("${_depends_common[@]}")
+depends=("${_depends_2s2h[@]}" "${_depends_2s2h_otr_exporter[@]}")
+makedepends=("git" "cmake" "ninja" "python" "curl" "lsb-release" "boost" "nlohmann-json" "spdlog")
 source=("git+https://github.com/HarbourMasters/${_reponame}.git"
         "git+https://github.com/Kenix3/libultraship.git"
         "git+https://github.com/HarbourMasters/OTRExporter.git"
@@ -31,7 +32,7 @@ _main_submodules=(
   ZAPDTR
 )
 
-SHIP_PREFIX=/opt/2s2h
+SHIP_PREFIX=/usr/lib/2s2h
 
 _is_debug() {
   for opt in "${OPTIONS[@]}"; do
@@ -114,7 +115,7 @@ package_2s2h-git() {
   pkgdesc="An unofficial port of The Legend of Zelda Majora's Mask (git)"
   provides=("2s2h")
   conflicts=("2s2h")
-  depends=("${_depends_2s2h[@]}" "${_depends_lus[@]}")
+  depends=("${_depends_2s2h[@]}")
   license=("CC0-1.0")
   install=2s2h.install
 
@@ -139,7 +140,7 @@ package_2s2h-otr-exporter-git() {
   provides=("2s2h-otr-exporter")
   conflicts=("2s2h-otr-exporter")
   license=("MIT")
-  depends=("${_depends_2s2h_otr_exporter[@]}" "${_depends_lus[@]}")
+  depends=("${_depends_2s2h_otr_exporter[@]}")
 
   cd "${srcdir}/${_reponame}"
 
