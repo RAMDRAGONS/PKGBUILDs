@@ -3,7 +3,7 @@
 # Submitter: Maxime Gauduin <alucryd@archlinux.org>
 
 pkgname=rpcs3-git
-pkgver=0.0.42.r19931.de6c1b526d
+pkgver=0.0.42.r19981.954d7968c7
 pkgrel=1
 pkgdesc='A Sony PlayStation 3 emulator'
 arch=(x86_64 aarch64)
@@ -58,6 +58,7 @@ makedepends=(
   lld
   vulkan-headers
   vulkan-memory-allocator
+  wayland
 )
 provides=(rpcs3)
 conflicts=(rpcs3)
@@ -105,6 +106,21 @@ prepare() {
 
   # Force static compilation of 3rdparty Fusion library to avoid missing libFusion.so at runtime
   sed -i 's/add_library(Fusion /add_library(Fusion STATIC /' 3rdparty/fusion/fusion/CMakeLists.txt 3rdparty/fusion/Fusion/CMakeLists.txt 2>/dev/null || true
+
+  # Fix FindWayland.cmake for Qt6WaylandClient compatibility
+  sed -i '/FIND_PACKAGE_HANDLE_STANDARD_ARGS(WAYLAND /a \
+  set(Wayland_FOUND ${WAYLAND_FOUND})\
+  set(Wayland_LIBRARIES ${WAYLAND_LIBRARIES})\
+  set(Wayland_INCLUDE_DIRS ${WAYLAND_INCLUDE_DIR})\
+  foreach(_comp Client Server Egl Cursor)\
+    string(TOUPPER ${_comp} _ucomp)\
+    if(WAYLAND_${_ucomp}_FOUND AND NOT TARGET Wayland::${_comp})\
+      add_library(Wayland::${_comp} UNKNOWN IMPORTED)\
+      set_target_properties(Wayland::${_comp} PROPERTIES\
+        IMPORTED_LOCATION "${WAYLAND_${_ucomp}_LIBRARIES}"\
+        INTERFACE_INCLUDE_DIRECTORIES "${WAYLAND_${_ucomp}_INCLUDE_DIR}")\
+    endif()\
+  endforeach()' buildfiles/cmake/FindWayland.cmake
 }
 
 build() {
