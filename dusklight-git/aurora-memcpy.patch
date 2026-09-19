@@ -1,0 +1,19 @@
+--- a/lib/internal.hpp
++++ b/lib/internal.hpp
+@@ -87,7 +87,7 @@ template <typename T>
+   requires(std::is_trivially_copyable_v<T>)
+ ALWAYS_INLINE T unaligned_load(const void* ptr) noexcept {
+   T value;
+-  std::memcpy(&value, ptr, sizeof(value));
++  memcpy(&value, ptr, sizeof(value));
+   return value;
+ }
+ 
+@@ -316,7 +316,7 @@ public:
+ 
+   ByteBuffer clone() const {
+     ByteBuffer clone{m_length};
+-    std::memcpy(clone.data(), m_data, m_length);
++    memcpy(clone.data(), m_data, m_length);
+     return clone;
+   }

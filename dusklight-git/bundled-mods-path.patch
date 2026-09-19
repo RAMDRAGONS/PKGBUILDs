@@ -1,0 +1,20 @@
+--- a/src/m_Do/m_Do_main.cpp
++++ b/src/m_Do/m_Do_main.cpp
+@@ -521,6 +521,17 @@ static void mods_init(const std::filesystem::path& mods_dir) {
+             .path = dusk::data::base_path_relative("mods"),
+             .inPlaceNative = true,
+         });
++#if defined(DUSK_ASSET_DIR)
++        modDirs.push_back({
++            .path = std::filesystem::path(DUSK_ASSET_DIR) / "mods",
++            .inPlaceNative = true,
++        });
++#else
++        modDirs.push_back({
++            .path = "/usr/share/dusklight/mods",
++            .inPlaceNative = true,
++        });
++#endif
+ #endif
+ #endif
+         dusk::mods::ModLoader::instance().set_search_dirs(std::move(modDirs));
