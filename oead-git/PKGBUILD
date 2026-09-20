@@ -2,14 +2,14 @@
 
 pkgname=oead-git
 _name=oead
-pkgver=1.2.9.4.r4.ga7cb4e0
+pkgver=1.2.9.4.r41.gad3fb11
 pkgrel=1
 pkgdesc="Library for recent Nintendo EAD formats in first-party games (C++ shared library and Python module)"
 arch=('x86_64')
 url="https://github.com/zeldamods/oead"
-license=('GPL2')
+license=('GPL-2.0-or-later')
 depends=('abseil-cpp' 'libyaml' 'python')
-makedepends=('git' 'cmake' 'pkgconf' 'python-build' 'python-installer' 'python-wheel' 'python-setuptools')
+makedepends=('git' 'cmake' 'pkgconf' 'pybind11' 'python-build' 'python-installer' 'python-wheel' 'python-scikit-build-core' 'python-setuptools-scm')
 provides=('oead' 'python-oead')
 conflicts=('oead' 'python-oead')
 source=("git+https://github.com/zeldamods/oead.git")
@@ -22,16 +22,17 @@ pkgver() {
 
 prepare() {
   cd "${srcdir}/${_name}"
-  git submodule update --init --recursive
+  # Initialize required submodules while offloading Abseil, LibYAML, and pybind11 to system packages
+  git submodule update --init --recursive lib/ordered-map lib/rapidyaml lib/zlib-ng lib/libyaml
 
   # Dynamically patch CMakeLists.txt to offload Abseil & LibYAML to system packages,
-  # but keep custom zlib-ng fork and rapidyaml submodule to prevent compile failures.
+  # build rapidyaml statically into liboead to avoid missing runtime libraries,
+  # and keep custom zlib-ng fork submodule.
   python -c '
 with open("CMakeLists.txt", "r") as f:
     content = f.read()
 
 target = """add_subdirectory(lib/abseil)
-add_subdirectory(lib/EasyIterator)
 add_subdirectory(lib/libyaml)
 add_subdirectory(lib/ordered-map)
 add_subdirectory(lib/rapidyaml)
@@ -43,8 +44,6 @@ add_subdirectory(lib/zlib-ng)"""
 replacement = """# Use system versions where they exist
 find_package(absl REQUIRED CONFIG)
 
-add_subdirectory(lib/EasyIterator)
-
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(YAML REQUIRED IMPORTED_TARGET yaml-0.1)
 add_library(yaml INTERFACE IMPORTED)
@@ -55,25 +54,40 @@ set_target_properties(tsl::ordered_map PROPERTIES
   INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/lib/ordered-map/include"
 )
 
+# Rapidyaml is static to embed into liboead without missing unbundled shared lib at runtime
+set(BUILD_SHARED_LIBS_SAVED ${BUILD_SHARED_LIBS})
+set(BUILD_SHARED_LIBS OFF)
 add_subdirectory(lib/rapidyaml)
+set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_SAVED})
 
 # Enabling AVX2 would require users to have a recent CPU
 option(WITH_AVX2 "" OFF)
 option(ZLIB_ENABLE_TESTS "" OFF)
 add_subdirectory(lib/zlib-ng)"""
 
-if target in content:
-    content = content.replace(target, replacement)
-    with open("CMakeLists.txt", "w") as f:
-        f.write(content)
-    print("Successfully patched CMakeLists.txt")
-else:
-    print("Warning: Could not patch CMakeLists.txt, target string not found")
+assert target in content, "Could not patch CMakeLists.txt, target string not found"
+content = content.replace(target, replacement)
+with open("CMakeLists.txt", "w") as f:
+    f.write(content)
+print("Successfully patched CMakeLists.txt")
 '
 
-  # Patch setup.py to pass CMAKE_POLICY_VERSION_MINIMUM for modern CMake compat
-  # (the Python build invokes cmake internally but doesn't pass this flag)
-  sed -i "s|'-DPYTHON_EXECUTABLE=' + sys.executable]|'-DPYTHON_EXECUTABLE=' + sys.executable,\n                      '-DCMAKE_POLICY_VERSION_MINIMUM=3.5']|" setup.py
+  # Patch py/CMakeLists.txt to use system pybind11 instead of the submodule
+  python -c '
+with open("py/CMakeLists.txt", "r") as f:
+    content = f.read()
+
+target = """set(PYBIND11_FINDPYTHON ON)
+add_subdirectory(../lib/pybind11 pybind11)"""
+
+replacement = """find_package(pybind11 CONFIG REQUIRED)"""
+
+assert target in content, "Could not patch py/CMakeLists.txt, target string not found"
+content = content.replace(target, replacement)
+with open("py/CMakeLists.txt", "w") as f:
+    f.write(content)
+print("Successfully patched py/CMakeLists.txt")
+'
 }
 
 build() {
@@ -82,7 +96,6 @@ build() {
     -DCMAKE_BUILD_TYPE=None \
     -DCMAKE_INSTALL_PREFIX=/usr \
     -DBUILD_SHARED_LIBS=ON \
-    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
     -Wno-dev
   cmake --build build
 
