@@ -4,7 +4,7 @@
 
 pkgname=zstd-git
 _pkgname=zstd
-pkgver=1.4.7.r3050.gd9c0c7e2c
+pkgver=1.4.7.r3067.g01b7154f1
 pkgrel=1
 pkgdesc='Zstandard - Fast real-time compression algorithm'
 url='https://facebook.github.io/zstd/'
@@ -61,8 +61,8 @@ endif()' build/cmake/lib/CMakeLists.txt
 
 build() {
   cd "$_pkgname"
-  export CFLAGS+=' -ffat-lto-objects'
-  export CXXFLAGS+=' -ffat-lto-objects'
+  export CFLAGS+=' -ffat-lto-objects -DXXH_ENABLE_AUTOVECTORIZE=ON'
+  export CXXFLAGS+=' -ffat-lto-objects -DXXH_ENABLE_AUTOVECTORIZE=ON'
 
   cmake -S build/cmake -B build -G Ninja \
     -DCMAKE_BUILD_TYPE=None \
