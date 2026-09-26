@@ -1,7 +1,7 @@
 # Maintainer: Alexandre Bouvier <contact@amb.tf>
 _pkgname=shadps4
 pkgname=$_pkgname-git
-pkgver=0.18.0.r64.g256546c
+pkgver=0.18.0.r141.gb77d194
 pkgrel=1
 pkgdesc="Sony PlayStation 4 emulator (CLI)"
 arch=('aarch64' 'x86_64')
@@ -113,6 +113,10 @@ prepare() {
 	sed -i '/add_subdirectory(protobuf/a endif()' externals/CMakeLists.txt
 	# use system zstd
 	sed -i '/# zstd (dependency of ZArchive)/i find_library(ZSTD_LIB zstd REQUIRED)\nadd_library(libzstd_static UNKNOWN IMPORTED)\nset_target_properties(libzstd_static PROPERTIES IMPORTED_LOCATION "${ZSTD_LIB}")' externals/CMakeLists.txt
+	# fix fmt 12 compatibility
+	sed -i 's|<fmt/core\.h>|<fmt/format.h>|' src/core/loader/elf.cpp
+	# fix missing cstring in types.h for clang/gcc 15+
+	sed -i '/#include <cstdint>/a #include <cstring>' src/common/types.h
 }
 
 build() {
