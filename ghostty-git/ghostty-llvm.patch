@@ -1,74 +1,24 @@
-diff --git a/pkg/dcimgui/build.zig b/pkg/dcimgui/build.zig
-index 72ddd4355..22af1e076 100644
---- a/pkg/dcimgui/build.zig
-+++ b/pkg/dcimgui/build.zig
-@@ -116,7 +116,12 @@ pub fn build(b: *std.Build) !void {
-             });
- 
-             if (b.systemIntegrationOption("freetype", .{})) {
--                lib.root_module.linkSystemLibrary("freetype2", dynamic_link_opts);
-+                // Workaround for https://github.com/ziglang/zig/issues/20476:
-+                // linkSystemLibrary on a static library archives the resolved .so
-+                // into the static library, producing LLD warnings that Zig treats
-+                // as errors. The consuming executable already links freetype2;
-+                // we only need the header search path here.
-+                lib.root_module.addSystemIncludePath(.{ .cwd_relative = "/usr/include/freetype2" });
-             } else {
-                 const freetype_dep = b.dependency("freetype", .{
-                     .target = target,
-diff --git a/src/apprt/gtk/class/application.zig b/src/apprt/gtk/class/application.zig
-index a97a32638..cb81df90a 100644
---- a/src/apprt/gtk/class/application.zig
-+++ b/src/apprt/gtk/class/application.zig
-@@ -1376,12 +1376,13 @@ pub const Application = extern struct {
-         // Setup our event loop
-         self.startupXev();
- 
-+        // Setup signal handlers BEFORE style manager to ensure SIGUSR2
-+        // is registered before style manager triggers soft reload
-+        self.startupSignals();
-+
-         // Setup our style manager (light/dark mode)
-         self.startupStyleManager();
- 
--        // Setup some signal handlers
--        self.startupSignals();
--
-         // Setup our action map
-         self.startupActionMap();
- 
-@@ -3300,6 +3301,10 @@ fn setGtkEnv(config: *const CoreConfig) std.Io.Writer.Error!void {
-         _ = setenv("GDK_DISABLE", @ptrCast(value[0 .. value.len - 1 :0]), 1);
-     }
- 
-+    if (global.environ().getPosix("WAYLAND_DISPLAY") != null and global.environ().getPosix("EGL_PLATFORM") == null) {
-+        _ = setenv("EGL_PLATFORM", "wayland", 0);
-+    }
-+
-     // Sync environ after altering system env
-     global.syncEnviron();
- }
 diff --git a/src/build/GhosttyResources.zig b/src/build/GhosttyResources.zig
-index 673c7e56a..ee2f65791 100644
+index 6f857655b..3eefd9d48 100644
 --- a/src/build/GhosttyResources.zig
 +++ b/src/build/GhosttyResources.zig
-@@ -23,6 +23,7 @@ pub fn init(b: *std.Build, cfg: *const Config, deps: *const SharedDeps) !Ghostty
+@@ -22,6 +22,7 @@ pub fn init(b: *std.Build, cfg: *const Config, deps: *const SharedDeps) !Ghostty
+             .omit_frame_pointer = false,
              .unwind_tables = .sync,
-             .link_libc = true,
          }),
 +        .use_llvm = true,
      });
+     build_data_exe.linkLibC();
  
-     deps.help_strings.addImport(build_data_exe);
 diff --git a/src/build/SharedDeps.zig b/src/build/SharedDeps.zig
-index e81007422..92994b53e 100644
+index 9276c9914..db34c6364 100644
 --- a/src/build/SharedDeps.zig
 +++ b/src/build/SharedDeps.zig
-@@ -1047,6 +1047,7 @@ fn gtkNgDistResourcesUncached(b: *std.Build) GtkNgResources {
+@@ -800,6 +800,7 @@ pub fn gtkNgDistResources(
+                 .root_source_file = b.path("src/apprt/gtk/build/blueprint.zig"),
                  .target = b.graph.host,
-                 .link_libc = true,
              }),
 +            .use_llvm = true,
          });
- 
-         // Adwaita headers
+         blueprint_exe.linkLibC();
+         blueprint_exe.linkSystemLibrary2("gtk4", dynamic_link_opts);
