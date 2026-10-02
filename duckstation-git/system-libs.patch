@@ -1,5 +1,5 @@
 diff --git i/CMakeModules/DuckStationDependencies.cmake w/CMakeModules/DuckStationDependencies.cmake
-index 12e075ba2..c832626ac 100644
+index 52d7cadaa..c832626ac 100644
 --- i/CMakeModules/DuckStationDependencies.cmake
 +++ w/CMakeModules/DuckStationDependencies.cmake
 @@ -5,33 +5,9 @@
@@ -159,12 +159,12 @@ index 12e075ba2..c832626ac 100644
  # All our builds include Qt, so this is not a problem.
  set(QT_NO_PRIVATE_MODULE_WARNING ON)
  if(LINUX)
--  find_package(Qt6 6.11.2 REQUIRED
+-  find_package(Qt6 6.12.0 REQUIRED
 -                NO_DEFAULT_PATH PATHS "${DEPS_PATH}/lib/cmake/Qt6"
 +  find_package(Qt6 REQUIRED
                  COMPONENTS Core Gui GuiPrivate Widgets LinguistTools DBus)
  else()
--  find_package(Qt6 6.11.2 REQUIRED
+-  find_package(Qt6 6.12.0 REQUIRED
 -                NO_DEFAULT_PATH PATHS "${DEPS_PATH}/lib/cmake/Qt6"
 +  find_package(Qt6 REQUIRED
                  COMPONENTS Core Gui GuiPrivate Widgets LinguistTools)
@@ -186,7 +186,7 @@ index 12e075ba2..c832626ac 100644
    endif()
  endif()
  
--find_package(FFMPEG 9.0 COMPONENTS avcodec avformat avutil swresample swscale)
+-find_package(FFMPEG 9.0.2 COMPONENTS avcodec avformat avutil swresample swscale)
 +find_package(FFMPEG COMPONENTS avcodec avformat avutil swresample swscale)
  if(NOT FFMPEG_FOUND)
    message(WARNING "FFmpeg not found, using bundled headers.")
