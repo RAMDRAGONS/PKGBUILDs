@@ -2,7 +2,7 @@
 # Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
 _pkgbase=azahar
 pkgname=("$_pkgbase-git")
-pkgver=2126.1.rc3.r2.gb0d6d9a
+pkgver=2126.1.r34.g662d412
 pkgrel=1
 pkgdesc="Nintendo 3DS emulator based on Citra"
 arch=('x86_64')
@@ -92,9 +92,6 @@ prepare() {
 	sed -i '/check_submodules_present()/d' ../../CMakeLists.txt
 	# use system spirv-tools
 	sed -i '/spirv-tools/d' ../../externals/CMakeLists.txt
-	# fix missing include of <cstring> for std::memset and std::memcpy
-	sed -i '/#include <vector>/a #include <cstring>' ../../src/audio_core/cubeb_sink.cpp
-	sed -i '/#include <vector>/a #include <cstring>' ../../src/audio_core/cubeb_input.cpp
 	# apply FFmpeg 7.0 compatibility patch
 	cd ../..
 	patch -p1 -i ../ffmpeg7.patch
