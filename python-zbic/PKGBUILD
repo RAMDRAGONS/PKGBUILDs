@@ -1,0 +1,23 @@
+# Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
+pkgname=python-zbic
+_name=${pkgname#python-}
+pkgver=1.0.1.post1
+pkgrel=1
+pkgdesc="Nintendo ZBIC compression for Python"
+arch=('x86_64')
+url="https://github.com/kinnay/zbic"
+license=('GPL-2.0-only')
+depends=('python')
+makedepends=('python-build' 'python-installer' 'python-setuptools' 'python-wheel')
+source=("https://files.pythonhosted.org/packages/source/${_name::1}/${_name}/${_name}-${pkgver}.tar.gz")
+sha256sums=('a798c24aea58f81a0b4bb0226f0f383b7e7f07a9a0150732cb45dc65ac541ff3')
+
+build() {
+    cd "${_name}-${pkgver}"
+    python -m build --wheel --no-isolation
+}
+
+package() {
+    cd "${_name}-${pkgver}"
+    python -m installer --destdir="${pkgdir}" dist/*.whl
+}

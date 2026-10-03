@@ -1,0 +1,16 @@
+pkgbase = python-zbic
+	pkgdesc = Nintendo ZBIC compression for Python
+	pkgver = 1.0.1.post1
+	pkgrel = 1
+	url = https://github.com/kinnay/zbic
+	arch = x86_64
+	license = GPL-2.0-only
+	makedepends = python-build
+	makedepends = python-installer
+	makedepends = python-setuptools
+	makedepends = python-wheel
+	depends = python
+	source = https://files.pythonhosted.org/packages/source/z/zbic/zbic-1.0.1.post1.tar.gz
+	sha256sums = a798c24aea58f81a0b4bb0226f0f383b7e7f07a9a0150732cb45dc65ac541ff3
+
+pkgname = python-zbic
