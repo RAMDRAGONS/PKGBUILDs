@@ -1,0 +1,202 @@
+pkgbase = linux-firmware-git
+	pkgdesc = Firmware files for Linux
+	pkgver = 20260916
+	pkgrel = 1
+	url = https://gitlab.com/kernel-firmware/linux-firmware
+	arch = any
+	license = LicenseRef-WHENCE
+	makedepends = git
+	makedepends = parallel
+	makedepends = python
+	makedepends = rdfind
+	options = !debug
+	options = !strip
+	source = git+https://gitlab.com/kernel-firmware/linux-firmware.git
+	validpgpkeys = 4CDE8575E547BF835FE15807A31B6BD72486CFD6
+	b2sums = SKIP
+
+pkgname = linux-firmware-git
+	pkgdesc = Firmware files for Linux - Default set
+	license = CC0-1.0
+	depends = linux-firmware-amd-git
+	depends = linux-firmware-amdgpu-git
+	depends = linux-firmware-atheros-git
+	depends = linux-firmware-broadcom-git
+	depends = linux-firmware-cirrus-git
+	depends = linux-firmware-intel-git
+	depends = linux-firmware-mediatek-git
+	depends = linux-firmware-nvidia-git
+	depends = linux-firmware-other-git
+	depends = linux-firmware-radeon-git
+	depends = linux-firmware-realtek-git
+	depends = linux-firmware-ti-git
+	optdepends = linux-firmware-liquidio-git: Firmware for Cavium LiquidIO server adapters
+	optdepends = linux-firmware-marvell-git: Firmware for Marvell devices
+	optdepends = linux-firmware-mellanox-git: Firmware for Mellanox Spectrum switches
+	optdepends = linux-firmware-nfp-git: Firmware for Netronome Flow Processors
+	optdepends = linux-firmware-qcom-git: Firmware for Qualcomm SoCs
+	optdepends = linux-firmware-qlogic-git: Firmware for QLogic devices
+	provides = linux-firmware=20260916
+	conflicts = linux-firmware
+
+pkgname = linux-firmware-whence-git
+	pkgdesc = Firmware files for Linux - WHENCE file (vendor licenses)
+	provides = linux-firmware-whence=20260916
+	conflicts = linux-firmware-whence
+
+pkgname = linux-firmware-other-git
+	pkgdesc = Firmware files for Linux - Unsorted firmware for various devices
+	provides = linux-firmware-other=20260916
+	conflicts = linux-firmware-other
+
+pkgname = amd-ucode-git
+	pkgdesc = Microcode update image for AMD CPUs
+	license = LicenseRef-amd-ucode
+	provides = amd-ucode=20260916
+	conflicts = amd-ucode
+
+pkgname = linux-firmware-amd-git
+	pkgdesc = Firmware files for Linux - Firmware for non-GPU AMD devices
+	license = LicenseRef-WHENCE
+	license = LicenseRef-amd
+	depends = linux-firmware-whence-git
+	provides = linux-firmware-amd=20260916
+	conflicts = linux-firmware-amd
+
+pkgname = linux-firmware-amdgpu-git
+	pkgdesc = Firmware files for Linux - Firmware for AMD Radeon GPUs
+	license = LicenseRef-WHENCE
+	license = LicenseRef-amdgpu
+	license = MIT
+	depends = linux-firmware-whence-git
+	provides = linux-firmware-amdgpu=20260916
+	conflicts = linux-firmware-amdgpu
+
+pkgname = linux-firmware-atheros-git
+	pkgdesc = Firmware files for Linux - Firmware for Qualcomm Atheros WiFi and Bluetooth adapters
+	license = LicenseRef-WHENCE
+	license = GPL-2.0-only
+	license = LicenseRef-atheros
+	depends = linux-firmware-whence-git
+	provides = linux-firmware-atheros=20260916
+	conflicts = linux-firmware-atheros
+
+pkgname = linux-firmware-broadcom-git
+	pkgdesc = Firmware files for Linux - Firmware for Broadcom and Cypress network adapters
+	license = LicenseRef-WHENCE
+	license = LicenseRef-broadcom
+	depends = linux-firmware-whence-git
+	provides = linux-firmware-broadcom=20260916
+	provides = linux-firmware-bnx2x
+	provides = linux-firmware-bnx2x-git
+	conflicts = linux-firmware-broadcom
+	conflicts = linux-firmware-bnx2x
+	conflicts = linux-firmware-bnx2x-git
+	replaces = linux-firmware-bnx2x<=20250613.12fe085f-4
+
+pkgname = linux-firmware-cirrus-git
+	pkgdesc = Firmware files for Linux - Firmware for Cirrus Logic audio devices
+	license = LicenseRef-WHENCE
+	license = LicenseRef-cirrus
+	depends = linux-firmware-whence-git
+	provides = linux-firmware-cirrus=20260916
+	conflicts = linux-firmware-cirrus
+
+pkgname = linux-firmware-intel-git
+	pkgdesc = Firmware files for Linux - Firmware for Intel devices
+	license = LicenseRef-WHENCE
+	license = Apache-2.0
+	license = GPL-2.0-only
+	license = LicenseRef-intel
+	depends = linux-firmware-whence-git
+	provides = linux-firmware-intel=20260916
+	conflicts = linux-firmware-intel
+
+pkgname = linux-firmware-liquidio-git
+	pkgdesc = Firmware files for Linux - Firmware for Cavium LiquidIO server adapters
+	license = LicenseRef-WHENCE
+	license = LicenseRef-liquidio
+	depends = linux-firmware-whence-git
+	provides = linux-firmware-liquidio=20260916
+	conflicts = linux-firmware-liquidio
+
+pkgname = linux-firmware-marvell-git
+	pkgdesc = Firmware files for Linux - Firmware for Marvell devices
+	license = LicenseRef-WHENCE
+	license = LicenseRef-marvell
+	depends = linux-firmware-whence-git
+	provides = linux-firmware-marvell=20260916
+	conflicts = linux-firmware-marvell
+
+pkgname = linux-firmware-mediatek-git
+	pkgdesc = Firmware files for Linux - Firmware for MediaTek and Ralink devices
+	license = LicenseRef-WHENCE
+	license = LicenseRef-mediatek
+	depends = linux-firmware-whence-git
+	provides = linux-firmware-mediatek=20260916
+	conflicts = linux-firmware-mediatek
+
+pkgname = linux-firmware-mellanox-git
+	pkgdesc = Firmware files for Linux - Firmware for Mellanox Spectrum switches
+	depends = linux-firmware-whence-git
+	provides = linux-firmware-mellanox=20260916
+	conflicts = linux-firmware-mellanox
+
+pkgname = linux-firmware-nfp-git
+	pkgdesc = Firmware files for Linux - Firmware for Netronome Flow Processors
+	license = LicenseRef-WHENCE
+	license = LicenseRef-netronome
+	depends = linux-firmware-whence-git
+	provides = linux-firmware-nfp=20260916
+	conflicts = linux-firmware-nfp
+
+pkgname = linux-firmware-nvidia-git
+	pkgdesc = Firmware files for Linux - Firmware for NVIDIA GPUs and SoCs
+	license = LicenseRef-WHENCE
+	license = LicenseRef-nvidia
+	depends = linux-firmware-whence-git
+	provides = linux-firmware-nvidia=20260916
+	conflicts = linux-firmware-nvidia
+
+pkgname = linux-firmware-qcom-git
+	pkgdesc = Firmware files for Linux - Firmware for Qualcomm SoCs
+	license = LicenseRef-WHENCE
+	license = BSD-3-Clause
+	license = LicenseRef-qcom
+	depends = linux-firmware-atheros-git
+	depends = linux-firmware-whence-git
+	provides = linux-firmware-qcom=20260916
+	conflicts = linux-firmware-qcom
+
+pkgname = linux-firmware-qlogic-git
+	pkgdesc = Firmware files for Linux - Firmware for QLogic devices
+	license = LicenseRef-WHENCE
+	license = LicenseRef-qlogic
+	depends = linux-firmware-whence-git
+	provides = linux-firmware-qlogic=20260916
+	conflicts = linux-firmware-qlogic
+
+pkgname = linux-firmware-radeon-git
+	pkgdesc = Firmware files for Linux - Firmware for ATI Radeon GPUs
+	license = LicenseRef-WHENCE
+	license = LicenseRef-radeon
+	depends = linux-firmware-whence-git
+	provides = linux-firmware-radeon=20260916
+	conflicts = linux-firmware-radeon
+
+pkgname = linux-firmware-realtek-git
+	pkgdesc = Firmware files for Linux - Firmware for Realtek devices
+	license = LicenseRef-WHENCE
+	license = LicenseRef-realtek
+	depends = linux-firmware-whence-git
+	provides = linux-firmware-realtek=20260916
+	conflicts = linux-firmware-realtek
+
+pkgname = linux-firmware-ti-git
+	pkgdesc = Firmware files for Linux - Firmware for Texas Instruments devices
+	license = LicenseRef-WHENCE
+	license = GPL-2.0-or-later
+	license = LicenseRef-ti
+	depends = linux-firmware-whence-git
+	provides = linux-firmware-ti=20260916
+	conflicts = linux-firmware-ti
