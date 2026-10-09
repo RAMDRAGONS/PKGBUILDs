@@ -1,6 +1,6 @@
 pkgbase = aseprite-git
 	pkgdesc = Create animated sprites and pixel art
-	pkgver = 1.3.18.beta3.r5.gce2db8405
+	pkgver = 1.3.18.6.r5.g14fe117e8
 	pkgrel = 1
 	url = http://www.aseprite.org/
 	arch = x86_64
@@ -24,6 +24,7 @@ pkgbase = aseprite-git
 	source = git+https://github.com/aseprite/aseprite.git#branch=main
 	source = desktop.patch
 	source = clang22.patch
+	source = flic.patch
 	source = git+https://github.com/aseprite/pixman.git
 	source = git+https://github.com/aseprite/simpleini.git
 	source = git+https://github.com/aseprite/gtest.git
@@ -52,6 +53,7 @@ pkgbase = aseprite-git
 	sha256sums = SKIP
 	sha256sums = 8b14e36939e930de581e95abf0591645aa0fcfd47161cf88b062917dbaaef7f9
 	sha256sums = c341da01abba71d4ca6b51e2cfb051af5b255d6d9055faff8ad6f36c5766c841
+	sha256sums = 62b0b00f780f148cfcd23ef0f50a2dea47126b5ddfe1ba1cd73e7b43ad32ae2d
 	sha256sums = SKIP
 	sha256sums = SKIP
 	sha256sums = SKIP

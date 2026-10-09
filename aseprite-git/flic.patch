@@ -1,0 +1,23 @@
+diff --git a/src/flic/decoder.cpp b/src/flic/decoder.cpp
+--- a/src/flic/decoder.cpp
++++ b/src/flic/decoder.cpp
+@@ -8,6 +8,7 @@
+ #include "flic.h"
+ #include "flic_details.h"
+ 
++#include <algorithm>
+ #include <limits>
+ 
+ #undef assert
+diff --git a/src/flic/encoder.cpp b/src/flic/encoder.cpp
+--- a/src/flic/encoder.cpp
++++ b/src/flic/encoder.cpp
+@@ -7,6 +7,8 @@
+ #include "flic.h"
+ #include "flic_details.h"
+ 
++#include <algorithm>
++
+ namespace flic {
+ 
+ template<typename Iterator>
