@@ -1,5 +1,5 @@
 diff --git i/CMakeModules/DuckStationDependencies.cmake w/CMakeModules/DuckStationDependencies.cmake
-index 52d7cadaa..c832626ac 100644
+index 3a3fdf911..c8b87e225 100644
 --- i/CMakeModules/DuckStationDependencies.cmake
 +++ w/CMakeModules/DuckStationDependencies.cmake
 @@ -5,33 +5,9 @@
@@ -84,7 +84,7 @@ index 52d7cadaa..c832626ac 100644
 +import_shared_dep(Shaderc Shaderc::shaderc_shared libshaderc_shared.so)
 +
 +# libpng (APNG fork)
-+import_static_dep(PNG PNG::png_shared libpng16.a)
++import_shared_dep(PNG PNG::png_shared libpng16.so)
 +set(PNG_LIBRARIES PNG::png_shared)
 +set(PNG_INCLUDE_DIRS "${DEPS_PATH}/include")
 +set(PNG_FOUND TRUE)
@@ -106,7 +106,7 @@ index 52d7cadaa..c832626ac 100644
 -             NO_DEFAULT_PATH PATHS "${DEPS_PATH}/lib/cmake/zstd")
 -find_package(WebP 1.6.0 REQUIRED
 -             NO_DEFAULT_PATH PATHS "${DEPS_PATH}/share/WebP/cmake")
--find_package(PNG 1.6.58 REQUIRED
+-find_package(PNG 1.6.59 REQUIRED
 -             NO_DEFAULT_PATH PATHS "${DEPS_PATH}/lib/cmake/PNG")
 -find_package(libjpeg-turbo 3.2.0 REQUIRED
 -             NO_DEFAULT_PATH PATHS "${DEPS_PATH}/lib/cmake/libjpeg-turbo")
@@ -130,7 +130,7 @@ index 52d7cadaa..c832626ac 100644
 -             NO_DEFAULT_PATH PATHS "${DEPS_PATH}/lib/cmake/Shaderc")
 -find_package(spirv_cross_c_shared REQUIRED
 -             NO_DEFAULT_PATH PATHS "${DEPS_PATH}/share/spirv_cross_c_shared/cmake")
--find_package(SDL3 3.4.16 REQUIRED
+-find_package(SDL3 3.4.18 REQUIRED
 -             NO_DEFAULT_PATH PATHS "${DEPS_PATH}/lib/cmake/SDL3")
 +find_package(WebP REQUIRED)
 +
@@ -192,7 +192,7 @@ index 52d7cadaa..c832626ac 100644
    message(WARNING "FFmpeg not found, using bundled headers.")
    set(FFMPEG_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/dep/ffmpeg/include")
 diff --git i/CMakeModules/DuckStationUtils.cmake w/CMakeModules/DuckStationUtils.cmake
-index 2bd7d72ed..f4d079b21 100644
+index 29e45ff5f..6f7fb30af 100644
 --- i/CMakeModules/DuckStationUtils.cmake
 +++ w/CMakeModules/DuckStationUtils.cmake
 @@ -382,6 +382,7 @@ function(add_resources TARGET DEST_SUBDIR SOURCE_DIR)
@@ -203,3 +203,55 @@ index 2bd7d72ed..f4d079b21 100644
    unset(LIBRARY_SOURCES)
    unset(LIBRARY_RPATHS)
    foreach(NAME IN LISTS ARGN)
+diff --git i/src/common/dynamic_library.cpp w/src/common/dynamic_library.cpp
+index 8e00c16b4..1638fcfb8 100644
+--- i/src/common/dynamic_library.cpp
++++ w/src/common/dynamic_library.cpp
+@@ -100,7 +100,23 @@ bool DynamicLibrary::Open(const char* filename, Error* error)
+ 
+   return true;
+ #else
+-  m_handle = dlopen(filename, RTLD_NOW);
++#ifndef RTLD_DEEPBIND
++#define RTLD_DEEPBIND 0
++#endif
++
++  if (std::strchr(filename, '/') == nullptr)
++  {
++    const std::string progpath = FileSystem::GetProgramPath(nullptr);
++    if (!progpath.empty())
++    {
++      const std::string local_path = Path::Combine(Path::GetDirectory(progpath), filename);
++      if (FileSystem::FileExists(local_path.c_str()))
++        m_handle = dlopen(local_path.c_str(), RTLD_NOW | RTLD_DEEPBIND);
++    }
++  }
++
++  if (!m_handle)
++    m_handle = dlopen(filename, RTLD_NOW | RTLD_DEEPBIND);
+   if (!m_handle)
+   {
+     const char* err = dlerror();
+diff --git i/src/util/dyn_libs.cpp w/src/util/dyn_libs.cpp
+index c91c8123d..d6615dea8 100644
+--- i/src/util/dyn_libs.cpp
++++ w/src/util/dyn_libs.cpp
+@@ -111,8 +111,16 @@ static bool LoadDynLib(const char* libname, int major_version, DynamicLibrary& d
+   std::call_once(once_flag, [&libname, &major_version, &dynlib, &symbols, extra_loader, error]() {
+     Error lerror;
+     DynamicLibrary lib;
+-    if (!lib.Open(DynamicLibrary::GetVersionedFilename(libname, major_version).c_str(), &lerror) ||
+-        !lib.ResolveSymbols(symbols.data(), symbols.size(), &lerror))
++    bool opened = lib.Open(DynamicLibrary::GetVersionedFilename(libname, major_version).c_str(), &lerror);
++#ifndef _WIN32
++    if (!opened && std::strcmp(libname, "sqlite3") == 0)
++      opened = lib.Open(DynamicLibrary::GetVersionedFilename(libname, 0).c_str(), &lerror);
++    if (!opened && std::strcmp(libname, "jpeg") == 0)
++      opened = lib.Open(DynamicLibrary::GetVersionedFilename(libname, 8).c_str(), &lerror);
++    if (!opened && major_version >= 0)
++      opened = lib.Open(DynamicLibrary::GetVersionedFilename(libname, -1).c_str(), &lerror);
++#endif
++    if (!opened || !lib.ResolveSymbols(symbols.data(), symbols.size(), &lerror))
+     {
+       ERROR_LOG("Failed to load {}: {}", libname, lerror.GetDescription());
+       Error::SetStringFmt(error, "Failed to load {}: {}", libname, lerror.GetDescription());
