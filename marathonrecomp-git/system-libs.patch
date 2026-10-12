@@ -1,5 +1,5 @@
 diff --git i/CMakeLists.txt w/CMakeLists.txt
-index 6a06ffb..b585a3a 100644
+index 7f95fd7a..d73d3d87 100644
 --- i/CMakeLists.txt
 +++ w/CMakeLists.txt
 @@ -1,6 +1,8 @@
@@ -12,7 +12,7 @@ index 6a06ffb..b585a3a 100644
      message(FATAL_ERROR "VCPKG_ROOT is not defined!")
  endif()
  
-@@ -19,6 +21,21 @@ set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+@@ -19,6 +21,22 @@ set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
  
  project("MarathonRecomp-ALL")
  
@@ -20,21 +20,22 @@ index 6a06ffb..b585a3a 100644
 +    find_package(PkgConfig REQUIRED)
 +    find_package(fmt REQUIRED)
 +    find_package(tomlplusplus REQUIRED)
-+    find_package(SDL2 REQUIRED CONFIG)
-+    find_package(SDL2_mixer REQUIRED CONFIG)
++    find_package(SDL3 REQUIRED CONFIG)
++    find_package(SDL3_mixer REQUIRED CONFIG)
 +    pkg_check_modules(xxHash REQUIRED IMPORTED_TARGET libxxhash)
 +    add_library(xxHash::xxhash ALIAS PkgConfig::xxHash)
 +    pkg_check_modules(zstd REQUIRED IMPORTED_TARGET libzstd)
 +    add_library(libzstd ALIAS PkgConfig::zstd)
 +    add_library(libzstd_static ALIAS PkgConfig::zstd)
-+    add_library(SDL2::SDL2-static ALIAS SDL2::SDL2)
-+    add_library(SDL2_mixer ALIAS SDL2_mixer::SDL2_mixer)
++    if(NOT TARGET SDL3::SDL3-static)
++        add_library(SDL3::SDL3-static ALIAS SDL3::SDL3-shared)
++    endif()
 +endif()
 +
  if (APPLE)
      enable_language(OBJC OBJCXX)
  endif()
-@@ -33,13 +50,6 @@ endif()
+@@ -33,13 +51,6 @@ endif()
  string(TOLOWER "${MARATHON_RECOMP_ARCHITECTURE}" MARATHON_RECOMP_ARCHITECTURE)
  message(STATUS "Detected architecture: ${MARATHON_RECOMP_ARCHITECTURE}")
  
@@ -49,10 +50,10 @@ index 6a06ffb..b585a3a 100644
      # Normally only defined by Visual Studio, added for consistency
      add_compile_definitions(_DEBUG)
 diff --git i/thirdparty/CMakeLists.txt w/thirdparty/CMakeLists.txt
-index d5c0858..a0b13ba 100644
+index 193f219d..8f6e5639 100644
 --- i/thirdparty/CMakeLists.txt
 +++ w/thirdparty/CMakeLists.txt
-@@ -40,11 +40,17 @@ else()
+@@ -40,10 +40,16 @@ else()
      message(FATAL_ERROR "Unsupported CPU architecture: ${BASE_ARCHITECTURE}")
  endif()
  
@@ -63,10 +64,10 @@ index d5c0858..a0b13ba 100644
  add_subdirectory("${MARATHON_RECOMP_THIRDPARTY_ROOT}/o1heap")
 -add_subdirectory("${MARATHON_RECOMP_THIRDPARTY_ROOT}/SDL")
 -add_subdirectory("${MARATHON_RECOMP_THIRDPARTY_ROOT}/SDL_mixer")
-+if (NOT TARGET SDL2::SDL2-static)
++if (NOT TARGET SDL3::SDL3-static)
 +    add_subdirectory("${MARATHON_RECOMP_THIRDPARTY_ROOT}/SDL")
 +endif()
-+if (NOT TARGET SDL2_mixer)
++if (NOT TARGET SDL3_mixer::SDL3_mixer)
 +    add_subdirectory("${MARATHON_RECOMP_THIRDPARTY_ROOT}/SDL_mixer")
 +endif()
  add_subdirectory("${MARATHON_RECOMP_THIRDPARTY_ROOT}/plume")
