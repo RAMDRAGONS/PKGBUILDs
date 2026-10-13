@@ -2,7 +2,7 @@
 # Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
 _pkgbase=azahar
 pkgname=("$_pkgbase-git")
-pkgver=2126.1.r43.g6280521
+pkgver=2127.0.alpha1.r6.gbfa7687
 pkgrel=1
 pkgdesc="Nintendo 3DS emulator based on Citra"
 arch=('x86_64')
@@ -56,6 +56,7 @@ source=(
 	"$_pkgbase-discord-rpc::git+https://github.com/azahar-emu/discord-rpc.git"
 	"$_pkgbase-dynarmic::git+https://github.com/azahar-emu/dynarmic.git"
 	"$_pkgbase-mcl::git+https://github.com/azahar-emu/mcl.git"
+	"$_pkgbase-microtar::git+https://github.com/azahar-emu/microtar.git"
 	"$_pkgbase-sirit::git+https://github.com/azahar-emu/sirit.git"
 	"dds-ktx::git+https://github.com/septag/dds-ktx.git"
 	"faad2::git+https://github.com/knik0/faad2.git"
@@ -66,6 +67,7 @@ source=(
 	"ffmpeg.patch"
 )
 b2sums=(
+	'SKIP'
 	'SKIP'
 	'SKIP'
 	'SKIP'
@@ -98,6 +100,7 @@ prepare() {
 	git config submodule.nihstro.url ../nihstro
 	git config submodule.sirit.url ../$_pkgbase-sirit
 	git config submodule.teakra.url ../teakra
+	git config submodule.microtar.url ../$_pkgbase-microtar
 	git -c protocol.file.allow=always submodule update
 	cd externals/dynarmic
 	git config submodule.mcl.url ../../../$_pkgbase-mcl
