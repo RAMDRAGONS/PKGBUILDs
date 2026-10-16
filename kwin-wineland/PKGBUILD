@@ -6,7 +6,7 @@
 # Contributor: Andrea Scarpino <andrea@archlinux.org>
 
 pkgname=kwin-wineland
-pkgver=6.7.5.r31121.gc389bfb
+pkgver=6.8.0.r31694.g2a8a76e
 pkgrel=1
 pkgdesc='An easy to use, but flexible, Wayland compositor (wineland branch)'
 arch=(x86_64)
@@ -87,7 +87,7 @@ optdepends=('plasma-keyboard: virtual keyboard')
 provides=(kwin)
 conflicts=(kwin)
 groups=(plasma)
-source=("kwin::git+https://invent.kde.org/erhanbilgili/kwin.git#branch=wineland_6.7")
+source=("kwin::git+https://invent.kde.org/erhanbilgili/kwin.git#branch=wineland_6.8")
 sha256sums=('SKIP')
 
 pkgver() {
