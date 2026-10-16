@@ -1,7 +1,7 @@
 # Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
 
 pkgname=marathonrecomp-git
-pkgver=r929.abab4ca5
+pkgver=r939.9741d5f4
 pkgrel=1
 pkgdesc="An unofficial PC port of the Xbox 360 version of Sonic the Hedgehog (2006) created through the process of static recompilation. (Git version)"
 arch=('x86_64')
@@ -10,14 +10,12 @@ license=('GPL3')
 depends=('sdl3' 'sdl3_mixer' 'fmt' 'tomlplusplus' 'xxhash' 'zstd' 'curl')
 makedepends=('git' 'cmake' 'ninja' 'clang' 'lld')
 source=('git+https://github.com/sonicnext-dev/MarathonRecomp.git'
-        '215.patch'
         'system-libs.patch'
         'fmt-10-compat.patch'
         'default.xex'
         'shader.arc'
         'shader_lt.arc')
 sha256sums=('SKIP'
-            '29b60a2400b43441ea90db72bb54896fdb5345abfcb834b08342909e487f4e1e'
             'ab2b895cac837993e4937ae26b031265cf57fc14c83cfa618a8df9578d86373f'
             '7a8e6450e7b22fd1d9c4a2048beb58f3fedecb2bebb5f183bdf14722f7315a27'
             '373689b7c8bc839fbc00f55f756da7a1ff55d786d043423606db8bf7f3905c94'
@@ -37,7 +35,6 @@ prepare() {
   cd MarathonRecomp
   git submodule update --init --recursive --force
   git submodule foreach --recursive git reset --hard
-  patch -Np1 -i "$srcdir/215.patch"
   patch -Np1 -i "$srcdir/system-libs.patch"
   patch -Np1 -i "$srcdir/fmt-10-compat.patch"
   mkdir -p MarathonRecompLib/private
