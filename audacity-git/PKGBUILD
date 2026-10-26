@@ -6,7 +6,7 @@
 # Contributor: Eric Bélanger <eric@archlinux.org>
 pkgname=audacity-git
 _pkgname=audacity
-pkgver=4.0.0.alpha.1.r3748.gc92166472c
+pkgver=4.0.0.alpha.1.r4019.g7c4aff15f0
 pkgrel=1
 pkgdesc="A program that lets you manipulate digital audio waveforms (Audacity 4 development branch)"
 arch=('x86_64')
@@ -26,6 +26,7 @@ depends=(
 	opus
 	opusfile
 	lame
+	libid3tag
 	mpg123
 	wavpack
 	libsndfile
@@ -90,6 +91,7 @@ prepare() {
 	git config submodule.muse_deps.url "$srcdir/muse_deps"
 	git -c protocol.file.allow=always submodule update
 	sed -i 's/muse_create_qml_module(muse_extensions_qml/& NO_UNITY/' muse/framework/extensions/qml/Muse/Extensions/CMakeLists.txt
+	sed -i 's/set(DEP_LIBS libid3tag)/set(DEP_LIBS id3tag)/' muse_deps/recipes/libid3tag/meta.cmake
 }
 
 build() {
