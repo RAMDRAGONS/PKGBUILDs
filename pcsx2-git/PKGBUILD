@@ -5,7 +5,7 @@
 # Contributor: Themaister <maister@archlinux.us>
 
 pkgname=pcsx2-git
-pkgver=2.9.31.r0.g4e9c5dcc88
+pkgver=2.9.149.r0.gb00c8cdb3c
 pkgrel=1
 pkgdesc='PlayStation 2 emulator'
 arch=(x86_64)
@@ -78,6 +78,9 @@ prepare() {
     cd pcsx2
     # Allow building against git versions of ffmpeg (where ffversion.h defines FFMPEG_VERSION as "N-xxxxx")
     sed -i 's/find_package(FFMPEG 7.1/find_package(FFMPEG/' cmake/SearchForStuff.cmake
+
+    # Fix build with newer SDL3 where SDL_HINT_JOYSTICK_RAWINPUT was removed
+    sed -i 's/SDL_HINT_JOYSTICK_RAWINPUT/"SDL_JOYSTICK_RAWINPUT"/' pcsx2/Input/SDLInputSource.cpp
 }
 
 build() 
