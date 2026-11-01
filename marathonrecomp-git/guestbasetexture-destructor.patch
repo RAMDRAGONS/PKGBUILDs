@@ -1,0 +1,17 @@
+diff --git i/MarathonRecomp/gpu/video.h w/MarathonRecomp/gpu/video.h
+index a06ce0fa..af4ceb35 100644
+--- i/MarathonRecomp/gpu/video.h
++++ w/MarathonRecomp/gpu/video.h
+@@ -228,6 +228,12 @@ struct GuestBaseTexture : GuestResource
+     GuestBaseTexture(ResourceType type) : GuestResource(type)
+     {
+     }
++
++    GuestBaseTexture(GuestBaseTexture&&) = default;
++    GuestBaseTexture& operator=(GuestBaseTexture&&) = default;
++    ~GuestBaseTexture()
++    {
++    }
+ };
+ 
+ // Texture/VolumeTexture
