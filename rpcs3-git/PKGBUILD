@@ -3,7 +3,7 @@
 # Submitter: Maxime Gauduin <alucryd@archlinux.org>
 
 pkgname=rpcs3-git
-pkgver=0.0.42.r19981.954d7968c7
+pkgver=0.0.43.r20561.b2e52d6358
 pkgrel=1
 pkgdesc='A Sony PlayStation 3 emulator'
 arch=(x86_64 aarch64)
@@ -121,6 +121,9 @@ prepare() {
         INTERFACE_INCLUDE_DIRECTORIES "${WAYLAND_${_ucomp}_INCLUDE_DIR}")\
     endif()\
   endforeach()' buildfiles/cmake/FindWayland.cmake
+
+  # Fix undeclared SDL_HINT_JOYSTICK_THREAD with SDL 3.5+
+  sed -i 's/SDL_HINT_JOYSTICK_THREAD/"SDL_JOYSTICK_THREAD"/' rpcs3/Input/sdl_instance.cpp
 }
 
 build() {
