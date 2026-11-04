@@ -3,7 +3,7 @@
 
 pkgname=spirv-tools-git
 epoch=3
-pkgver="2026.2".4707.df032578c
+pkgver="2026.4".4903.b570f00a7
 pkgrel=1
 pkgdesc='API and commands for processing SPIR-V modules'
 url='https://github.com/KhronosGroup/SPIRV-Tools'
@@ -56,6 +56,10 @@ prepare() {
   
   # Suppress warning about system-level install directories in Abseil
   sed -i 's/list(APPEND SYSTEM_INSTALL_DIRS .*)/set(SYSTEM_INSTALL_DIRS "")/g' abseil-cpp/CMakeLists.txt
+
+  # Fix NSDI 101 instructions incorrectly checked against NonSemanticShaderDebugInfoVersion (bumped to 102 in spirv-headers)
+  sed -i 's/nsdi_version >= NonSemanticShaderDebugInfoVersion/nsdi_version >= 101/g' SPIRV-Tools/source/val/validate_extensions.cpp
+  sed -i 's/CHECK_NSDI_MIN_VERSION(NonSemanticShaderDebugInfoVersion)/CHECK_NSDI_MIN_VERSION(101)/g' SPIRV-Tools/source/val/validate_extensions.cpp
   
   cmake   -S SPIRV-Tools -B _build "${cmake_args[@]}" -Wno-author
   python SPIRV-Tools/utils/update_build_version.py SPIRV-Tools/CHANGES _build/build-version.inc
