@@ -1,8 +1,21 @@
-diff --git i/CMakeModules/DuckStationBuildSummary.cmake w/CMakeModules/DuckStationBuildSummary.cmake
-index c66ed795f..9a10b30c8 100644
---- i/CMakeModules/DuckStationBuildSummary.cmake
-+++ w/CMakeModules/DuckStationBuildSummary.cmake
-@@ -23,26 +23,12 @@ if(BUILD_TESTS)
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 51d2f48e5..1dbf1e833 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -21,7 +21,7 @@ if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
+                       "running cmake from the build directory.")
+ endif()
+ 
+-if(NOT CMAKE_BUILD_TYPE MATCHES "Debug|Devel|MinSizeRel|RelWithDebInfo|Release")
++if(NOT CMAKE_BUILD_TYPE MATCHES "Debug|Devel|MinSizeRel|RelWithDebInfo|Release|None")
+   message(FATAL_ERROR "CMAKE_BUILD_TYPE not set. Please set it first.")
+ endif()
+ 
+diff --git a/CMakeModules/DuckStationBuildSummary.cmake b/CMakeModules/DuckStationBuildSummary.cmake
+index f45fd364b..1eb89976a 100644
+--- a/CMakeModules/DuckStationBuildSummary.cmake
++++ b/CMakeModules/DuckStationBuildSummary.cmake
+@@ -30,26 +30,12 @@ if(BUILD_TESTS)
    message(STATUS "[Extra] Building unit tests.")
  endif()
  
@@ -32,7 +45,7 @@ index c66ed795f..9a10b30c8 100644
  elseif(DEFINED HOST_PAGE_SIZE)
    message(STATUS "Building with detected page size of ${HOST_PAGE_SIZE}")
  endif()
-@@ -51,12 +37,7 @@ if(DEFINED HOST_CACHE_LINE_SIZE)
+@@ -58,12 +44,7 @@ if(DEFINED HOST_CACHE_LINE_SIZE)
  endif()
  
  if(NOT IS_SUPPORTED_COMPILER)
@@ -45,13 +58,13 @@ index c66ed795f..9a10b30c8 100644
 +  message(STATUS "Supported compiler detected.")
  endif()
  
- if(WIN32)
-diff --git i/src/core/core.cpp w/src/core/core.cpp
-index dd408a010..cd725d299 100644
---- i/src/core/core.cpp
-+++ w/src/core/core.cpp
-@@ -688,9 +688,7 @@ bool Core::ProcessStartup(Error* error)
-   SetRymlCallbacks();
+ if(CPU_ARCH_X64 AND DISABLE_SSE4)
+diff --git a/src/core/core.cpp b/src/core/core.cpp
+index 7305eb756..56e05ab00 100644
+--- a/src/core/core.cpp
++++ b/src/core/core.cpp
+@@ -701,9 +701,7 @@ bool Core::ProcessStartup(Error* error)
+   Achievements::ProcessStartup();
  
  #ifdef __linux__
 -  // Running DuckStation out of /usr is not supported and makes no sense.
@@ -61,11 +74,11 @@ index dd408a010..cd725d299 100644
  #endif
  
    return true;
-diff --git i/src/duckstation-qt/autoupdaterdialog.cpp w/src/duckstation-qt/autoupdaterdialog.cpp
-index 63a0685ec..9e44123f4 100644
---- i/src/duckstation-qt/autoupdaterdialog.cpp
-+++ w/src/duckstation-qt/autoupdaterdialog.cpp
-@@ -149,6 +149,7 @@ AutoUpdaterDialog* AutoUpdaterDialog::create(QWidget* const parent, Error* const
+diff --git a/src/duckstation-qt/autoupdaterdialog.cpp b/src/duckstation-qt/autoupdaterdialog.cpp
+index 70dc07562..3a508b2cb 100644
+--- a/src/duckstation-qt/autoupdaterdialog.cpp
++++ b/src/duckstation-qt/autoupdaterdialog.cpp
+@@ -139,6 +139,7 @@ AutoUpdaterDialog::~AutoUpdaterDialog()
  
  void AutoUpdaterDialog::warnAboutUnofficialBuild()
  {
@@ -73,15 +86,3 @@ index 63a0685ec..9e44123f4 100644
    //
    // To those distributing their own builds or packages of DuckStation, and seeing this message:
    //
-diff --git i/CMakeLists.txt w/CMakeLists.txt
-index 5b7a16811..d5e35c1bf 100644
---- i/CMakeLists.txt
-+++ w/CMakeLists.txt
-@@ -21,7 +21,7 @@ if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
-                       "running cmake from the build directory.")
- endif()
- 
--if(NOT CMAKE_BUILD_TYPE MATCHES "Debug|Devel|MinSizeRel|RelWithDebInfo|Release")
-+if(NOT CMAKE_BUILD_TYPE MATCHES "Debug|Devel|MinSizeRel|RelWithDebInfo|Release|None")
-   message(FATAL_ERROR "CMAKE_BUILD_TYPE not set. Please set it first.")
- endif()

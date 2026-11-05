@@ -1,6 +1,6 @@
 pkgbase = duckstation-git
 	pkgdesc = Fast PlayStation 1 emulator for PC and Android (Git version)
-	pkgver = 0.1.r12635.0cafa7633
+	pkgver = 0.1.r13121.e3dd73373
 	pkgrel = 1
 	url = https://github.com/stenzek/duckstation
 	arch = x86_64
@@ -60,8 +60,8 @@ pkgbase = duckstation-git
 	b2sums = SKIP
 	b2sums = f2656b0d9a3865faf957e8600a7617516d9139d15c6d7581c06b4829b4c9338ec5f747e4ccfcc49b6b9f5a96f0476121eda99457469c8e1cfecd8ecc3b1697ed
 	b2sums = c1af0a12c12ad0d022ee99b5ac05b5a0d84f3fc9936a747b509fd62680184f63147d6980f36b8c102fba9d70ac44cdcd641fa495faea4a62c524e66534cb569f
-	b2sums = 7a568dc568e3271007a15ad04ca5501a885bf4430049447d362a70124b0ef5bd3d0be6a3fb23ff48d640d205cfb7bacd1aada28b037f8f29ff5f611946aeb239
-	b2sums = 0a651de76c0ad5f080db18a5a7051de042479ef94de799777902403bbfce0faa5f4c37392db0a05c858ca545ac7b4ef67d6e9edfbac333011dac04c64dbbf377
+	b2sums = f9df90e17e452c813f192214a994e5e404e13c590899c1f276bd012a3fc7095075eea4438a5591c5df435fcfdc6f5abdfda24155afcf79b0b1fce349abddee84
+	b2sums = 50f8a23f7061f988b7ba59f1aa21e28bea5bde12fc5137c247491967fc431d278dc5a02ed33db02ea454584edb880b3a762fee666286dbcf1226d08e28f2eae7
 	b2sums = 4df60f5e43cac651457fb866212baab36a3de3c82d9eb5ff28566c4973fd0cfcf3b3f7d779057d741396483690a0dd06a892c1e6f1225ebd609dd38bbd3d6f24
 
 pkgname = duckstation-git
