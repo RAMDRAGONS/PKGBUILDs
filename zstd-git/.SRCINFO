@@ -1,6 +1,6 @@
 pkgbase = zstd-git
 	pkgdesc = Zstandard - Fast real-time compression algorithm
-	pkgver = 1.4.7.r3050.gd9c0c7e2c
+	pkgver = 1.4.7.r3090.g49bf1d14c
 	pkgrel = 1
 	url = https://facebook.github.io/zstd/
 	arch = x86_64

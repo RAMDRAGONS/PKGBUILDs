@@ -4,7 +4,7 @@
 
 pkgname=zstd-git
 _pkgname=zstd
-pkgver=1.4.7.r3067.g01b7154f1
+pkgver=1.4.7.r3090.g49bf1d14c
 pkgrel=1
 pkgdesc='Zstandard - Fast real-time compression algorithm'
 url='https://facebook.github.io/zstd/'
@@ -57,6 +57,9 @@ if(ZSTD_SEEKABLE_SUPPORT)\
     set(PublicHeaders ${PublicHeaders} ${SEEKABLE_DIR}/zstd_seekable.h)\
     include_directories(${SEEKABLE_DIR} ${LIBRARY_DIR}/common)\
 endif()' build/cmake/lib/CMakeLists.txt
+
+  # fix undeclared identifier with modern lz4 (contentChecksum_t -> LZ4F_contentChecksum_t)
+  sed -i 's/(contentChecksum_t)/(LZ4F_contentChecksum_t)/' programs/fileio.c
 }
 
 build() {
