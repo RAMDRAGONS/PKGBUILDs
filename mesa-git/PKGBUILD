@@ -12,7 +12,7 @@
 
 pkgname=mesa-git
 pkgdesc="an open-source implementation of the OpenGL specification, git version"
-pkgver=26.3.0_devel.231071.e2e6232ee66.d41d8cd
+pkgver=27.0.0_devel.233672.5e6b5424c63.7ccf26e
 pkgrel=1
 arch=('x86_64')
 makedepends=(
@@ -33,6 +33,8 @@ makedepends=(
     'wayland-protocols'
     'python-packaging'
     'python-pyaml'
+    'libdisplay-info'
+    'libpng'
 )
 depends=(
     'libdrm'
@@ -57,6 +59,8 @@ depends=(
     'glibc'
     'zlib'
     'xcb-util-keysyms'
+    'libdisplay-info'
+    'libpng'
 )
 optdepends=('opengl-man-pages: for the OpenGL API man pages')
 provides=(
@@ -96,10 +100,12 @@ source=(
     'mesa::git+https://gitlab.freedesktop.org/mesa/mesa.git#branch=main'
     'LICENSE'
     "venus-protocol-1.1::git+https://gitlab.freedesktop.org/virgl/venus-protocol.git"
+    'fix-util-rust-bindgen-include.patch'
 )
 sha256sums=('SKIP'
             '7fdc119cf53c8ca65396ea73f6d10af641ba41ea1dd2bd44a824726e01c8b3f2'
             'SKIP'
+            'ea03727e5058f0194e442076c1319c35544041ee07c21e2cf60dd61af2b445fa'
             '357703d41365b4b27c590e3ed91eabb1b663f07c4c084095e60cbed4362dff0d'
             '5e719e8df665df0d1c8fbfd238015744736151d4445ec0836b8e628aae103b77'
             '3354b9ac3fae1ff6755cb6db53683adb661634f67557942dea4facebec0fee4b'
@@ -109,6 +115,7 @@ sha256sums=('SKIP'
 b2sums=('SKIP'
         'cc60238726b35133b5b729fb4ed1e76e04136588533615d84b4a54656d5b41727d5e7ff06ef4de3eb102eed6669d6c5c5cb8ac9fbdf6fc25aa477877c5c3ba87'
         'SKIP'
+        '3e3874803d17e55404848f950eb362d60ef059833f0b98e3364624ef921f5d933e91715631463571396e5f45f9206456192afa29bec8038bc20d0714aaf81ed5'
         '7a1b3b82bbbf6a123512815c3e8f068a17890cbbb8b68e88a5a492f62469942fadd776207eebd913052a1c06e1fd37a549e86526b9fc8f08b9ca7cb0044ac16b'
         '4b89e07f23af8328dbb34fe2b3f1b202f1e6a3885a6269740a23359b41bb4099ac2484565d3b2b0936261689ca525785ac620c766997234fd8d0f409e80e5ea3'
         '4cede03c08758ccd6bf53a0d0057d7542dfdd0c93d342e89f3b90460be85518a9fd24958d8b1da2b5a09b5ddbee8a4263982194158e171c2bba3e394d88d6dac'
@@ -117,7 +124,7 @@ b2sums=('SKIP'
         '93385f64103fdb482bec34c7912474ae7a5935948715e6eb9a54907e0db5c39f089f6cd393bab33c935c59a1bbb0f4099431f206343811c1a450554d96a35756')
 
 
-options=(!lto !debug)
+options=(!lto !debug !strip)
 # lto and debug are disabled manually through meson -D flags, but it feels cleaner to also list them here.
 
 # Rust crates for NVK, used as Meson subprojects
@@ -214,7 +221,6 @@ case $MESA_WHICH_LLVM in
             'rust-bindgen'
         )
         depends+=(
-            'llvm-libs'
             'clang'
             'libclc'
             'spirv-llvm-translator'
@@ -285,7 +291,7 @@ build () {
         -D valgrind=disabled
         -D video-codecs=all
         -D vulkan-drivers=amd,intel,intel_hasvk,swrast,virtio,nouveau
-        -D vulkan-layers=device-select,intel-nullhw,overlay
+        -D vulkan-layers=device-select,intel-nullhw,overlay,screenshot,vram-report-limit
         -D tools=[]
         -D zstd=enabled
         -D buildtype=plain
@@ -314,6 +320,7 @@ package() {
     # remove script file from /usr/bin
     # https://gitlab.freedesktop.org/mesa/mesa/issues/2230
     rm "${pkgdir}/usr/bin/mesa-overlay-control.py"
+    rm "${pkgdir}/usr/bin/mesa-screenshot-control.py"
     rmdir "${pkgdir}/usr/bin"
 
     # indirect rendering
