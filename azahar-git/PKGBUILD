@@ -2,7 +2,7 @@
 # Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
 _pkgbase=azahar
 pkgname=("$_pkgbase-git")
-pkgver=2127.0.alpha1.r6.gbfa7687
+pkgver=2127.0.rc3.r0.g11eceda
 pkgrel=1
 pkgdesc="Nintendo 3DS emulator based on Citra"
 arch=('x86_64')
@@ -46,7 +46,6 @@ makedepends=(
 	'spirv-headers'
 	'vulkan-headers'
 	'vulkan-memory-allocator'
-	'xbyak'
 	'zydis'
 )
 checkdepends=('catch2')
@@ -63,10 +62,12 @@ source=(
 	"libretro-common::git+https://github.com/libretro/libretro-common.git"
 	"nihstro::git+https://github.com/neobrain/nihstro.git"
 	"teakra::git+https://github.com/wwylele/teakra.git"
+	"xbyak::git+https://github.com/herumi/xbyak.git"
 	"xxhash::git+https://github.com/Cyan4973/xxHash.git"
 	"ffmpeg.patch"
 )
 b2sums=(
+	'SKIP'
 	'SKIP'
 	'SKIP'
 	'SKIP'
@@ -101,6 +102,7 @@ prepare() {
 	git config submodule.sirit.url ../$_pkgbase-sirit
 	git config submodule.teakra.url ../teakra
 	git config submodule.microtar.url ../$_pkgbase-microtar
+	git config submodule.xbyak.url ../xbyak
 	git -c protocol.file.allow=always submodule update
 	cd externals/dynarmic
 	git config submodule.mcl.url ../../../$_pkgbase-mcl
@@ -133,13 +135,15 @@ build() {
 		-D CMAKE_CXX_FLAGS_NONE="-DNDEBUG"
 		-D CMAKE_INSTALL_PREFIX=/usr
 		-D DISABLE_SYSTEM_DYNARMIC=ON
+		# xbyak 7.3x+ strict mem size checks throw in dynarmic JIT
+		-D DISABLE_SYSTEM_XBYAK=ON
 		-D ENABLE_LTO=ON
 		-D ENABLE_QT_TRANSLATION=ON
 		-D ENABLE_ROOM_STANDALONE=OFF
 		-D ENABLE_TESTS=OFF
-		-D USE_DISCORD_PRESENCE=ON
+		-D ENABLE_DISCORD_RPC=ON
 		-D USE_SYSTEM_LIBS=ON
-		-Wno-dev
+		-W no-dev
 	)
 	local flags
 	IFS=' ' read -r -a flags <<< "$CXXFLAGS"
