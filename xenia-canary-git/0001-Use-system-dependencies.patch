@@ -32,8 +32,8 @@ index efae2de45..bcc8ceff8 100644
 -[submodule "third_party/cxxopts"]
 -	path = third_party/cxxopts
 -	url = https://github.com/jarro2783/cxxopts.git
--[submodule "third_party/SDL2"]
--	path = third_party/SDL2
+-[submodule "third_party/SDL3"]
+-	path = third_party/SDL3
 -	url = https://github.com/libsdl-org/SDL.git
 -[submodule "third_party/utfcpp"]
 -	path = third_party/utfcpp
@@ -98,12 +98,13 @@ diff --git a/src/xenia/emulator.cc b/src/xenia/emulator.cc
 index cf1856972..6f0d9a747 100644
 --- a/src/xenia/emulator.cc
 +++ b/src/xenia/emulator.cc
-@@ -16,7 +16,7 @@
+@@ -16,8 +16,8 @@
  #include "third_party/tabulate/single_include/tabulate/tabulate.hpp"
  #include "third_party/zarchive/include/zarchive/zarchivecommon.h"
  #include "third_party/zarchive/include/zarchive/zarchivewriter.h"
 -#include "third_party/zarchive/src/sha_256.h"
 +// #include "third_party/zarchive/src/sha_256.h"
+ #include "version.h"
  #include "xenia/apu/audio_system.h"
  #include "xenia/base/assert.h"
  #include "xenia/base/byte_stream.h"
@@ -369,14 +370,13 @@ index 808f0ee9f..1135e6321 100644
  
  # ==============================================================================
  # libusb (Windows only)
-Submodule third_party/SDL2 e11183ea6...000000000 (submodule deleted)
-diff --git a/third_party/SDL2/include b/third_party/SDL2/include
+diff --git a/third_party/SDL3/include b/third_party/SDL3/include
 new file mode 120000
-index 000000000..38776340f
+index 000000000..408ea0f82
 --- /dev/null
-+++ b/third_party/SDL2/include
++++ b/third_party/SDL3/include
 @@ -0,0 +1 @@
-+/usr/include/SDL2
++/usr/include
 \ No newline at end of file
 Submodule third_party/SPIRV-Tools 33e025681...000000000 (submodule deleted)
 diff --git a/third_party/SPIRV-Tools/include b/third_party/SPIRV-Tools/include

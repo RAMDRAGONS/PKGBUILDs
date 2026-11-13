@@ -3,7 +3,7 @@
 _binname=xenia_canary
 _branchname=canary_experimental
 pkgname=xenia-canary-git
-pkgver=r8722.66af56ed7
+pkgver=r8981.4f04bc7cc
 pkgrel=1
 pkgdesc='An experimental emulator for the Xbox 360.'
 arch=('x86_64')
@@ -28,7 +28,7 @@ depends=('alsa-lib'
          'gtk3'
          'hicolor-icon-theme'
          'pugixml'
-         'sdl2'
+         'sdl3'
          'snappy'
          'xxhash'
          'zarchive'
@@ -63,7 +63,7 @@ sha256sums=('SKIP'
             'SKIP'
             'SKIP'
             '6df34559e1bb42e1c0a67152a8f1ebd8c59bd890f6d7625f711ae80859165822'
-            '0060f567eaa6820055a480d36ec68b6371829668986dc77d65eda44e8fc7df0a'
+            '5151b8e7ed2c56c0b96a746d8910d383f2e729f459f19c4638bd03c9699b2758'
             '51f3ec6c06d2cbb7e27f8235c1aa2fc2ca99123462d9580f868104fef603068d'
             'd56f9c3e4cebb3816c2fc18fab3f7c1bc7c3f24820c2e2e34e23d9dbcc0741f0')
 
