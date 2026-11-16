@@ -1,0 +1,184 @@
+# Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
+
+pkgname=shadowrecomp-git
+_pkgname=ShadowRecomp
+_appid=io.github.foxworkshop.shadowrecomp
+pkgver=1.0.0.r3.g9fcbc85
+pkgrel=1
+pkgdesc="An unofficial PC port of the Xbox version of Shadow the Hedgehog, created through the process of static recompilation. (Git version)"
+arch=('x86_64')
+url="https://github.com/FoxWorkshop/ShadowRecomp"
+license=('GPL-3.0-or-later')
+depends=('curl' 'dbus' 'directx-shader-compiler' 'fmt' 'glibc' 'hicolor-icon-theme' 'libgcc'
+         'libstdc++' 'nativefiledialog-extended' 'sdl3' 'sdl3_mixer' 'tomlplusplus'
+         'vulkan-icd-loader' 'xxhash' 'zstd')
+makedepends=('cargo' 'clang' 'cmake' 'git' 'lld' 'ninja' 'nlohmann-json' 'pkgconf'
+             'vulkan-headers')
+provides=("shadowrecomp=${pkgver}")
+conflicts=('shadowrecomp')
+source=("git+https://github.com/FoxWorkshop/ShadowRecomp.git"
+        "git+https://github.com/FoxWorkshop/ShadowRecompResources"
+        "git+https://github.com/cameron314/concurrentqueue"
+        "git+https://github.com/redorav/ddspp.git"
+        "git+https://github.com/ocornut/imgui"
+        "git+https://github.com/epezent/implot"
+        "git+https://github.com/Chlumsky/msdf-atlas-gen"
+        "git+https://github.com/Chlumsky/artery-font-format"
+        "git+https://github.com/Chlumsky/msdfgen"
+        "git+https://github.com/renderbag/plume.git"
+        "git+https://github.com/zeux/volk"
+        "git+https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator"
+        "git+https://github.com/nothings/stb"
+        "git+https://github.com/martinus/unordered_dense.git"
+        "git+https://github.com/FoxWorkshop/XShaderRecomp"
+        "git+https://github.com/aras-p/smol-v"
+        "git+https://github.com/FoxWorkshop/XboxRecomp"
+        "git+https://github.com/kyz/libmspack.git"
+        "git+https://github.com/kokke/tiny-AES-c"
+        "git+https://github.com/zyantific/zydis"
+        "git+https://github.com/zyantific/zycore-c"
+        "git+https://github.com/Sewer56/XboxRecomp2.git"
+        'system-libs.patch'
+        'xdg-basedir.patch'
+        'fmt-compat.patch'
+        'sdl-joystick-thread.patch'
+        'default.xbe')
+sha256sums=('SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            '6cf901bda35a18c2b78bcda61e2dfd94148d68a9c6870284cb9a496502c51922'
+            '479de0f3673dc08942a907ec8ab3ed61df3a80fc7c3381d08e814ebd8508c54b'
+            '04ffb38779ba2a5398c0ded683229e5bdef58a2c4dc816441aa3f107a46aefb4'
+            '800ba00986b87460d0761ccf4479a6859d5f1f08828eb616e9ad9e9bab657a8b'
+            '5b16d285d60542d70f9a1e7dc1590aed4d81a4cb87f920e17a5f10b67c07b42c')
+
+# Points the listed submodules (path=source-dir) of a checkout at the local
+# clones in $srcdir. Unlisted ones (vendored SDL, fmt, zstd, dxc, vcpkg...)
+# stay uninitialized because system packages replace them.
+_submodules() {
+  local _dir=$1 _entry
+  shift
+  git -C "$_dir" submodule init "${@%%=*}"
+  for _entry in "$@"; do
+    git -C "$_dir" config "submodule.${_entry%%=*}.url" "$srcdir/${_entry#*=}"
+  done
+  git -C "$_dir" -c protocol.file.allow=always submodule update --force "${@%%=*}"
+}
+
+pkgver() {
+  cd "$_pkgname"
+  ( set -o pipefail
+    git describe --long --tags --abbrev=7 2>/dev/null |
+      sed 's/^v//;s/\([^-]*-g\)/r\1/;s/-/./g' ||
+    printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short=7 HEAD)"
+  )
+}
+
+prepare() {
+  cd "$_pkgname"
+
+  _submodules . \
+    ShadowRecompResources=ShadowRecompResources \
+    thirdparty/concurrentqueue=concurrentqueue \
+    thirdparty/ddspp=ddspp \
+    thirdparty/imgui=imgui \
+    thirdparty/implot=implot \
+    thirdparty/msdf-atlas-gen=msdf-atlas-gen \
+    thirdparty/plume=plume \
+    thirdparty/stb=stb \
+    thirdparty/unordered_dense=unordered_dense \
+    tools/XShaderRecomp=XShaderRecomp \
+    tools/XboxRecomp=XboxRecomp \
+    tools/XboxRecomp2=XboxRecomp2
+  _submodules thirdparty/msdf-atlas-gen \
+    artery-font-format=artery-font-format \
+    msdfgen=msdfgen
+  _submodules thirdparty/plume \
+    contrib/volk=volk \
+    contrib/VulkanMemoryAllocator=VulkanMemoryAllocator
+  _submodules tools/XShaderRecomp \
+    thirdparty/smol-v=smol-v
+  _submodules tools/XboxRecomp \
+    thirdparty/libmspack=libmspack \
+    thirdparty/tiny-AES-c=tiny-AES-c \
+    thirdparty/zydis=zydis
+  _submodules tools/XboxRecomp/thirdparty/zydis \
+    dependencies/zycore=zycore-c
+
+  patch -Np1 -i "$srcdir/system-libs.patch"
+  patch -Np1 -i "$srcdir/xdg-basedir.patch"
+  patch -Np1 -i "$srcdir/fmt-compat.patch"
+  patch -Np1 -i "$srcdir/sdl-joystick-thread.patch"
+
+  mkdir -p ShadowRecompLib/private
+  ln -sf "$srcdir/default.xbe" ShadowRecompLib/private/default.xbe
+
+  export RUSTUP_TOOLCHAIN=stable
+  cargo fetch --locked --target "$(rustc --print host-tuple)" \
+    --manifest-path tools/XboxRecomp2/Cargo.toml
+}
+
+build() {
+  cd "$_pkgname"
+
+  export RUSTUP_TOOLCHAIN=stable
+  export CARGO_TARGET_DIR="$srcdir/xboxrecomp2-target"
+  cargo build --frozen --release --manifest-path tools/XboxRecomp2/Cargo.toml \
+    -p xbox-recomp2-cli
+
+  # Upstream relies on clang-only flags (-ffp-model, -mllvm).
+  export CC="${CC:-clang}" CXX="${CXX:-clang++}"
+
+  # Defines upstream's Release configuration would add; build type None leaves
+  # optimization to makepkg's flags.
+  CFLAGS+=" -DNDEBUG"
+  CXXFLAGS+=" -DNDEBUG -DXSHADER_RECOMP_NOLOGGING"
+
+  local cmake_options=(
+    -B build
+    -S .
+    -G Ninja
+    -D CMAKE_BUILD_TYPE=None
+    -D CMAKE_INSTALL_PREFIX=/usr
+    -D CMAKE_AR="$(command -v "${AR:-ar}")"
+    -D CMAKE_RANLIB="$(command -v "${RANLIB:-ranlib}")"
+    -D CMAKE_SKIP_RPATH=ON
+    -D FETCHCONTENT_FULLY_DISCONNECTED=ON
+    -D SHADOW_RECOMP_USE_SYSTEM_LIBS=ON
+    -D SHADOW_RECOMP_XBOXRECOMP2_EXECUTABLE="$CARGO_TARGET_DIR/release/xboxrecomp2"
+  )
+  cmake "${cmake_options[@]}"
+  cmake --build build --target ShadowRecomp
+}
+
+package() {
+  cd "$_pkgname"
+
+  install -Dm755 build/ShadowRecomp/ShadowRecomp "$pkgdir/usr/bin/shadowrecomp"
+  install -Dm644 ShadowRecompResources/images/game_icon.png \
+    "$pkgdir/usr/share/icons/hicolor/128x128/apps/$_appid.png"
+  install -Dm644 "flatpak/$_appid.metainfo.xml" \
+    "$pkgdir/usr/share/metainfo/$_appid.metainfo.xml"
+  install -Dm644 "flatpak/$_appid.desktop" \
+    "$pkgdir/usr/share/applications/$_appid.desktop"
+  sed -i 's|^Exec=.*|Exec=shadowrecomp|' "$pkgdir/usr/share/applications/$_appid.desktop"
+}

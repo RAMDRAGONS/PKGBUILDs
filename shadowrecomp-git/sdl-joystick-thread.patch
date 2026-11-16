@@ -1,0 +1,13 @@
+--- a/ShadowRecomp/input/input.cpp
++++ b/ShadowRecomp/input/input.cpp
+@@ -750,7 +750,10 @@
+ 	SDL_SetHint(SDL_HINT_JOYSTICK_ENHANCED_REPORTS, "1");
+ 	SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_WII, "1");
+ 	SDL_SetHint(SDL_HINT_XINPUT_ENABLED, "1");
++	// Newer SDL3 removed this hint.
++#ifdef SDL_HINT_JOYSTICK_THREAD
+ 	SDL_SetHint(SDL_HINT_JOYSTICK_THREAD, "1");
++#endif
+ 
+ 	SDL_InitSubSystem(SDL_INIT_EVENTS);
+ 	SDL_AddEventWatch(Input_OnSDLEvent, nullptr);

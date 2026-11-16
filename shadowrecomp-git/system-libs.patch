@@ -1,0 +1,111 @@
+diff --git i/CMakeLists.txt w/CMakeLists.txt
+index a97d841..af85ccd 100644
+--- i/CMakeLists.txt
++++ w/CMakeLists.txt
+@@ -3,11 +3,15 @@
+ #
+ cmake_minimum_required (VERSION 3.20)
+ 
+-if(NOT DEFINED ENV{VCPKG_ROOT})
+-    message(FATAL_ERROR "VCPKG_ROOT is not defined!")
+-endif()
++option(SHADOW_RECOMP_USE_SYSTEM_LIBS "Use system libraries instead of vcpkg and vendored copies" OFF)
+ 
+-include($ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
++if(NOT SHADOW_RECOMP_USE_SYSTEM_LIBS)
++    if(NOT DEFINED ENV{VCPKG_ROOT})
++        message(FATAL_ERROR "VCPKG_ROOT is not defined!")
++    endif()
++
++    include($ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
++endif()
+ 
+ if(VCPKG_TARGET_TRIPLET MATCHES "static")
+     set(VCPKG_APPLOCAL_DEPS OFF)
+@@ -29,6 +33,35 @@ set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+ 
+ project ("ShadowRecomp-ALL")
+ 
++if(SHADOW_RECOMP_USE_SYSTEM_LIBS)
++    find_package(PkgConfig REQUIRED)
++    find_package(fmt REQUIRED)
++    find_package(tomlplusplus REQUIRED)
++    find_package(SDL3 REQUIRED CONFIG)
++    find_package(SDL3_mixer REQUIRED CONFIG)
++
++    # FetchContent would otherwise clone nlohmann_json at configure time.
++    set(FETCHCONTENT_TRY_FIND_PACKAGE_MODE ALWAYS)
++
++    pkg_check_modules(xxHash REQUIRED IMPORTED_TARGET GLOBAL libxxhash)
++    add_library(xxHash::xxhash ALIAS PkgConfig::xxHash)
++    pkg_check_modules(zstd REQUIRED IMPORTED_TARGET GLOBAL libzstd)
++    add_library(libzstd ALIAS PkgConfig::zstd)
++    add_library(libzstd_static ALIAS PkgConfig::zstd)
++    if(NOT TARGET SDL3::SDL3-static)
++        add_library(SDL3::SDL3-static ALIAS SDL3::SDL3-shared)
++    endif()
++
++    find_program(DIRECTX_DXC_TOOL dxc REQUIRED)
++    find_library(DIRECTX_DXCOMPILER_LIB dxcompiler REQUIRED)
++    find_path(DIRECTX_DXC_INCLUDE dxcapi.h PATH_SUFFIXES dxc REQUIRED)
++    add_library(Microsoft::DirectXShaderCompiler SHARED IMPORTED GLOBAL)
++    set_target_properties(Microsoft::DirectXShaderCompiler PROPERTIES
++        IMPORTED_LOCATION "${DIRECTX_DXCOMPILER_LIB}"
++        INTERFACE_INCLUDE_DIRECTORIES "${DIRECTX_DXC_INCLUDE}"
++    )
++endif()
++
+ # Ship symbols with release builds (for now)
+ if (MSVC)
+     # To generate PDB needs DEBUG, but doing so disables REF, ICF (re-enabling).
+@@ -45,11 +78,15 @@ endif()
+ string(TOLOWER "${SHADOW_RECOMP_ARCHITECTURE}" SHADOW_RECOMP_ARCHITECTURE)
+ message(STATUS "Detected architecture: ${SHADOW_RECOMP_ARCHITECTURE}")
+ 
++# Later options win, so only supply CPU defaults the user's flags don't already
++# decide. An explicit -march also implies its own tuning.
+ if (SHADOW_RECOMP_ARCHITECTURE STREQUAL "x86_64" OR SHADOW_RECOMP_ARCHITECTURE STREQUAL "amd64")
+-    add_compile_options(
+-        -march=sandybridge # You have a puter made after 2011, right?
+-        -mtune=znver4      # Most probably have one circa 2022-2023
+-    )
++    if (NOT CMAKE_CXX_FLAGS MATCHES "-march=")
++        add_compile_options(-march=sandybridge) # You have a puter made after 2011, right?
++        if (NOT CMAKE_CXX_FLAGS MATCHES "-mtune=")
++            add_compile_options(-mtune=znver4) # Most probably have one circa 2022-2023
++        endif()
++    endif()
+ endif()
+ 
+ # Sewer says: Don't clear used registers before every return.
+diff --git i/thirdparty/CMakeLists.txt w/thirdparty/CMakeLists.txt
+index 3344974..d023016 100644
+--- i/thirdparty/CMakeLists.txt
++++ w/thirdparty/CMakeLists.txt
+@@ -5,6 +5,12 @@ set(MSDF_ATLAS_USE_SKIA OFF)
+ set(MSDF_ATLAS_NO_ARTERY_FONT ON)
+ set(MSDFGEN_DISABLE_PNG ON)
+ 
++if (SHADOW_RECOMP_USE_SYSTEM_LIBS)
++    set(MSDF_ATLAS_USE_VCPKG OFF)
++    # Font atlases are built from TTF only, so skip the tinyxml2 dependency.
++    set(MSDFGEN_DISABLE_SVG ON)
++endif()
++
+ set(SDL_TEST_LIBRARY OFF)
+ 
+ set(SDLMIXER_DEPS_SHARED OFF)
+@@ -32,6 +38,10 @@ add_subdirectory("${SHADOW_RECOMP_THIRDPARTY_ROOT}/msdf-atlas-gen")
+ 
+ add_subdirectory("${SHADOW_RECOMP_THIRDPARTY_ROOT}/discord-rpc")
+ add_subdirectory("${SHADOW_RECOMP_THIRDPARTY_ROOT}/o1heap")
+-add_subdirectory("${SHADOW_RECOMP_THIRDPARTY_ROOT}/SDL")
+-add_subdirectory("${SHADOW_RECOMP_THIRDPARTY_ROOT}/SDL_mixer")
++if (NOT TARGET SDL3::SDL3-static)
++    add_subdirectory("${SHADOW_RECOMP_THIRDPARTY_ROOT}/SDL")
++endif()
++if (NOT TARGET SDL3_mixer::SDL3_mixer)
++    add_subdirectory("${SHADOW_RECOMP_THIRDPARTY_ROOT}/SDL_mixer")
++endif()
+ add_subdirectory("${SHADOW_RECOMP_THIRDPARTY_ROOT}/plume")
+\ No newline at end of file
