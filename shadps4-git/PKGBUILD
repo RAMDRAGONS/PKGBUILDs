@@ -1,7 +1,8 @@
 # Maintainer: Alexandre Bouvier <contact@amb.tf>
+# Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
 _pkgname=shadps4
 pkgname=$_pkgname-git
-pkgver=0.20.0.r46.g8d50471
+pkgver=0.21.0.r81.g7c0b846
 pkgrel=1
 pkgdesc="Sony PlayStation 4 emulator (CLI)"
 arch=('aarch64' 'x86_64')
@@ -119,6 +120,8 @@ prepare() {
 	sed -i 's|<fmt/core\.h>|<fmt/format.h>|' src/core/loader/elf.cpp
 	# fix missing cstring in types.h for clang/gcc 15+
 	sed -i '/#include <cstdint>/a #include <cstring>' src/common/types.h
+	# fix httplib ambiguous Get overload
+	sed -i 's|api\.Get(path, {{\("Authorization".*\)}});|api.Get(path, httplib::Headers{{\1}});|' src/core/libraries/np/np_handler/np_handler_profile.cpp
 }
 
 build() {
