@@ -1,15 +1,43 @@
 # Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
 
 pkgname=marathonrecomp-git
-pkgver=r971.1e05f7dc
+_pkgname=MarathonRecomp
+_appid=io.github.sonicnext_dev.marathonrecomp
+pkgver=1.0.0.r13.gf52da1c
 pkgrel=1
 pkgdesc="An unofficial PC port of the Xbox 360 version of Sonic the Hedgehog (2006) created through the process of static recompilation. (Git version)"
 arch=('x86_64')
 url="https://github.com/sonicnext-dev/MarathonRecomp"
-license=('GPL3')
-depends=('sdl3' 'sdl3_mixer' 'fmt' 'tomlplusplus' 'xxhash' 'zstd' 'curl')
-makedepends=('git' 'cmake' 'ninja' 'clang' 'lld')
-source=('git+https://github.com/sonicnext-dev/MarathonRecomp.git'
+license=('GPL-3.0-or-later')
+depends=('curl' 'fmt' 'sdl3' 'sdl3_mixer' 'tomlplusplus' 'xxhash' 'zstd')
+makedepends=('clang' 'cmake' 'git' 'lld' 'ninja' 'pkgconf' 'vulkan-headers')
+provides=("marathonrecomp=${pkgver}")
+conflicts=('marathonrecomp')
+source=("git+https://github.com/sonicnext-dev/MarathonRecomp.git"
+        "git+https://github.com/sonicnext-dev/MarathonRecompResources"
+        "git+https://github.com/cameron314/concurrentqueue"
+        "git+https://github.com/redorav/ddspp.git"
+        "git+https://github.com/sonicnext-dev/ffmpeg-core"
+        "git+https://github.com/ocornut/imgui"
+        "git+https://github.com/epezent/implot"
+        "git+https://github.com/nlohmann/json"
+        "git+https://github.com/Neargye/magic_enum"
+        "git+https://github.com/Chlumsky/msdf-atlas-gen"
+        "git+https://github.com/Chlumsky/artery-font-format"
+        "git+https://github.com/Chlumsky/msdfgen"
+        "git+https://github.com/btzy/nativefiledialog-extended"
+        "git+https://github.com/renderbag/plume.git"
+        "git+https://github.com/zeux/volk"
+        "git+https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator"
+        "git+https://github.com/nothings/stb"
+        "git+https://github.com/martinus/unordered_dense.git"
+        "git+https://github.com/sonicnext-dev/XenonRecomp.git"
+        "git+https://github.com/kyz/libmspack.git"
+        "git+https://github.com/simd-everywhere/simde-no-tests.git"
+        "git+https://github.com/kokke/tiny-AES-c"
+        "git+https://github.com/sonicnext-dev/XenosRecomp.git"
+        "git+https://github.com/renderbag/dxc-bin.git"
+        "git+https://github.com/aras-p/smol-v"
         'system-libs.patch'
         'fmt-10-compat.patch'
         'guestbasetexture-destructor.patch'
@@ -17,6 +45,30 @@ source=('git+https://github.com/sonicnext-dev/MarathonRecomp.git'
         'shader.arc'
         'shader_lt.arc')
 sha256sums=('SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
             'ab2b895cac837993e4937ae26b031265cf57fc14c83cfa618a8df9578d86373f'
             '7a8e6450e7b22fd1d9c4a2048beb58f3fedecb2bebb5f183bdf14722f7315a27'
             'a711d0f02fc56a8f76f43d7e469d7287a77eb4f8cd1718a8a3cbd3befc94286b'
@@ -24,19 +76,61 @@ sha256sums=('SKIP'
             '1bc8fd8d7a879ec6dcef4321ff19b8cbb05fabfc127f063ad56c9a7214e52ae2'
             'ca08119e9ee97e6a6fc4e2d48ad9492412d710f6ee8480e6a5318aa922659011')
 
+# Points the listed submodules (path=source-dir) of a checkout at the local
+# clones in $srcdir. Unlisted ones (vendored SDL, SDL_mixer, fmt, tomlplusplus,
+# xxHash, zstd, vcpkg...) stay uninitialized because system packages replace them.
+_submodules() {
+  local _dir=$1 _entry
+  shift
+  git -C "$_dir" submodule init "${@%%=*}"
+  for _entry in "$@"; do
+    git -C "$_dir" config "submodule.${_entry%%=*}.url" "$srcdir/${_entry#*=}"
+  done
+  git -C "$_dir" -c protocol.file.allow=always submodule update --force "${@%%=*}"
+}
+
 pkgver() {
-  cd MarathonRecomp
-  if git describe --long --tags >/dev/null 2>&1; then
-    git describe --long --tags | sed 's/^v//;s/\([^-]*-g\)/r\1/;s/-/./g'
-  else
-    printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
-  fi
+  cd "$_pkgname"
+  ( set -o pipefail
+    git describe --long --tags --abbrev=7 2>/dev/null |
+      sed 's/^v//;s/\([^-]*-g\)/r\1/;s/-/./g' ||
+    printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short=7 HEAD)"
+  )
 }
 
 prepare() {
-  cd MarathonRecomp
-  git submodule update --init --recursive --force
-  git submodule foreach --recursive git reset --hard
+  cd "$_pkgname"
+
+  _submodules . \
+    MarathonRecompResources=MarathonRecompResources \
+    thirdparty/concurrentqueue=concurrentqueue \
+    thirdparty/ddspp=ddspp \
+    thirdparty/ffmpeg-core=ffmpeg-core \
+    thirdparty/imgui=imgui \
+    thirdparty/implot=implot \
+    thirdparty/json=json \
+    thirdparty/magic_enum=magic_enum \
+    thirdparty/msdf-atlas-gen=msdf-atlas-gen \
+    thirdparty/nativefiledialog-extended=nativefiledialog-extended \
+    thirdparty/plume=plume \
+    thirdparty/stb=stb \
+    thirdparty/unordered_dense=unordered_dense \
+    tools/XenonRecomp=XenonRecomp \
+    tools/XenosRecomp=XenosRecomp
+  _submodules thirdparty/msdf-atlas-gen \
+    artery-font-format=artery-font-format \
+    msdfgen=msdfgen
+  _submodules thirdparty/plume \
+    contrib/volk=volk \
+    contrib/VulkanMemoryAllocator=VulkanMemoryAllocator
+  _submodules tools/XenonRecomp \
+    thirdparty/libmspack=libmspack \
+    thirdparty/simde=simde-no-tests \
+    thirdparty/tiny-AES-c=tiny-AES-c
+  _submodules tools/XenosRecomp \
+    thirdparty/dxc-bin=dxc-bin \
+    thirdparty/smol-v=smol-v
+
   patch -Np1 -i "$srcdir/system-libs.patch"
   patch -Np1 -i "$srcdir/fmt-10-compat.patch"
   patch -Np1 -i "$srcdir/guestbasetexture-destructor.patch"
@@ -45,7 +139,7 @@ prepare() {
 }
 
 build() {
-  cd MarathonRecomp
+  cd "$_pkgname"
   export CC=clang
   export CXX=clang++
   export LDFLAGS="-fuse-ld=lld $LDFLAGS"
@@ -57,9 +151,10 @@ build() {
 }
 
 package() {
-  cd MarathonRecomp
+  cd "$_pkgname"
   install -Dm755 build/MarathonRecomp/MarathonRecomp "$pkgdir/usr/bin/marathonrecomp"
-  install -Dm644 MarathonRecompResources/images/game_icon.png "$pkgdir/usr/share/icons/hicolor/128x128/apps/io.github.sonicnext_dev.marathonrecomp.png"
-  install -Dm644 flatpak/io.github.sonicnext_dev.marathonrecomp.desktop "$pkgdir/usr/share/applications/io.github.sonicnext_dev.marathonrecomp.desktop"
-  sed -i 's|Exec=/app/bin/MarathonRecomp|Exec=marathonrecomp|' "$pkgdir/usr/share/applications/io.github.sonicnext_dev.marathonrecomp.desktop"
+  install -Dm644 MarathonRecompResources/images/game_icon.png "$pkgdir/usr/share/icons/hicolor/128x128/apps/$_appid.png"
+  install -Dm644 "flatpak/$_appid.metainfo.xml" "$pkgdir/usr/share/metainfo/$_appid.metainfo.xml"
+  install -Dm644 "flatpak/$_appid.desktop" "$pkgdir/usr/share/applications/$_appid.desktop"
+  sed -i 's|Exec=/app/bin/MarathonRecomp|Exec=marathonrecomp|' "$pkgdir/usr/share/applications/$_appid.desktop"
 }
