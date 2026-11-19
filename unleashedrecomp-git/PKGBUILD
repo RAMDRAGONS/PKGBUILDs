@@ -1,15 +1,43 @@
 # Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
 
 pkgname=unleashedrecomp-git
-pkgver=1.0.3.r11.gcf829a9
+_pkgname=UnleashedRecomp
+_appid=io.github.hedge_dev.unleashedrecomp
+pkgver=1.0.3.r13.g700bbd2
 pkgrel=1
 pkgdesc="An unofficial PC port of the Xbox 360 version of Sonic Unleashed created through the process of static recompilation. (Git version)"
 arch=('x86_64')
 url="https://github.com/hedge-dev/UnleashedRecomp"
-license=('GPL3')
-depends=('sdl2' 'sdl2_mixer' 'fmt' 'tomlplusplus' 'xxhash' 'zstd')
-makedepends=('git' 'cmake' 'ninja' 'clang' 'lld')
-source=('git+https://github.com/hedge-dev/UnleashedRecomp.git'
+license=('GPL-3.0-or-later')
+depends=('curl' 'fmt' 'sdl2' 'sdl2_mixer' 'tomlplusplus' 'xxhash' 'zstd')
+makedepends=('clang' 'cmake' 'git' 'lld' 'ninja' 'pkgconf' 'vulkan-headers')
+provides=("unleashedrecomp=${pkgver}")
+conflicts=('unleashedrecomp')
+source=("git+https://github.com/hedge-dev/UnleashedRecomp.git"
+        "git+https://github.com/hedge-dev/UnleashedRecompResources.git"
+        "git+https://github.com/hedge-dev/SWA.git"
+        "git+https://github.com/cameron314/concurrentqueue"
+        "git+https://github.com/redorav/ddspp.git"
+        "git+https://github.com/ocornut/imgui"
+        "git+https://github.com/epezent/implot"
+        "git+https://github.com/nlohmann/json"
+        "git+https://github.com/Neargye/magic_enum"
+        "git+https://github.com/Chlumsky/msdf-atlas-gen"
+        "git+https://github.com/Chlumsky/artery-font-format"
+        "git+https://github.com/Chlumsky/msdfgen"
+        "git+https://github.com/btzy/nativefiledialog-extended"
+        "git+https://github.com/renderbag/plume.git"
+        "git+https://github.com/zeux/volk"
+        "git+https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator"
+        "git+https://github.com/nothings/stb"
+        "git+https://github.com/martinus/unordered_dense.git"
+        "git+https://github.com/hedge-dev/XenonRecomp.git"
+        "git+https://github.com/kyz/libmspack.git"
+        "git+https://github.com/simd-everywhere/simde-no-tests.git"
+        "git+https://github.com/kokke/tiny-AES-c"
+        "git+https://github.com/hedge-dev/XenosRecomp.git"
+        "git+https://github.com/renderbag/dxc-bin.git"
+        "git+https://github.com/aras-p/smol-v"
         'xdg-basedir.patch'
         'system-libs.patch'
         '1519.patch'
@@ -23,6 +51,30 @@ source=('git+https://github.com/hedge-dev/UnleashedRecomp.git'
         'default.xexp'
         'shader.ar')
 sha256sums=('SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
             'bd689283161308d5c0727b4dc49e3fb72ea11a3908eee6a63e15d778b85267c3'
             'b0a7db71fbb041399cf0a03ae93dd4600ae80d1ab15b7598adb8e78dbeecd21b'
             '57c8014435dffd1da789f6a8b13216f8203369cb04fa629d157cb4618f56831b'
@@ -36,14 +88,61 @@ sha256sums=('SKIP'
             '8cbc696f70f5b518da2ce2e27c7303e2ea9c49e63045b6315a9cc7c98fa3b700'
             'e5eff2b0efabd6c4aff6c563329232810271526e4fd0abf2de2f7730db8b63e5')
 
+# Points the listed submodules (path=source-dir) of a checkout at the local
+# clones in $srcdir. Unlisted ones (vendored SDL, SDL_mixer, fmt, tomlplusplus,
+# xxHash, zstd, MoltenVK, vcpkg...) stay uninitialized because system packages replace them.
+_submodules() {
+  local _dir=$1 _entry
+  shift
+  git -C "$_dir" submodule init "${@%%=*}"
+  for _entry in "$@"; do
+    git -C "$_dir" config "submodule.${_entry%%=*}.url" "$srcdir/${_entry#*=}"
+  done
+  git -C "$_dir" -c protocol.file.allow=always submodule update --force "${@%%=*}"
+}
+
 pkgver() {
-  cd UnleashedRecomp
-  git describe --long --tags | sed 's/^v//;s/\([^-]*-g\)/r\1/;s/-/./g'
+  cd "$_pkgname"
+  ( set -o pipefail
+    git describe --long --tags --abbrev=7 2>/dev/null |
+      sed 's/^v//;s/\([^-]*-g\)/r\1/;s/-/./g' ||
+    printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short=7 HEAD)"
+  )
 }
 
 prepare() {
-  cd UnleashedRecomp
-  git submodule update --init --recursive
+  cd "$_pkgname"
+
+  _submodules . \
+    UnleashedRecomp/api=SWA \
+    UnleashedRecompResources=UnleashedRecompResources \
+    thirdparty/concurrentqueue=concurrentqueue \
+    thirdparty/ddspp=ddspp \
+    thirdparty/imgui=imgui \
+    thirdparty/implot=implot \
+    thirdparty/json=json \
+    thirdparty/magic_enum=magic_enum \
+    thirdparty/msdf-atlas-gen=msdf-atlas-gen \
+    thirdparty/nativefiledialog-extended=nativefiledialog-extended \
+    thirdparty/plume=plume \
+    thirdparty/stb=stb \
+    thirdparty/unordered_dense=unordered_dense \
+    tools/XenonRecomp=XenonRecomp \
+    tools/XenosRecomp=XenosRecomp
+  _submodules thirdparty/msdf-atlas-gen \
+    artery-font-format=artery-font-format \
+    msdfgen=msdfgen
+  _submodules thirdparty/plume \
+    contrib/volk=volk \
+    contrib/VulkanMemoryAllocator=VulkanMemoryAllocator
+  _submodules tools/XenonRecomp \
+    thirdparty/libmspack=libmspack \
+    thirdparty/simde=simde-no-tests \
+    thirdparty/tiny-AES-c=tiny-AES-c
+  _submodules tools/XenosRecomp \
+    thirdparty/dxc-bin=dxc-bin \
+    thirdparty/smol-v=smol-v
+
   patch -Np1 -i "$srcdir/xdg-basedir.patch"
   patch -Np1 -i "$srcdir/system-libs.patch"
   patch -Np1 -i "$srcdir/1519.patch"
@@ -58,7 +157,7 @@ prepare() {
 }
 
 build() {
-  cd UnleashedRecomp
+  cd "$_pkgname"
   export CC=clang
   export CXX=clang++
   cmake -B build -G Ninja \
@@ -69,9 +168,10 @@ build() {
 }
 
 package() {
-  cd UnleashedRecomp
+  cd "$_pkgname"
   install -Dm755 build/UnleashedRecomp/UnleashedRecomp "$pkgdir/usr/bin/unleashedrecomp"
-  install -Dm644 UnleashedRecompResources/images/game_icon.png "$pkgdir/usr/share/icons/hicolor/128x128/apps/io.github.hedge_dev.unleashedrecomp.png"
-  install -Dm644 flatpak/io.github.hedge_dev.unleashedrecomp.desktop "$pkgdir/usr/share/applications/io.github.hedge_dev.unleashedrecomp.desktop"
-  sed -i 's|Exec=/app/bin/UnleashedRecomp|Exec=unleashedrecomp|' "$pkgdir/usr/share/applications/io.github.hedge_dev.unleashedrecomp.desktop"
+  install -Dm644 UnleashedRecompResources/images/game_icon.png "$pkgdir/usr/share/icons/hicolor/128x128/apps/$_appid.png"
+  install -Dm644 "flatpak/$_appid.metainfo.xml" "$pkgdir/usr/share/metainfo/$_appid.metainfo.xml"
+  install -Dm644 "flatpak/$_appid.desktop" "$pkgdir/usr/share/applications/$_appid.desktop"
+  sed -i 's|Exec=/app/bin/UnleashedRecomp|Exec=unleashedrecomp|' "$pkgdir/usr/share/applications/$_appid.desktop"
 }
