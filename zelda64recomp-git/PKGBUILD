@@ -7,7 +7,7 @@
 _reponame=Zelda64Recomp
 _pkgname=${_reponame,,}
 pkgname=${_pkgname}-git
-pkgver=1.2.2.r4.g1a9c266
+pkgver=1.2.2.r6.gb65c482
 _zrecomp_dirname="${_reponame}"
 pkgrel=1
 arch=("x86_64" "aarch64")
@@ -47,7 +47,7 @@ source=("git+${url}.git#branch=dev"
 
         # Tools for building MM elf and generating static recomps
         "git+https://github.com/z64tools/z64decompress.git"
-        "git+https://github.com/N64Recomp/N64Recomp.git"
+        "git+https://github.com/N64Recomp/N64Recomp.git#commit=a13e5cff96686776b0e03baf23923e3c1927b770"
 
         # N64Recomp dependencies
         "git+https://github.com/Decompollaborate/rabbitizer.git"
@@ -136,7 +136,7 @@ _walk_submodules() {
         # Initialize and update submodule
         git submodule init "${dir}"
         git config "submodule.${dir}.url" "${srcdir}/${basedir}"
-        git -c protocol.file.allow=always submodule update "${dir}"
+        git -c protocol.file.allow=always submodule update --force "${dir}"
 
         ( cd "$dir" && _walk_submodules; )
     done <<< "$submodules"
@@ -183,22 +183,27 @@ prepare() {
   # 1. Patch both copies of N64Recomp for system fmt and tomlplusplus, and modern clang compatibility
   for dir in "${srcdir}/N64Recomp" "${srcdir}/${_zrecomp_dirname}/lib/N64ModernRuntime/N64Recomp"; do
     cd "$dir"
+    git checkout -f -- CMakeLists.txt 2>/dev/null || true
+    [[ -f src/mdebug.cpp ]] && git checkout -f -- src/mdebug.cpp 2>/dev/null || true
     sed -i 's|add_subdirectory(lib/fmt)|find_package(fmt REQUIRED)|' CMakeLists.txt
     sed -i '/set(TOML_ENABLE_FORMATTERS OFF)/d' CMakeLists.txt
     sed -i 's|add_subdirectory(lib/tomlplusplus)|find_package(tomlplusplus REQUIRED)|' CMakeLists.txt
     
-    sed -i 's/\bSymbolLists fmt\b/SymbolLists fmt::fmt/g' CMakeLists.txt
-    sed -i 's/\bN64RecompElf fmt\b/N64RecompElf fmt::fmt/g' CMakeLists.txt
-    sed -i 's/\bN64RecompCLI fmt\b/N64RecompCLI fmt::fmt/g' CMakeLists.txt
-    sed -i 's/\bRSPRecomp fmt\b/RSPRecomp fmt::fmt/g' CMakeLists.txt
-    sed -i 's/\bRecompModTool fmt\b/RecompModTool fmt::fmt/g' CMakeLists.txt
-    sed -i 's/\bOfflineModRecomp fmt\b/OfflineModRecomp fmt::fmt/g' CMakeLists.txt
+    sed -i '/fmt::fmt/!s/\bSymbolLists fmt\b/SymbolLists fmt::fmt/g' CMakeLists.txt
+    sed -i '/fmt::fmt/!s/\bN64RecompElf fmt\b/N64RecompElf fmt::fmt/g' CMakeLists.txt
+    sed -i '/fmt::fmt/!s/\bN64RecompCLI fmt\b/N64RecompCLI fmt::fmt/g' CMakeLists.txt
+    sed -i '/fmt::fmt/!s/\bRSPRecomp fmt\b/RSPRecomp fmt::fmt/g' CMakeLists.txt
+    sed -i '/fmt::fmt/!s/\bRecompModTool fmt\b/RecompModTool fmt::fmt/g' CMakeLists.txt
+    sed -i '/fmt::fmt/!s/\bOfflineModRecomp fmt\b/OfflineModRecomp fmt::fmt/g' CMakeLists.txt
     
-    [[ -f src/mdebug.cpp ]] && sed -i '1s|^|#include <cstring>\n|' src/mdebug.cpp
+    if [[ -f src/mdebug.cpp ]] && ! grep -q '#include <cstring>' src/mdebug.cpp; then
+      sed -i '1s|^|#include <cstring>\n|' src/mdebug.cpp
+    fi
   done
 
   # 2. Patch rt64 for system zstd and compiler warning fixes
   cd "${srcdir}/${_zrecomp_dirname}/lib/rt64"
+  git checkout -f -- CMakeLists.txt src/tools/texture_packer/CMakeLists.txt 2>/dev/null || true
   sed -i 's/add_compile_options(-Werror)//g' CMakeLists.txt
   sed -i 's|add_subdirectory(src/contrib/zstd/build/cmake)||g' CMakeLists.txt
   sed -i 's|target_link_libraries(rt64 libzstd_static)|find_library(ZSTD_LIBRARY NAMES zstd REQUIRED)\ntarget_link_libraries(rt64 ${ZSTD_LIBRARY})|g' CMakeLists.txt
@@ -208,22 +213,28 @@ prepare() {
   
   # 3. Patch re-spirv (submodule of rt64) for system SPIRV-Headers
   cd "${srcdir}/${_zrecomp_dirname}/lib/rt64/src/contrib/re-spirv"
+  git checkout -f -- CMakeLists.txt 2>/dev/null || true
   sed -i '/if (NOT DEFINED SPIRV-Headers_SOURCE_DIR)/,/endif()/d' CMakeLists.txt
   sed -i '/set(SPIRV_HEADER_DIR ${SPIRV-Headers_SOURCE_DIR})/d' CMakeLists.txt
   sed -i 's|target_include_directories(re-spirv PUBLIC ${SPIRV_HEADER_DIR}/include)|find_package(SPIRV-Headers REQUIRED)\ntarget_link_libraries(re-spirv PUBLIC SPIRV-Headers::SPIRV-Headers)|g' CMakeLists.txt
   # 4. Patch MIPS patches Makefile for newer Clang compatibility
   # Clang 16+ treats -Wincompatible-pointer-types as an error by default
   cd "${srcdir}/${_zrecomp_dirname}/patches"
+  git checkout -f -- Makefile 2>/dev/null || true
   sed -i 's/-Wno-unsupported-floating-point-opt/-Wno-unsupported-floating-point-opt -Wno-error=incompatible-pointer-types/' Makefile
 
   # 5. Patch RmlUi robin_hood.h for missing <cstdint> (needed by newer compilers)
-  sed -i '/#include <cstring>/a #include <cstdint>' \
-    "${srcdir}/${_zrecomp_dirname}/lib/RmlUi/Include/RmlUi/Core/Containers/robin_hood.h"
+  git -C "${srcdir}/${_zrecomp_dirname}/lib/RmlUi" checkout -f -- Include/RmlUi/Core/Containers/robin_hood.h 2>/dev/null || true
+  if ! grep -q '#include <cstdint>' "${srcdir}/${_zrecomp_dirname}/lib/RmlUi/Include/RmlUi/Core/Containers/robin_hood.h"; then
+    sed -i '/#include <cstring>/a #include <cstdint>' \
+      "${srcdir}/${_zrecomp_dirname}/lib/RmlUi/Include/RmlUi/Core/Containers/robin_hood.h"
+  fi
 
   # 6. Patch Zelda64Recomp CMakeLists.txt to dynamically link libstdc++ and respect user's CPU target flag
   # Mixing static libstdc++ with system C++ shared libraries (fmt, tomlplusplus) causes segmentation faults.
   # Hardcoding -march=nehalem on the main executable causes alignment mismatches (GPF) with static libraries compiled under native/v3 instruction sets.
   cd "${srcdir}/${_zrecomp_dirname}"
+  git checkout -f -- CMakeLists.txt 2>/dev/null || true
   sed -i 's|-latomic -static-libstdc++|-latomic|g' CMakeLists.txt
   sed -i '/-march=nehalem/d' CMakeLists.txt
 }
@@ -258,6 +269,9 @@ build() {
 
 
   cd "${srcdir}/${_zrecomp_dirname}"
+
+  # Clean any previously generated recomp/patch files in case of incremental rebuilds
+  rm -rf RecompiledFuncs RecompiledPatches
 
   echo "  -> Generating recomp functions..."
   ./RSPRecomp aspMain.us.rev1.toml

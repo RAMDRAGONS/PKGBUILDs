@@ -1,6 +1,6 @@
 pkgbase = zelda64recomp-git
 	pkgdesc = A port of The Legend of Zelda Majora's Mask made possible by static recompilation (git)
-	pkgver = 1.2.2.r4.g1a9c266
+	pkgver = 1.2.2.r6.gb65c482
 	pkgrel = 1
 	url = https://github.com/Zelda64Recomp/Zelda64Recomp
 	arch = x86_64
@@ -50,7 +50,7 @@ pkgbase = zelda64recomp-git
 	source = git+https://github.com/richgel999/miniz.git
 	source = git+https://github.com/N64Recomp/o1heap.git
 	source = git+https://github.com/z64tools/z64decompress.git
-	source = git+https://github.com/N64Recomp/N64Recomp.git
+	source = git+https://github.com/N64Recomp/N64Recomp.git#commit=a13e5cff96686776b0e03baf23923e3c1927b770
 	source = git+https://github.com/Decompollaborate/rabbitizer.git
 	source = git+https://github.com/serge1/ELFIO.git
 	source = git+https://github.com/zherczeg/sljit.git
