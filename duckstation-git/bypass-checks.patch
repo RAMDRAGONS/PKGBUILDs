@@ -1,7 +1,7 @@
-diff --git a/CMakeLists.txt b/CMakeLists.txt
+diff --git i/CMakeLists.txt w/CMakeLists.txt
 index 51d2f48e5..1dbf1e833 100644
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
+--- i/CMakeLists.txt
++++ w/CMakeLists.txt
 @@ -21,7 +21,7 @@ if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
                        "running cmake from the build directory.")
  endif()
@@ -11,10 +11,10 @@ index 51d2f48e5..1dbf1e833 100644
    message(FATAL_ERROR "CMAKE_BUILD_TYPE not set. Please set it first.")
  endif()
  
-diff --git a/CMakeModules/DuckStationBuildSummary.cmake b/CMakeModules/DuckStationBuildSummary.cmake
+diff --git i/CMakeModules/DuckStationBuildSummary.cmake w/CMakeModules/DuckStationBuildSummary.cmake
 index f45fd364b..1eb89976a 100644
---- a/CMakeModules/DuckStationBuildSummary.cmake
-+++ b/CMakeModules/DuckStationBuildSummary.cmake
+--- i/CMakeModules/DuckStationBuildSummary.cmake
++++ w/CMakeModules/DuckStationBuildSummary.cmake
 @@ -30,26 +30,12 @@ if(BUILD_TESTS)
    message(STATUS "[Extra] Building unit tests.")
  endif()
@@ -59,25 +59,41 @@ index f45fd364b..1eb89976a 100644
  endif()
  
  if(CPU_ARCH_X64 AND DISABLE_SSE4)
-diff --git a/src/core/core.cpp b/src/core/core.cpp
-index 7305eb756..56e05ab00 100644
---- a/src/core/core.cpp
-+++ b/src/core/core.cpp
-@@ -701,9 +701,7 @@ bool Core::ProcessStartup(Error* error)
+diff --git i/src/core/core.cpp w/src/core/core.cpp
+index 1100efc23..7ad0c987b 100644
+--- i/src/core/core.cpp
++++ w/src/core/core.cpp
+@@ -698,25 +698,7 @@ bool Core::ProcessStartup(Error* error)
    Achievements::ProcessStartup();
  
  #ifdef __linux__
 -  // Running DuckStation out of /usr is not supported and makes no sense.
 -  if (std::memcmp(EmuFolders::AppRoot.data(), "/usr/", 5) == 0)
 -    return false;
-+  // Runtime /usr/ check bypassed.
+-
+-#if __has_include("scmversion/tag.h") && UPDATER_RELEASE_IS_OFFICIAL
+-  // Official Linux builds are only distributed as AppImages. Repackaging them is not permitted.
+-  if (EmuFolders::AppRoot.starts_with("/app/") || EmuFolders::AppRoot.starts_with("/snap/") ||
+-      FileSystem::FileExists("/.flatpak-info") || std::getenv("FLATPAK_ID") || std::getenv("SNAP"))
+-  {
+-    return false;
+-  }
+-
+-  if (const char* appimage_path = std::getenv("APPIMAGE"); !appimage_path || !FileSystem::FileExists(appimage_path))
+-    return false;
+-
+-  // AppRoot should be on the runtime's FUSE mount.
+-  if (struct statfs sfs; statfs(EmuFolders::AppRoot.c_str(), &sfs) != 0 || sfs.f_type != 0x65735546)
+-    return false;
+-#endif
++  // Runtime checks bypassed.
  #endif
  
    return true;
-diff --git a/src/duckstation-qt/autoupdaterdialog.cpp b/src/duckstation-qt/autoupdaterdialog.cpp
-index 70dc07562..3a508b2cb 100644
---- a/src/duckstation-qt/autoupdaterdialog.cpp
-+++ b/src/duckstation-qt/autoupdaterdialog.cpp
+diff --git i/src/duckstation-qt/autoupdaterdialog.cpp w/src/duckstation-qt/autoupdaterdialog.cpp
+index 353d476e8..c0edb5f82 100644
+--- i/src/duckstation-qt/autoupdaterdialog.cpp
++++ w/src/duckstation-qt/autoupdaterdialog.cpp
 @@ -139,6 +139,7 @@ AutoUpdaterDialog::~AutoUpdaterDialog()
  
  void AutoUpdaterDialog::warnAboutUnofficialBuild()

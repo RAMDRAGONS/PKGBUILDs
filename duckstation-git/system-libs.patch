@@ -192,7 +192,7 @@ index f5f49ef09..c8b87e225 100644
    message(WARNING "FFmpeg not found, using bundled headers.")
    set(FFMPEG_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/dep/ffmpeg/include")
 diff --git i/CMakeModules/DuckStationUtils.cmake w/CMakeModules/DuckStationUtils.cmake
-index f2f96216c..3a9c16bcc 100644
+index 482b65502..2098d665c 100644
 --- i/CMakeModules/DuckStationUtils.cmake
 +++ w/CMakeModules/DuckStationUtils.cmake
 @@ -385,6 +385,7 @@ function(add_resources TARGET DEST_SUBDIR SOURCE_DIR)
@@ -232,6 +232,28 @@ index 8e00c16b4..1638fcfb8 100644
    if (!m_handle)
    {
      const char* err = dlerror();
+diff --git i/src/duckstation-qt/qthost.cpp w/src/duckstation-qt/qthost.cpp
+index 9c4485d21..3a62b2a2a 100644
+--- i/src/duckstation-qt/qthost.cpp
++++ w/src/duckstation-qt/qthost.cpp
+@@ -56,7 +56,7 @@
+ #include "util/postprocessing.h"
+ #include "util/translation.h"
+ 
+-#ifdef __linux__
++#if defined(__linux__) && defined(ENABLE_X11)
+ #include "util/x11_tools.h"
+ #endif
+ 
+@@ -3618,7 +3618,7 @@ int main(int argc, char* argv[])
+   ApplyWaylandWorkarounds();
+ #endif
+ 
+-#ifdef __linux__
++#if defined(__linux__) && defined(ENABLE_X11)
+   // Qt detects auto-repeat by looking for the press after a release in its event queue, which isn't reliable, as the
+   // press may not have been read yet. Missed detections send spurious release/press pairs while a key is held.
+   if (const auto* x11_app = qGuiApp->nativeInterface<QNativeInterface::QX11Application>())
 diff --git i/src/util/dyn_libs.cpp w/src/util/dyn_libs.cpp
 index e695a7908..12b5281ca 100644
 --- i/src/util/dyn_libs.cpp
