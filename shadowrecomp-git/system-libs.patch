@@ -1,28 +1,23 @@
 diff --git i/CMakeLists.txt w/CMakeLists.txt
-index a97d841..af85ccd 100644
+index 2efeb45..42105d7 100644
 --- i/CMakeLists.txt
 +++ w/CMakeLists.txt
-@@ -3,11 +3,15 @@
+@@ -3,8 +3,12 @@
  #
  cmake_minimum_required (VERSION 3.20)
  
 -if(NOT DEFINED ENV{VCPKG_ROOT})
 -    message(FATAL_ERROR "VCPKG_ROOT is not defined!")
--endif()
 +option(SHADOW_RECOMP_USE_SYSTEM_LIBS "Use system libraries instead of vcpkg and vendored copies" OFF)
- 
--include($ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
++
 +if(NOT SHADOW_RECOMP_USE_SYSTEM_LIBS)
 +    if(NOT DEFINED ENV{VCPKG_ROOT})
 +        message(FATAL_ERROR "VCPKG_ROOT is not defined!")
 +    endif()
-+
-+    include($ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
-+endif()
+ endif()
  
- if(VCPKG_TARGET_TRIPLET MATCHES "static")
-     set(VCPKG_APPLOCAL_DEPS OFF)
-@@ -29,6 +33,35 @@ set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+ set(SHADOW_RECOMP_THIRDPARTY_ROOT ${CMAKE_SOURCE_DIR}/thirdparty)
+@@ -23,6 +27,35 @@ set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
  
  project ("ShadowRecomp-ALL")
  
@@ -58,7 +53,7 @@ index a97d841..af85ccd 100644
  # Ship symbols with release builds (for now)
  if (MSVC)
      # To generate PDB needs DEBUG, but doing so disables REF, ICF (re-enabling).
-@@ -45,11 +78,15 @@ endif()
+@@ -39,11 +72,15 @@ endif()
  string(TOLOWER "${SHADOW_RECOMP_ARCHITECTURE}" SHADOW_RECOMP_ARCHITECTURE)
  message(STATUS "Detected architecture: ${SHADOW_RECOMP_ARCHITECTURE}")
  

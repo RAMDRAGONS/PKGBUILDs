@@ -3,7 +3,7 @@
 pkgname=shadowrecomp-git
 _pkgname=ShadowRecomp
 _appid=io.github.foxworkshop.shadowrecomp
-pkgver=1.0.0.r3.g9fcbc85
+pkgver=1.0.1.r12.g02b96a0
 pkgrel=1
 pkgdesc="An unofficial PC port of the Xbox version of Shadow the Hedgehog, created through the process of static recompilation. (Git version)"
 arch=('x86_64')
@@ -65,10 +65,10 @@ sha256sums=('SKIP'
             'SKIP'
             'SKIP'
             'SKIP'
-            '6cf901bda35a18c2b78bcda61e2dfd94148d68a9c6870284cb9a496502c51922'
-            '479de0f3673dc08942a907ec8ab3ed61df3a80fc7c3381d08e814ebd8508c54b'
+            '853a6aec0a647446b9c53fe5ba04b3f3d08e5ab93f5a282768d9b2800b5d2039'
+            'e1ce54b6516dd902cacb61d9f4ba57d26a2a69bf417dac655cf654543a3a597d'
             '04ffb38779ba2a5398c0ded683229e5bdef58a2c4dc816441aa3f107a46aefb4'
-            '800ba00986b87460d0761ccf4479a6859d5f1f08828eb616e9ad9e9bab657a8b'
+            'eda6ba302ea5c6ec382e23227bfa3b7a628c8a41cfaaabce6fb510c0777a73b3'
             '5b16d285d60542d70f9a1e7dc1590aed4d81a4cb87f920e17a5f10b67c07b42c')
 
 # Points the listed submodules (path=source-dir) of a checkout at the local

@@ -1,18 +1,18 @@
 diff --git i/ShadowRecomp/user/paths.cpp w/ShadowRecomp/user/paths.cpp
-index 13a8588..d3fb979 100644
+index e3dbf10..ab1abd0 100644
 --- i/ShadowRecomp/user/paths.cpp
 +++ w/ShadowRecomp/user/paths.cpp
-@@ -33,7 +33,8 @@ std::filesystem::path BuildUserPath()
-     {
+@@ -36,7 +36,8 @@ std::filesystem::path BuildUserPath()
          // Prefer to store in the .config directory if it exists. Use the home directory otherwise.
          std::filesystem::path homePath = homeDir;
+ #if defined(__linux__)
 -        std::filesystem::path configPath = homePath / ".config";
 +        const char* configHome = getenv("XDG_CONFIG_HOME");
 +        std::filesystem::path configPath = (configHome != nullptr && configHome[0] == '/') ? std::filesystem::path(configHome) : homePath / ".config";
-         if (std::filesystem::exists(configPath))
-             userPath = configPath / USER_DIRECTORY;
-         else
-@@ -46,6 +47,42 @@ std::filesystem::path BuildUserPath()
+ #else
+         std::filesystem::path configPath = homePath / "Library" / "Application Support";
+ #endif
+@@ -52,6 +53,44 @@ std::filesystem::path BuildUserPath()
      return userPath;
  }
  
@@ -40,6 +40,8 @@ index 13a8588..d3fb979 100644
 +
 +    if (homeDir != nullptr)
 +        return std::filesystem::path(homeDir) / ".local" / "share" / USER_DIRECTORY;
++#elif defined(__APPLE__)
++    return GetUserPath();
 +#endif
 +
 +    return GAME_INSTALL_DIRECTORY;
@@ -56,23 +58,27 @@ index 13a8588..d3fb979 100644
  {
      return g_userPath;
 diff --git i/ShadowRecomp/user/paths.h w/ShadowRecomp/user/paths.h
-index 23437a8..fa48c7a 100644
+index 620f541..e0fcda4 100644
 --- i/ShadowRecomp/user/paths.h
 +++ w/ShadowRecomp/user/paths.h
-@@ -10,12 +10,11 @@
- 
- extern std::filesystem::path g_executableRoot;
- 
+@@ -13,17 +13,9 @@ extern std::filesystem::path g_executableRoot;
+ bool CheckPortable();
+ std::filesystem::path BuildUserPath();
+ const std::filesystem::path& GetUserPath();
 -inline std::filesystem::path GetGamePath()
 -{
+-#ifdef __APPLE__
+-    // On macOS, there is the expectation that the app may be installed to
+-    // /Applications/, and the bundle should not be modified. Thus we need
+-    // to install game files to the user directory instead of next to the app.
+-    return GetUserPath();
+-#else
 -    return GAME_INSTALL_DIRECTORY;
+-#endif
 -}
--
- bool CheckPortable();
 +
 +std::filesystem::path BuildGamePath();
 +const std::filesystem::path& GetGamePath();
-+
- std::filesystem::path BuildUserPath();
- const std::filesystem::path& GetUserPath();
  
+ inline std::filesystem::path GetSavePath(bool checkForMods)
+ {

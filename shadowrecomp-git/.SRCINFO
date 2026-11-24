@@ -1,6 +1,6 @@
 pkgbase = shadowrecomp-git
-	pkgdesc = Unofficial PC port of Shadow the Hedgehog (2005, Xbox) via static recompilation
-	pkgver = 1.0.0.r3.g9fcbc85
+	pkgdesc = An unofficial PC port of the Xbox version of Shadow the Hedgehog, created through the process of static recompilation. (Git version)
+	pkgver = 1.0.1.r12.g02b96a0
 	pkgrel = 1
 	url = https://github.com/FoxWorkshop/ShadowRecomp
 	arch = x86_64
@@ -29,7 +29,7 @@ pkgbase = shadowrecomp-git
 	depends = vulkan-icd-loader
 	depends = xxhash
 	depends = zstd
-	provides = shadowrecomp=1.0.0.r3.g9fcbc85
+	provides = shadowrecomp=1.0.1.r12.g02b96a0
 	conflicts = shadowrecomp
 	source = git+https://github.com/FoxWorkshop/ShadowRecomp.git
 	source = git+https://github.com/FoxWorkshop/ShadowRecompResources
@@ -80,10 +80,10 @@ pkgbase = shadowrecomp-git
 	sha256sums = SKIP
 	sha256sums = SKIP
 	sha256sums = SKIP
-	sha256sums = 6cf901bda35a18c2b78bcda61e2dfd94148d68a9c6870284cb9a496502c51922
-	sha256sums = 479de0f3673dc08942a907ec8ab3ed61df3a80fc7c3381d08e814ebd8508c54b
+	sha256sums = 853a6aec0a647446b9c53fe5ba04b3f3d08e5ab93f5a282768d9b2800b5d2039
+	sha256sums = e1ce54b6516dd902cacb61d9f4ba57d26a2a69bf417dac655cf654543a3a597d
 	sha256sums = 04ffb38779ba2a5398c0ded683229e5bdef58a2c4dc816441aa3f107a46aefb4
-	sha256sums = 800ba00986b87460d0761ccf4479a6859d5f1f08828eb616e9ad9e9bab657a8b
+	sha256sums = eda6ba302ea5c6ec382e23227bfa3b7a628c8a41cfaaabce6fb510c0777a73b3
 	sha256sums = 5b16d285d60542d70f9a1e7dc1590aed4d81a4cb87f920e17a5f10b67c07b42c
 
 pkgname = shadowrecomp-git
