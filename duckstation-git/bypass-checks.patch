@@ -12,10 +12,10 @@ index 51d2f48e5..1dbf1e833 100644
  endif()
  
 diff --git i/CMakeModules/DuckStationBuildSummary.cmake w/CMakeModules/DuckStationBuildSummary.cmake
-index f45fd364b..1eb89976a 100644
+index 0b920c26d..b65df1846 100644
 --- i/CMakeModules/DuckStationBuildSummary.cmake
 +++ w/CMakeModules/DuckStationBuildSummary.cmake
-@@ -30,26 +30,12 @@ if(BUILD_TESTS)
+@@ -24,26 +24,12 @@ if(BUILD_TESTS)
    message(STATUS "[Extra] Building unit tests.")
  endif()
  
@@ -45,7 +45,7 @@ index f45fd364b..1eb89976a 100644
  elseif(DEFINED HOST_PAGE_SIZE)
    message(STATUS "Building with detected page size of ${HOST_PAGE_SIZE}")
  endif()
-@@ -58,12 +44,7 @@ if(DEFINED HOST_CACHE_LINE_SIZE)
+@@ -52,12 +38,7 @@ if(DEFINED HOST_CACHE_LINE_SIZE)
  endif()
  
  if(NOT IS_SUPPORTED_COMPILER)
@@ -91,10 +91,10 @@ index 1100efc23..7ad0c987b 100644
  
    return true;
 diff --git i/src/duckstation-qt/autoupdaterdialog.cpp w/src/duckstation-qt/autoupdaterdialog.cpp
-index 353d476e8..c0edb5f82 100644
+index e8262b164..d2d0a7db9 100644
 --- i/src/duckstation-qt/autoupdaterdialog.cpp
 +++ w/src/duckstation-qt/autoupdaterdialog.cpp
-@@ -139,6 +139,7 @@ AutoUpdaterDialog::~AutoUpdaterDialog()
+@@ -137,6 +137,7 @@ AutoUpdaterDialog::~AutoUpdaterDialog()
  
  void AutoUpdaterDialog::warnAboutUnofficialBuild()
  {

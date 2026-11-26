@@ -1,8 +1,8 @@
 diff --git i/CMakeModules/DuckStationDependencies.cmake w/CMakeModules/DuckStationDependencies.cmake
-index f5f49ef09..c8b87e225 100644
+index 8c11e5d8f..8934ca02c 100644
 --- i/CMakeModules/DuckStationDependencies.cmake
 +++ w/CMakeModules/DuckStationDependencies.cmake
-@@ -5,33 +5,9 @@
+@@ -5,31 +5,9 @@
  # packages or build recipes without explicit permission from the copyright holder.
  
  # Get prebuilt dependencies for the current platform and architecture.
@@ -21,8 +21,6 @@ index f5f49ef09..c8b87e225 100644
 -    set(DEPS_PATH "${CMAKE_SOURCE_DIR}/dep/prebuilt/linux${DEPS_CROSS_PREFIX}-armhf")
 -  elseif(CPU_ARCH_ARM64)
 -    set(DEPS_PATH "${CMAKE_SOURCE_DIR}/dep/prebuilt/linux${DEPS_CROSS_PREFIX}-arm64")
--  elseif(CPU_ARCH_LOONGARCH64)
--    set(DEPS_PATH "${CMAKE_SOURCE_DIR}/dep/prebuilt/linux${DEPS_CROSS_PREFIX}-loongarch64")
 -  else()
 -    message(FATAL_ERROR "Unsupported architecture")
 -  endif()
@@ -38,10 +36,11 @@ index f5f49ef09..c8b87e225 100644
  
  # Enable threads everywhere.
  set(THREADS_PREFER_PTHREAD_FLAG ON)
-@@ -44,66 +20,94 @@ if(NOT APPLE)
+@@ -41,67 +19,94 @@ if(NOT APPLE)
+   find_package(Libbacktrace REQUIRED)
  endif()
  
- # libpng relies on zlib, which we need the system version for on Mac.
+-# libpng relies on zlib, which we need the system version for on Mac.
 -if(APPLE OR CPU_ARCH_ARM32 OR CPU_ARCH_ARM64)
 -  find_package(ZLIB REQUIRED)
 -else()
@@ -102,7 +101,7 @@ index f5f49ef09..c8b87e225 100644
  endif()
  
 -# Enforce use of bundled dependencies to avoid conflicts with system libraries.
--find_package(zstd 1.5.7 REQUIRED
+-find_package(zstd 1.6.0 REQUIRED
 -             NO_DEFAULT_PATH PATHS "${DEPS_PATH}/lib/cmake/zstd")
 -find_package(WebP 1.6.0 REQUIRED
 -             NO_DEFAULT_PATH PATHS "${DEPS_PATH}/share/WebP/cmake")
@@ -159,12 +158,12 @@ index f5f49ef09..c8b87e225 100644
  # All our builds include Qt, so this is not a problem.
  set(QT_NO_PRIVATE_MODULE_WARNING ON)
  if(LINUX)
--  find_package(Qt6 6.12.0 REQUIRED
+-  find_package(Qt6 6.12.1 REQUIRED
 -                NO_DEFAULT_PATH PATHS "${DEPS_PATH}/lib/cmake/Qt6"
 +  find_package(Qt6 REQUIRED
                  COMPONENTS Core Gui GuiPrivate Widgets LinguistTools DBus)
  else()
--  find_package(Qt6 6.12.0 REQUIRED
+-  find_package(Qt6 6.12.1 REQUIRED
 -                NO_DEFAULT_PATH PATHS "${DEPS_PATH}/lib/cmake/Qt6"
 +  find_package(Qt6 REQUIRED
                  COMPONENTS Core Gui GuiPrivate Widgets LinguistTools)
@@ -182,8 +181,8 @@ index f5f49ef09..c8b87e225 100644
  # Libraries that are pulled in from host.
  find_package(CURL REQUIRED)
  if(LINUX)
-@@ -125,7 +129,7 @@ if(NOT APPLE)
-   endif()
+@@ -116,7 +121,7 @@ if(LINUX)
+   find_package(Wayland REQUIRED Egl)
  endif()
  
 -find_package(FFMPEG 9.0.2 COMPONENTS avcodec avformat avutil swresample swscale)
@@ -192,10 +191,10 @@ index f5f49ef09..c8b87e225 100644
    message(WARNING "FFmpeg not found, using bundled headers.")
    set(FFMPEG_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/dep/ffmpeg/include")
 diff --git i/CMakeModules/DuckStationUtils.cmake w/CMakeModules/DuckStationUtils.cmake
-index 482b65502..2098d665c 100644
+index bcab3c160..b0982e599 100644
 --- i/CMakeModules/DuckStationUtils.cmake
 +++ w/CMakeModules/DuckStationUtils.cmake
-@@ -385,6 +385,7 @@ function(add_resources TARGET DEST_SUBDIR SOURCE_DIR)
+@@ -382,6 +382,7 @@ function(add_resources TARGET DEST_SUBDIR SOURCE_DIR)
  endfunction()
  
  function(add_runtime_libraries TARGET)
@@ -232,28 +231,6 @@ index 8e00c16b4..1638fcfb8 100644
    if (!m_handle)
    {
      const char* err = dlerror();
-diff --git i/src/duckstation-qt/qthost.cpp w/src/duckstation-qt/qthost.cpp
-index 9c4485d21..3a62b2a2a 100644
---- i/src/duckstation-qt/qthost.cpp
-+++ w/src/duckstation-qt/qthost.cpp
-@@ -56,7 +56,7 @@
- #include "util/postprocessing.h"
- #include "util/translation.h"
- 
--#ifdef __linux__
-+#if defined(__linux__) && defined(ENABLE_X11)
- #include "util/x11_tools.h"
- #endif
- 
-@@ -3618,7 +3618,7 @@ int main(int argc, char* argv[])
-   ApplyWaylandWorkarounds();
- #endif
- 
--#ifdef __linux__
-+#if defined(__linux__) && defined(ENABLE_X11)
-   // Qt detects auto-repeat by looking for the press after a release in its event queue, which isn't reliable, as the
-   // press may not have been read yet. Missed detections send spurious release/press pairs while a key is held.
-   if (const auto* x11_app = qGuiApp->nativeInterface<QNativeInterface::QX11Application>())
 diff --git i/src/util/dyn_libs.cpp w/src/util/dyn_libs.cpp
 index e695a7908..12b5281ca 100644
 --- i/src/util/dyn_libs.cpp

@@ -1,6 +1,6 @@
 # Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
 pkgname=duckstation-git
-pkgver=0.1.r13356.11dec2c30
+pkgver=0.1.r13367.2c79bd36a
 pkgrel=1
 pkgdesc="Fast PlayStation 1 emulator for PC and Android (Git version)"
 arch=('x86_64' 'aarch64')
@@ -37,8 +37,8 @@ b2sums=('SKIP'
         'SKIP'
         'f2656b0d9a3865faf957e8600a7617516d9139d15c6d7581c06b4829b4c9338ec5f747e4ccfcc49b6b9f5a96f0476121eda99457469c8e1cfecd8ecc3b1697ed'
         'c1af0a12c12ad0d022ee99b5ac05b5a0d84f3fc9936a747b509fd62680184f63147d6980f36b8c102fba9d70ac44cdcd641fa495faea4a62c524e66534cb569f'
-        '021371f8218869221e106e464aa3ce7a9602afba5522368896d6fad0922f5fd098b8de7fa9941c7565032e7c3e6b1db12f8884cbec38a83d47afdbe5b63049a1'
-        'a372fd2b4f534fbfce1ec821adfcd971dc348a8bd069afebca90952dd12a2680f1601b17689d87df5b8dba18c298dd8fb214ce1553212bb90b491620df96f1a5'
+        '22e24eeb590a71096746fde5b771bc2a5b7dbd4947fbf26c538b04c45d69d53bc20bff3c67cb6848dc8f5a3254634f13aa50688b23e1e41823e23a67d303dfaa'
+        '092826fb676cfbbe5553be3c75ffacf2fe9a04cfd54b5873c90aba395a6d007affaa804ebe3fb2fbb837aa1dcaacc3869681ae96abee095452b319505e7b006b'
         '4df60f5e43cac651457fb866212baab36a3de3c82d9eb5ff28566c4973fd0cfcf3b3f7d779057d741396483690a0dd06a892c1e6f1225ebd609dd38bbd3d6f24')
 
 pkgver() {
@@ -148,8 +148,6 @@ build() {
     -DDEPS_PATH="$srcdir/deps-install" \
     -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON \
     -DCMAKE_INSTALL_RPATH='$ORIGIN' \
-    -DENABLE_X11=OFF \
-    -DENABLE_WAYLAND=ON \
     -DBUILD_QT_FRONTEND=ON \
     -DUSE_DRC=ON
   ninja -C build
