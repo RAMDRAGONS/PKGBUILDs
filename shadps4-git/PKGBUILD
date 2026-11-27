@@ -2,7 +2,7 @@
 # Maintainer: Judas Drekonym <judas.drekonym@gmail.com>
 _pkgname=shadps4
 pkgname=$_pkgname-git
-pkgver=0.21.0.r81.g7c0b846
+pkgver=0.21.0.r95.g0256d9e
 pkgrel=1
 pkgdesc="Sony PlayStation 4 emulator (CLI)"
 arch=('aarch64' 'x86_64')
@@ -122,11 +122,14 @@ prepare() {
 	sed -i '/#include <cstdint>/a #include <cstring>' src/common/types.h
 	# fix httplib ambiguous Get overload
 	sed -i 's|api\.Get(path, {{\("Authorization".*\)}});|api.Get(path, httplib::Headers{{\1}});|' src/core/libraries/np/np_handler/np_handler_profile.cpp
+	# fix magic_enum 0.10+ compatibility
+	sed -i 's|GroupAny|Memtime|' src/shader_recompiler/ir/opcodes.h
+	sed -i '/project(shadPS4/a add_compile_definitions(MAGIC_ENUM_NO_AUTO_IS_FLAGS)' CMakeLists.txt
 }
 
 build() {
 	export CFLAGS="$CFLAGS -DNDEBUG"
-	export CXXFLAGS="$CXXFLAGS -DNDEBUG"
+	export CXXFLAGS="$CXXFLAGS -DNDEBUG -DMAGIC_ENUM_NO_AUTO_IS_FLAGS"
 	local options=(
 		-B build
 		-D CMAKE_BUILD_TYPE=None
